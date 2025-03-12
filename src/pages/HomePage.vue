@@ -1,16 +1,9 @@
 <template>
   <div class="home">
+    <HeroSection /> <!-- Se integra el HeroSection reutilizable -->
+
     <main class="main-content">
-      <v-container fluid class="hero-container">
-        <v-row>
-          <v-col cols="12" md="6">
-            <div class="hero">
-              <h2 class="headline">Atención al cliente para tu gimnasio</h2>
-              <p class="subheading">Gestiona las consultas de tus clientes de forma eficiente y mejora su experiencia
-              </p>
-            </div>
-          </v-col>
-        </v-row>
+      <v-container fluid>
         <v-row class="features" justify="center">
           <v-col cols="12" md="4" v-for="(feature, index) in features" :key="index">
             <FeatureCard :icon="feature.icon" :title="feature.title" :description="feature.description" />
@@ -18,13 +11,15 @@
         </v-row>
       </v-container>
     </main>
+
     <Footer />
   </div>
 </template>
 
 <script lang="ts" setup>
-import Footer from '../components/Footer.vue';
-import FeatureCard from '../components/FeatureCard.vue';
+import HeroSection from '@/components/HeroSection.vue';
+import Footer from '@/components/Footer.vue';
+import FeatureCard from '@/components/FeatureCard.vue';
 
 const features = [
   { icon: 'mdi-email', title: 'Mensajes Directos', description: 'Recibe y responde consultas de tus clientes.' },

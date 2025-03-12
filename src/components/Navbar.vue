@@ -6,13 +6,15 @@
     </div>
     <v-spacer></v-spacer>
     <div class="nav-links d-none d-md-flex align-center gap-6">
-      <a href="#" class="nav-link">Inicio</a>
-      <a href="#" class="nav-link">Miembros</a>
-      <a href="#" class="nav-link">Clases</a>
-      <a href="#" class="nav-link">Planes</a>
-      <a href="#" class="nav-link">Instalaciones</a>
+      <router-link to="/" class="nav-link">Inicio</router-link>
+      <router-link to="/miembros" class="nav-link">Miembros</router-link>
+      <router-link to="/clases" class="nav-link">Clases</router-link>
+      <router-link to="/planes" class="nav-link">Planes</router-link>
+      <router-link to="/instalaciones" class="nav-link">Instalaciones</router-link>
     </div>
-    <v-btn color="primary" class="ml-4 white--text font-weight-bold d-none d-md-block">Iniciar Sesión</v-btn>
+    <v-btn color="primary" class="ml-4 white--text font-weight-bold d-none d-md-block" @click="navigateToLogin">
+      Iniciar Sesión
+    </v-btn>
     <v-btn icon @click="toggleSidebar">
       <v-icon>mdi-menu</v-icon>
     </v-btn>
@@ -25,20 +27,29 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router'; // Importa useRoute y useRouter
 import SidebarHome from '@/components/SidebarHome.vue';
 import SidebarDashboard from '@/components/SidebarDashboard.vue';
 
+const router = useRouter();
+const route = useRoute(); // Usa useRoute aquí
 const showSidebar = ref(false);
+
+// Función para redirigir al login
+const navigateToLogin = () => {
+  router.push('/login');
+};
+
 const toggleSidebar = () => {
   showSidebar.value = !showSidebar.value;
 };
 
-const route = useRoute();
 const isHomePage = computed(() => route.path === '/');
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/styles/_variables.scss'; // Asegúrate de que esta ruta sea correcta
+
 .fixed-navbar {
   position: fixed;
   top: 0;
@@ -61,7 +72,7 @@ body {
   font-family: 'Lexend', sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
-  color: #000000;
+  color: $color-negro; // Usa la variable SCSS
 }
 
 .nav-links {
@@ -71,18 +82,32 @@ body {
 }
 
 .nav-link {
-  font-family: 'Noto Sans', sans-serif;
+  text-decoration: none;
+  color: $color-negro; // Usa la variable SCSS
+  font-family: $fuente-principal; // Usa la variable SCSS
   font-size: 0.875rem;
   font-weight: 500;
-  color: #000000;
   transition: color 0.3s ease;
-}
 
-.nav-link:hover {
-  color: #FF0000;
+  &:link,
+  &:visited {
+    color: $color-negro; // Usa la variable SCSS
+  }
+
+  &:hover {
+    color: $color-rojo-vibrante; // Usa la variable SCSS
+  }
+
+  &:active {
+    color: darken($color-rojo-vibrante, 10%); // Usa la función SCSS
+  }
 }
 
 .v-btn {
-  font-weight: 600;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 </style>

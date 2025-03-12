@@ -2,7 +2,7 @@
   <v-card class="feature-card">
     <v-row class="feature-card-content" align="center">
       <v-col class="d-flex justify-center">
-        <v-icon class="feature-icon" size="40">{{ icon }}</v-icon>
+        <v-icon class="feature-icon" size="60">{{ icon }}</v-icon>
       </v-col>
       <v-col>
         <v-card-title class="title">{{ title }}</v-card-title>

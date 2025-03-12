@@ -162,7 +162,6 @@ const navigateTo = (link: string) => {
   transition: all 0.3s ease;
 }
 
-
 .menu-text {
   color: black;
 }
@@ -199,8 +198,6 @@ const navigateTo = (link: string) => {
 .v-leave-to {
   opacity: 0;
 }
-
-
 
 .menu-item,
 .faq-item {
