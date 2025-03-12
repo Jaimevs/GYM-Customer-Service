@@ -1,0 +1,31 @@
+/* _mixins.scss */
+
+/* --- Mixin para centrar un elemento con flexbox --- */
+@mixin centrar-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- Mixin para sombras --- */
+@mixin sombra($intensidad: 0.1) {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, $intensidad);
+}
+
+/* --- Mixin para media queries --- */
+@mixin media-query($tamaño) {
+  @if $tamaño == small {
+    @media (max-width: 600px) { @content; }
+  }
+  @else if $tamaño == medium {
+    @media (max-width: 960px) { @content; }
+  }
+  @else if $tamaño == large {
+    @media (min-width: 961px) { @content; }
+  }
+}
+
+/* --- Mixin para transiciones --- */
+@mixin transición($propiedad, $duracion, $tipo-easing: ease) {
+  transition: $propiedad $duracion $tipo-easing;
+}
