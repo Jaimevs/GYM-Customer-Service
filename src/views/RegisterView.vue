@@ -306,9 +306,10 @@ form {
   
   .signin-signup {
     width: 100%;
-    top: 5%;
+    top: 95px;
     transform: translate(-50%, 0);
     left: 50%;
+    transition: 1s 0.8s ease-in-out;
   }
 
   .panels-container {
@@ -360,10 +361,15 @@ form {
     height: 1500px;
     transform: translateX(-50%);
     left: 30%;
-    bottom: 68%;
+    bottom: 80%;
     right: initial;
     top: initial;
     transition: 2s ease-in-out;
+    z-index: 0;
+  }
+
+  .sign-up-form {
+    z-index: 3;
   }
 }
 
@@ -385,8 +391,24 @@ form {
   }
 
   .container:before {
-    bottom: 72%;
+    bottom: 85%;
     left: 50%;
+    opacity: 0.8;
+  }
+
+  .signin-signup {
+    top: 150px;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .container:before {
+    bottom: 90%;
+  }
+  
+  .signin-signup {
+    top: 120px;
   }
 }
 </style>
