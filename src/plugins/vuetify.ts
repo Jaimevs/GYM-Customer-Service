@@ -1,12 +1,15 @@
 import { createVuetify } from "vuetify";
-import "vuetify/styles"; // Importar los estilos de Vuetify
-
-// Importar los iconos de Material Design
-import "@mdi/font/css/materialdesignicons.css";
+import * as components from "vuetify/components";
+import * as directives from "vuetify/directives";
 
 const vuetify = createVuetify({
+  components,
+  directives,
   icons: {
-    defaultSet: "mdi", // Set de iconos por defecto
+    defaultSet: "mdi",
+
+    sets: {
+    },
   },
   theme: {
     defaultTheme: "light", // Especificar el tema por defecto

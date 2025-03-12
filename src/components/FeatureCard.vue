@@ -1,9 +1,15 @@
 <template>
-  <div class="feature-card">
-    <div class="feature-icon">{{ icon }}</div>
-    <h3>{{ title }}</h3>
-    <p>{{ description }}</p>
-  </div>
+  <v-card class="feature-card">
+    <v-row class="feature-card-content" align="center">
+      <v-col class="d-flex justify-center">
+        <v-icon class="feature-icon" size="40">{{ icon }}</v-icon>
+      </v-col>
+      <v-col>
+        <v-card-title class="title">{{ title }}</v-card-title>
+        <v-card-subtitle class="description">{{ description }}</v-card-subtitle>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <script lang="ts" setup>
@@ -16,26 +22,54 @@ defineProps({
 
 <style scoped>
 .feature-card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  width: calc(33.333% - 2rem);
-  min-width: 250px;
-  text-align: center;
+  width: 100%;
+  max-width: 350px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 16px;
+  padding: 16px;
+  background-color: $color-blanco;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.feature-card-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
 }
 
 .feature-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  color: $color-rojo-vibrante;
+  transition: transform 0.3s ease-in-out;
 }
 
-.feature-card h3 {
-  color: #333;
-  margin-bottom: 0.5rem;
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
 }
 
-.feature-card p {
-  color: #666;
+.title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: $color-gris-oscuro;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.description {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $color-gris-claro;
+  line-height: 1.4;
 }
 </style>

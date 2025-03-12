@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue"; // Ruta hacia la vista Home
-import LoginView from "../views/LoginView.vue"; // Ruta hacia la vista Login
-import RegisterView from "../views/RegisterView.vue"; // Ruta hacia la vista Register
-import DashboardView from "../views/DashboardView.vue"; // Ruta hacia Dashboard
+import HomeView from "../views/HomeView.vue";
+import LoginView from "../views/LoginView.vue";
+import RegisterView from "../views/RegisterView.vue";
+import DashboardView from "../views/DashboardView.vue";
+import ProfileView from "../views/ProfileView.vue"; // Vista para perfil
+import SettingsView from "../views/SettingsView.vue"; // Vista para ajustes
 
 const routes = [
   {
@@ -24,6 +26,16 @@ const routes = [
     path: "/dashboard",
     name: "Dashboard",
     component: DashboardView,
+  },
+  {
+    path: "/profile", // Ruta para perfil
+    name: "Profile",
+    component: ProfileView, // Componente de perfil
+  },
+  {
+    path: "/settings", // Ruta para ajustes
+    name: "Settings",
+    component: SettingsView, // Componente de ajustes
   },
 ];
 
