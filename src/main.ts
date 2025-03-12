@@ -4,6 +4,7 @@ import vuetify from "./plugins/vuetify";
 import router from "./router";
 import "vuetify/styles"; // Estilos base de Vuetify
 import "@mdi/font/css/materialdesignicons.css"; // Importa los iconos de Material Design
+import '@fortawesome/fontawesome-free/css/all.css'; // Importa los iconos de Font Awesome
 
 const app = createApp(App);
 
