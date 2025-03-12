@@ -1,0 +1,55 @@
+/* main.scss */
+
+/* Importación de archivos parciales */
+@import './variables';
+@import './mixins';
+
+/* --- Estilos globales --- */
+body {
+  font-family: $fuente-principal, sans-serif;
+  background-color: $color-blanco;
+  color: $color-gris-oscuro;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Estilos generales para los botones --- */
+button {
+  background-color: $color-rojo-vibrante;
+  color: $color-blanco;
+  border: none;
+  padding: $espaciado-base $espaciado-grande;
+  border-radius: $radio-borde;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background-color: darken($color-rojo-vibrante, 10%);
+  }
+
+  &:active {
+    background-color: darken($color-rojo-vibrante, 20%);
+  }
+
+  @include transición(background-color, 0.3s);
+}
+
+/* --- Estilos para el navbar --- */
+.navbar {
+  background-color: $color-negro;
+  color: $color-blanco;
+  padding: $espaciado-base;
+}
+
+/* --- Layouts responsivos usando mixin --- */
+.container {
+  @include centrar-flex;
+  flex-direction: column;
+  padding: $espaciado-grande;
+}
+
+@include media-query(small) {
+  .container {
+    flex-direction: row;
+  }
+}
