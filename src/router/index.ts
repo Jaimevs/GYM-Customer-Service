@@ -5,6 +5,7 @@ import RegisterView from "../views/RegisterView.vue";
 import DashboardView from "../views/DashboardView.vue";
 import ProfileView from "../views/ProfileView.vue"; // Vista para perfil
 import SettingsView from "../views/SettingsView.vue"; // Vista para ajustes
+import ErrorPage from "../views/ErrorPage.vue";
 
 const routes = [
   {
@@ -37,11 +38,31 @@ const routes = [
     name: "Settings",
     component: SettingsView, // Componente de ajustes
   },
+  {
+    path: '/error/:code',
+    name: 'Error',
+    component: ErrorPage,
+    props: true
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: ErrorPage,
+    props: { errorCode: '404', errorMessage: 'Página no encontrada' }
+  }
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  if (!navigator.onLine && to.name !== 'NotFound') {
+    next({ name: 'NotFound', params: { errorCode: 'offline' } });
+  } else {
+    next();
+  }
 });
 
 export default router;

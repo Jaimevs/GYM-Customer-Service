@@ -11,4 +11,8 @@ const app = createApp(App);
 app.use(router);
 app.use(vuetify); 
 
+window.addEventListener('offline', () => {
+    router.push({ name: 'Error', params: { code: 'offline' } });
+  });
+
 app.mount("#app");
