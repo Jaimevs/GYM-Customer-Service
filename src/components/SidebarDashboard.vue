@@ -5,8 +5,12 @@
     </div>
     <ul>
       <li><router-link to="/" class="sidebar-link"><v-icon>mdi-home</v-icon> Inicio</router-link></li>
-      <li><router-link to="/profile" class="sidebar-link"><v-icon>mdi-account</v-icon> Perfil</router-link></li>
-      <li><router-link to="/settings" class="sidebar-link"><v-icon>mdi-settings</v-icon> Ajustes</router-link></li>
+      <li><router-link to="/dashboard" class="sidebar-link"><v-icon>mdi-view-dashboard</v-icon> Dashboard</router-link></li>
+      <li><router-link to="/feedback" class="sidebar-link"><v-icon>mdi-message-alert</v-icon> Quejas y Sugerencias</router-link></li>
+      <li><router-link to="/trainer-evaluation" class="sidebar-link"><v-icon>mdi-clipboard-check</v-icon> Evaluación de Entrenadores</router-link></li>
+      <li><router-link to="/memberships" class="sidebar-link"><v-icon>mdi-credit-card</v-icon> Membresías y Pagos</router-link></li>
+      <li><router-link to="/chat" class="sidebar-link"><v-icon>mdi-chat</v-icon> Chat Interno</router-link></li>
+      <li><router-link to="/settings" class="sidebar-link"><v-icon>mdi-cog</v-icon> Ajustes</router-link></li>
     </ul>
   </div>
 </template>
@@ -28,6 +32,7 @@
   border-radius: 0 15px 15px 0;
   /* Bordes redondeados */
   color: #fff;
+  overflow-y: auto; /* Permite desplazamiento si hay muchos elementos */
 }
 
 .sidebar-header {
