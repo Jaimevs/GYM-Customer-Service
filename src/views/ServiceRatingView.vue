@@ -1,24 +1,24 @@
 <template>
-  <div class="trainers-dashboard-view">
+  <div class="service-dashboard-view">
     <!-- Sidebar -->
     <SidebarDashboard :isVisible="isSidebarVisible" @update:isVisible="updateSidebarVisibility" />
 
     <!-- Contenido principal -->
-    <main class="trainers-dashboard-main" :class="{ 'sidebar-visible': isSidebarVisible }">
+    <main class="service-dashboard-main" :class="{ 'sidebar-visible': isSidebarVisible }">
       <!-- Navbar -->
       <NavbarDashboard @toggle-sidebar="toggleSidebar" />
 
       <!-- Título y contenido -->
-      <h1>Evaluación de Entrenadores</h1>
-      <p>Aquí puedes visualizar y administrar la evaluación de los entrenadores.</p>
+      <h1>Valoración del Servicio</h1>
+      <p>Aquí puedes visualizar y administrar las valoraciones y retroalimentación del servicio brindado.</p>
 
-      <section class="trainers-content">
-        <!-- Evaluaciones Container -->
-        <div class="evaluaciones-container">
+      <section class="service-content">
+        <!-- Valoraciones Container -->
+        <div class="valoraciones-container">
           <header class="header-section">
             <div class="titulo-container">
-              <h2 class="titulo-principal">Evaluaciones y Seguimiento</h2>
-              <p class="subtitulo">Gestiona las evaluaciones y seguimiento de los entrenadores.</p>
+              <h2 class="titulo-principal">Valoraciones y Retroalimentación</h2>
+              <p class="subtitulo">Gestiona las valoraciones del servicio y sigue el rendimiento.</p>
             </div>
           </header>
 
@@ -30,7 +30,7 @@
               </div>
               <div class="card-content">
                 <div class="flex items-center">
-                  <div class="text-2xl font-bold mr-2">4.2</div>
+                  <div class="text-2xl font-bold mr-2">4.5</div>
                   <div class="flex">
                     <StarIcon class="h-4 w-4 fill-primary text-primary" />
                   </div>
@@ -43,7 +43,7 @@
                 <h3 class="card-title">Total de Reseñas</h3>
               </div>
               <div class="card-content">
-                <div class="text-2xl font-bold">128</div>
+                <div class="text-2xl font-bold">300</div>
               </div>
             </div>
 
@@ -51,19 +51,45 @@
               <div class="card-header">
                 <h3 class="card-title flex items-center">
                   <AlertCircleIcon class="mr-2 h-4 w-4 text-destructive" />
-                  Alertas de Calificación
+                  Alertas de Valoración
                 </h3>
               </div>
               <div class="card-content">
-                <div class="text-2xl font-bold">3</div>
+                <div class="text-2xl font-bold">5</div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Comentarios Ficticios -->
+        <section class="comments-section">
+          <header class="header-section">
+            <h3 >Comentarios de los Usuarios:</h3>
+            <p class="subtitulo">Estos son algunos de los comentarios que los usuarios han dejado sobre el servicio.</p>
+          </header>
+
+          <!-- Comentarios -->
+          <div class="comments-container">
+            <div class="comment-card" v-for="(comment, index) in comments" :key="index">
+              <div class="comment-header">
+                <div class="user-info">
+                  <span class="user-name">{{ comment.name }}</span>
+                  <div class="user-rating">
+                    <StarIcon class="h-4 w-4 fill-primary text-primary" />
+                    <span class="rating">{{ comment.rating }}</span>
+                  </div>
+                </div>
+                <p class="comment-date">{{ comment.date }}</p>
+              </div>
+              <div class="comment-content">
+                <p>{{ comment.text }}</p>
+              </div>
+            </div>
+          </div>
+        </section>
       </section>
 
       <!--<ComplaintFilters class="evaluation-filters" />-->
-      <TrainersList class="evaluation-filters" />
     </main>
   </div>
 </template>
@@ -74,9 +100,31 @@ import SidebarDashboard from '@/components/SidebarDashboard.vue';
 import NavbarDashboard from '@/components/NavbarDashboard.vue';
 import AlertCircleIcon from '@/components/icons/AlertCircleIcon.vue';
 import StarIcon from '@/components/icons/StarIcon.vue';
-import TrainersList from '../components/TrainersList.vue';
+
 // Estado para la visibilidad del sidebar
 const isSidebarVisible = ref(true);
+
+// Comentarios ficticios
+const comments = ref([
+  {
+    name: 'Juan Pérez',
+    rating: 5,
+    date: '2025-03-10',
+    text: 'Excelente servicio, muy rápido y profesional. Lo recomiendo al 100%.',
+  },
+  {
+    name: 'María López',
+    rating: 4,
+    date: '2025-03-09',
+    text: 'El servicio es bueno, aunque podría mejorar en tiempos de espera.',
+  },
+  {
+    name: 'Carlos Ruiz',
+    rating: 3,
+    date: '2025-03-08',
+    text: 'Servicio aceptable, pero hubo algunos problemas con la comunicación.',
+  },
+]);
 
 const toggleSidebar = () => {
   isSidebarVisible.value = !isSidebarVisible.value;
@@ -90,12 +138,12 @@ const updateSidebarVisibility = (newValue: boolean) => {
 <style scoped lang="scss">
 @use '@/styles/_variables.scss' as *;
 
-.trainers-dashboard-view {
+.service-dashboard-view {
   display: flex;
   min-height: 100vh;
 }
 
-.trainers-dashboard-main {
+.service-dashboard-main {
   flex: 1;
   padding: $espaciado-grande;
   margin-top: 64px;
@@ -111,13 +159,13 @@ const updateSidebarVisibility = (newValue: boolean) => {
 }
 
 @include media-query(small) {
-  .trainers-dashboard-main {
+  .service-dashboard-main {
     margin-left: 0;
     padding: $espaciado-base;
   }
 }
 
-.trainers-content {
+.service-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem;
@@ -239,10 +287,59 @@ const updateSidebarVisibility = (newValue: boolean) => {
   color: #ef4444;
 }
 
-.evaluation-filters {
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
+.comments-section {
+  margin-top: 2rem;
+}
+
+.comments-container {
+  display: grid;
+  gap: 1rem;
+}
+
+.comment-card {
+  background: white;
+  border-radius: 12px;
   padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.comment-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.user-rating {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.rating {
+  font-weight: bold;
+}
+
+.comment-date {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.comment-content {
+  margin-top: 1rem;
+  color: #333;
 }
 </style>
