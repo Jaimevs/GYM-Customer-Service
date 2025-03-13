@@ -7,8 +7,8 @@
 /* --- Estilos globales --- */
 body {
   font-family: $fuente-principal, sans-serif;
-  background-color: $color-blanco;
-  color: $color-gris-oscuro;
+  background-color: $color-gris-fondo;
+  color: $color-negro;
   margin: 0;
   padding: 0;
 }
@@ -52,4 +52,7 @@ button {
   .container {
     flex-direction: row;
   }
+}
+* {
+  scroll-behavior: smooth;
 }

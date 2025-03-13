@@ -1,0 +1,36 @@
+/* _variables.scss */
+
+/* --- Colores --- */
+$color-rojo-vibrante: #FF2B00;
+$color-negro: #000000;
+$color-gris-oscuro: #333333;
+$color-amarillo-dorado: #FFD700;
+$color-blanco: #FFFFFF;
+$color-verde-lima: #32CD32;
+$color-gris-claro: #D3D3D3;
+$color-azul-profundo: #003366;
+/* Colores adicionales */
+$color-azul-gimnasio: #0074D9;
+$color-gris-fondo: #F5F5F5;
+$color-texto-secundario: #666666;
+
+/* Tipografía */
+$fuente-titulo: 'Poppins', sans-serif; // Más moderna para títulos
+/* --- Tipografía --- */
+$fuente-principal: 'Roboto', sans-serif;
+$fuente-secundaria: 'Open Sans', sans-serif;
+
+/* --- Espaciados --- */
+$espaciado-pequeño: 8px; /* Espaciado pequeño */
+$espaciado-base: 16px;
+$espaciado-grande: 24px;
+$espaciado-extra-grande: 32px;
+
+/* --- Bordes y Radios --- */
+$radio-borde: 4px;
+$ancho-borde: 2px;
+$ancho-borde-grueso: 3px;
+
+/* --- Sombras --- */
+$sombra-suave: 0 2px 4px rgba(0, 0, 0, 0.1);
+$sombra-fuerte: 0 4px 8px rgba(0, 0, 0, 0.2);

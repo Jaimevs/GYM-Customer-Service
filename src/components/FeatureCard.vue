@@ -1,15 +1,11 @@
 <template>
-  <v-card class="feature-card">
-    <v-row class="feature-card-content" align="center">
-      <v-col class="d-flex justify-center">
-        <v-icon class="feature-icon" size="40">{{ icon }}</v-icon>
-      </v-col>
-      <v-col>
-        <v-card-title class="title">{{ title }}</v-card-title>
-        <v-card-subtitle class="description">{{ description }}</v-card-subtitle>
-      </v-col>
-    </v-row>
-  </v-card>
+  <div class="feature-card">
+    <div class="feature-icon-container">
+      <v-icon class="feature-icon" size="60">{{ icon }}</v-icon>
+    </div>
+    <h2 class="custom-title">{{ title }}</h2>
+    <p class="custom-description">{{ description }}</p>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -20,56 +16,58 @@ defineProps({
 });
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@use 'sass:color';
+@use '@/styles/_variables.scss' as *; // Importa las variables SCSS
+@use '@/styles/_mixins.scss' as *; // Importa los mixins
+
 .feature-card {
   width: 100%;
   max-width: 350px;
-  min-height: 150px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: $radio-borde;
+  padding: $espaciado-base;
   background-color: $color-blanco;
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: $sombra-suave;
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: $sombra-fuerte;
+  }
 }
 
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.feature-card-content {
-  display: flex;
-  align-items: center;
-  width: 100%;
+.feature-icon-container {
+  margin-bottom: $espaciado-base;
 }
 
 .feature-icon {
   color: $color-rojo-vibrante;
   transition: transform 0.3s ease-in-out;
+
+  .feature-card:hover & {
+    transform: scale(1.2);
+  }
 }
 
-.feature-card:hover .feature-icon {
-  transform: scale(1.1);
-}
-
-.title {
-  font-family: 'Lexend', sans-serif;
-  font-size: 1.3rem;
+.custom-title {
+  font-family: $fuente-titulo;
+  font-size: 1.5rem;
   font-weight: bold;
-  color: $color-gris-oscuro;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  color: $color-negro;
+  margin-bottom: $espaciado-base;
 }
 
-.description {
-  font-family: 'Noto Sans', sans-serif;
+.custom-description {
+  font-family: $fuente-principal;
   font-size: 1rem;
   font-weight: 500;
-  color: $color-gris-claro;
-  line-height: 1.4;
+  color: $color-texto-secundario;
+  line-height: 1.6;
+  text-align: center;
 }
 </style>
