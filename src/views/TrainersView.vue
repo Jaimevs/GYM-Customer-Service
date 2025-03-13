@@ -63,6 +63,7 @@
       </section>
       
       <!--<ComplaintFilters class="evaluation-filters" />-->
+      <TrainersList class="evaluation-filters" />
     </main>
   </div>
 </template>
@@ -73,8 +74,7 @@ import SidebarDashboard from '@/components/SidebarDashboard.vue';
 import NavbarDashboard from '@/components/NavbarDashboard.vue';
 import AlertCircleIcon from '@/components/icons/AlertCircleIcon.vue';
 import StarIcon from '@/components/icons/StarIcon.vue';
-import ComplaintFilters from '../components/ComplaintFilters.vue';
-
+import TrainersList from '../components/TrainersList.vue';
 // Estado para la visibilidad del sidebar
 const isSidebarVisible = ref(true);
 
