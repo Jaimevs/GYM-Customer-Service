@@ -48,7 +48,8 @@ const isHomePage = computed(() => route.path === '/');
 </script>
 
 <style scoped lang="scss">
-@import '@/styles/_variables.scss'; // Asegúrate de que esta ruta sea correcta
+@use 'sass:color';
+@use '@/styles/_variables.scss' as vars; // Usa @use en lugar de @import
 
 .fixed-navbar {
   position: fixed;
@@ -72,7 +73,7 @@ body {
   font-family: 'Lexend', sans-serif;
   font-size: 1.5rem;
   font-weight: bold;
-  color: $color-negro; // Usa la variable SCSS
+  color: vars.$color-negro; // Usa vars.$variable
 }
 
 .nav-links {
@@ -83,23 +84,23 @@ body {
 
 .nav-link {
   text-decoration: none;
-  color: $color-negro; // Usa la variable SCSS
-  font-family: $fuente-principal; // Usa la variable SCSS
+  color: vars.$color-negro; // Usa vars.$variable
+  font-family: vars.$fuente-principal; // Usa vars.$variable
   font-size: 0.875rem;
   font-weight: 500;
   transition: color 0.3s ease;
 
   &:link,
   &:visited {
-    color: $color-negro; // Usa la variable SCSS
+    color: vars.$color-negro; // Usa vars.$variable
   }
 
   &:hover {
-    color: $color-rojo-vibrante; // Usa la variable SCSS
+    color: vars.$color-rojo-vibrante; // Usa vars.$variable
   }
 
   &:active {
-    color: darken($color-rojo-vibrante, 10%); // Usa la función SCSS
+    color: color.adjust(vars.$color-rojo-vibrante, $lightness: -10%); // Usa color.adjust
   }
 }
 
