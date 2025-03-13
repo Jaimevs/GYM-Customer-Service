@@ -10,6 +10,7 @@ import FeedbackPage from "../views/FeedbackView.vue";
 import TrainersView from "../views/TrainersView.vue";
 import ServiceManagementView from "../views/ServiceManagementView.vue";
 import MembershipsView from "../views/MembershipsView.vue";
+import ValidityControlView from "../views/ValidityControlView.vue";
 
 const routes = [
   {
@@ -50,8 +51,14 @@ const routes = [
   {
     path: "/gestion-membresias",
     name: "MembershipVue",
-    component: MembershipsView, 
+    component: MembershipsView,
   },
+  {
+    path: "/control-vigencia",
+    name: "ValidityControlVue",
+    component: ValidityControlView,
+  },
+
   {
     path: "/error/:code",
     name: "Error",
