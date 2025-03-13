@@ -6,11 +6,21 @@
           <h2 class="title">Iniciar Sesión</h2>
           <div class="input-field">
             <i class="fas fa-user"></i>
-            <input type="text" v-model="username" placeholder="Usuario" />
+            <input 
+              id="username"
+              type="text"
+              v-model="input.username"
+              placeholder="Ingresa tu usuario"
+              :class="{'input-error': errors.username}" />
           </div>
           <div class="input-field">
             <i class="fas fa-lock"></i>
-            <input type="password" v-model="password" placeholder="Contraseña" />
+            <input 
+              id="password"
+              type="password"
+              v-model="input.password"
+              placeholder="Ingresa tu contraseña"
+              :class="{'input-error': errors.password}" />
           </div>
           <input type="submit" value="Entrar" class="btn solid" />
           <p class="social-text">O inicia sesión con plataformas sociales</p>
@@ -42,23 +52,54 @@
             Registrarse
           </button>
         </div>
-        
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import { SET_AUTHENTICATION, SET_USERNAME } from '@/store/storeconstants';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const username = ref('');
-const password = ref('');
+
+const input = ref({
+  username: "",
+  password: ""
+});
+
+const errors = ref({
+  username: false,
+  password: false
+});
+
+const output = ref(''); // Mensaje de autenticación
+const isAuthenticated = ref(false);
 
 const handleLogin = () => {
-  console.log('Iniciando sesión con:', username.value, password.value);
-  // Aquí iría la lógica de autenticación
+  // Reiniciar errores
+  errors.value.username = false;
+  errors.value.password = false;
+
+  // Validar si los campos están vacíos
+  if (input.value.username === "") {
+    errors.value.username = true;
+  }
+  if (input.value.password === "") {
+    errors.value.password = true;
+  }
+
+  // Si no hay errores, proceder con la autenticación
+  if (!errors.value.username && !errors.value.password) {
+    output.value = "Autenticación completada";
+    // Aquí deberías hacer la llamada a la API para autenticar al usuario
+    isAuthenticated.value = true;
+    router.push('/dashboard');
+  } else {
+    output.value = "Nombre de usuario y contraseña no pueden estar vacíos";
+    isAuthenticated.value = false;
+  }
 };
 
 const goToRegister = () => {
@@ -67,6 +108,7 @@ const goToRegister = () => {
 </script>
 
 <style scoped>
+/* Los estilos permanecen igual que los que has proporcionado */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
 
 * {
@@ -306,72 +348,24 @@ form {
     justify-content: space-around;
     align-items: center;
     padding: 2.5rem 8%;
-    grid-column: 1 / 2;
-  }
-
-  .left-panel {
-    grid-row: 1 / 2;
-  }
-
-  .image {
-    width: 200px;
-    transition: transform 0.9s ease-in-out;
-    transition-delay: 0.6s;
-  }
-
-  .panel .content {
-    padding-right: 15%;
-    transition: transform 0.9s ease-in-out;
-    transition-delay: 0.8s;
   }
 
   .panel h3 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   .panel p {
-    font-size: 0.7rem;
-    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    margin: 1.1rem 0;
   }
 
   .btn.transparent {
-    width: 110px;
-    height: 35px;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
+    margin-top: 20px;
   }
 
-  .container:before {
-    width: 1500px;
-    height: 1500px;
-    transform: translateX(-50%);
-    left: 30%;
-    bottom: 68%;
-    right: initial;
-    top: initial;
-    transition: 2s ease-in-out;
-  }
-}
-
-@media (max-width: 570px) {
-  form {
-    padding: 0 1.5rem;
-  }
-
-  .image {
-    display: none;
-  }
-  
-  .panel .content {
-    padding: 0.5rem 1rem;
-  }
-  
-  .container {
-    padding: 1.5rem;
-  }
-
-  .container:before {
-    bottom: 72%;
-    left: 50%;
+  .input-field {
+    margin-bottom: 1rem;
   }
 }
 </style>

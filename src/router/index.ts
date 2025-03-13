@@ -7,6 +7,7 @@ import ProfileView from "../views/ProfileView.vue"; // Vista para perfil
 import SettingsView from "../views/SettingsView.vue"; // Vista para ajustes
 import ErrorPage from "../views/ErrorPage.vue";
 import FeedbackPage from "../views/FeedbackView.vue";
+import TrainersView from "../views/TrainersView.vue";
 
 const routes = [
   {
@@ -55,6 +56,11 @@ const routes = [
     path: '/feedback',
     name: 'Feedback',
     component: FeedbackPage
+  },
+  {
+    path: '/trainers',
+    name: 'Trainers',
+    component: TrainersView
   },
 ];
 
