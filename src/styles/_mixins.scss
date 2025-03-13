@@ -13,15 +13,20 @@
 }
 
 /* --- Mixin para media queries --- */
-@mixin media-query($tamaño) {
-  @if $tamaño == small {
-    @media (max-width: 600px) { @content; }
-  }
-  @else if $tamaño == medium {
-    @media (max-width: 960px) { @content; }
-  }
-  @else if $tamaño == large {
-    @media (min-width: 961px) { @content; }
+/* Mixin para consultas de medios responsivas */
+@mixin media-query($size) {
+  @if $size == small {
+    @media (max-width: 600px) {
+      @content;
+    }
+  } @else if $size == medium {
+    @media (max-width: 960px) {
+      @content;
+    }
+  } @else if $size == large {
+    @media (max-width: 1264px) {
+      @content;
+    }
   }
 }
 
