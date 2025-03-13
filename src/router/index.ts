@@ -8,6 +8,10 @@ import SettingsView from "../views/SettingsView.vue"; // Vista para ajustes
 import ErrorPage from "../views/ErrorPage.vue";
 import FeedbackPage from "../views/FeedbackView.vue";
 import TrainersView from "../views/TrainersView.vue";
+import ServiceManagementView from "../views/ServiceManagementView.vue";
+import MembershipsView from "../views/MembershipsView.vue";
+import ValidityControlView from "../views/ValidityControlView.vue";
+import ServiceRatingView from "../views/ServiceRatingView.vue";
 
 const routes = [
   {
@@ -41,26 +45,47 @@ const routes = [
     component: SettingsView, // Componente de ajustes
   },
   {
-    path: '/error/:code',
-    name: 'Error',
+    path: "/gestion-servicios",
+    name: "ServiceManagement",
+    component: ServiceManagementView,
+  },
+  {
+    path: "/gestion-membresias",
+    name: "MembershipVue",
+    component: MembershipsView,
+  },
+  {
+    path: "/control-vigencia",
+    name: "ValidityControlVue",
+    component: ValidityControlView,
+  },
+  {
+    path: "/valoracion-servicios",
+    name: "ServiceRatingVue",
+    component: ServiceRatingView,
+  },
+
+  {
+    path: "/error/:code",
+    name: "Error",
     component: ErrorPage,
-    props: true
+    props: true,
   },
   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
     component: ErrorPage,
-    props: { errorCode: '404', errorMessage: 'Página no encontrada' }
+    props: { errorCode: "404", errorMessage: "Página no encontrada" },
   },
   {
-    path: '/feedback',
-    name: 'Feedback',
-    component: FeedbackPage
+    path: "/feedback",
+    name: "Feedback",
+    component: FeedbackPage,
   },
   {
-    path: '/trainers',
-    name: 'Trainers',
-    component: TrainersView
+    path: "/trainers",
+    name: "Trainers",
+    component: TrainersView,
   },
 ];
 
