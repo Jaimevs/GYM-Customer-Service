@@ -9,6 +9,7 @@ import ErrorPage from "../views/ErrorPage.vue";
 import FeedbackPage from "../views/FeedbackView.vue";
 import TrainersView from "../views/TrainersView.vue";
 import ServiceManagementView from "../views/ServiceManagementView.vue";
+import MembershipsView from "../views/MembershipsView.vue";
 
 const routes = [
   {
@@ -45,6 +46,11 @@ const routes = [
     path: "/gestion-servicios", // Nueva ruta para gestión de servicios
     name: "ServiceManagement",
     component: ServiceManagementView, // Componente de gestión de servicios
+  },
+  {
+    path: "/gestion-membresias",
+    name: "MembershipVue",
+    component: MembershipsView, 
   },
   {
     path: "/error/:code",
