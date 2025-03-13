@@ -6,6 +6,7 @@ import DashboardView from "../views/DashboardView.vue";
 import ProfileView from "../views/ProfileView.vue"; // Vista para perfil
 import SettingsView from "../views/SettingsView.vue"; // Vista para ajustes
 import ErrorPage from "../views/ErrorPage.vue";
+import FeedbackPage from "../views/FeedbackView.vue";
 
 const routes = [
   {
@@ -49,7 +50,12 @@ const routes = [
     name: 'NotFound',
     component: ErrorPage,
     props: { errorCode: '404', errorMessage: 'Página no encontrada' }
-  }
+  },
+  {
+    path: '/feedback',
+    name: 'Feedback',
+    component: FeedbackPage
+  },
 ];
 
 const router = createRouter({
