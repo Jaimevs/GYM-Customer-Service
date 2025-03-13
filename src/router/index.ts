@@ -11,6 +11,7 @@ import TrainersView from "../views/TrainersView.vue";
 import ServiceManagementView from "../views/ServiceManagementView.vue";
 import MembershipsView from "../views/MembershipsView.vue";
 import ValidityControlView from "../views/ValidityControlView.vue";
+import ServiceRatingView from "../views/ServiceRatingView.vue";
 
 const routes = [
   {
@@ -44,9 +45,9 @@ const routes = [
     component: SettingsView, // Componente de ajustes
   },
   {
-    path: "/gestion-servicios", // Nueva ruta para gestión de servicios
+    path: "/gestion-servicios",
     name: "ServiceManagement",
-    component: ServiceManagementView, // Componente de gestión de servicios
+    component: ServiceManagementView,
   },
   {
     path: "/gestion-membresias",
@@ -57,6 +58,11 @@ const routes = [
     path: "/control-vigencia",
     name: "ValidityControlVue",
     component: ValidityControlView,
+  },
+  {
+    path: "/valoracion-servicios",
+    name: "ServiceRatingVue",
+    component: ServiceRatingView,
   },
 
   {
