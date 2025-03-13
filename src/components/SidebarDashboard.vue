@@ -81,6 +81,9 @@ const toggleSidebar = () => {
 
 // Nuevas opciones del menú
 const menuItems = ref([
+  { title: 'Dashboard', link: '/dashboard', icon: 'mdi mdi-view-dashboard' },
+  { title: 'Quejas y Sugerencias', link: '/feedback', icon: 'mdi mdi-comment-quote' },
+  { title: 'Evaluación de Entrenadores', link: '/trainers', icon: 'mdi mdi-star-outline' },
   { title: 'Gestión de Servicios', link: '/gestion-servicios', icon: 'mdi-cogs' },
   { title: 'Gestión de Membresías', link: '/gestion-membresias', icon: 'mdi-card-account-details' },
   { title: 'Control de Vigencia de Membresías', link: '/control-vigencia', icon: 'mdi-calendar-check' },
