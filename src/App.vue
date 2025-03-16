@@ -1,20 +1,21 @@
 <template>
-  <VApp>
-    <!-- Mostrar el Navbar solo si estamos en la ruta '/' -->
-    <Navbar v-if="isHomePage" />
-    <!-- El contenido de las vistas se renderiza aquí -->
-    <RouterView />
-  </VApp>
+  <v-app>
+    <component :is="currentLayout">
+      <router-view />
+    </component>
+  </v-app>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import Navbar from '@/components/Navbar.vue';  // Asegúrate de que la ruta sea correcta
 
-// Obtener la ruta actual
 const route = useRoute();
 
-// Mostrar el Navbar solo en la ruta '/'
-const isHomePage = computed(() => route.path === '/');
+// Determinar el layout basado en la ruta actual
+const currentLayout = computed(() => {
+  console.log('Ruta actual:', route.path); // Depuración: Mostrar la ruta actual
+  console.log('Meta layout:', route.meta.layout); // Depuración: Mostrar el layout asignado
+  return route.meta.layout || 'div'; // Fallback a 'div' si no hay layout
+});
 </script>

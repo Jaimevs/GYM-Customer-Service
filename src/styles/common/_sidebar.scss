@@ -1,0 +1,105 @@
+/* _sidebar.scss */
+
+/* --- Variables --- */
+$primary-color: #333; // Gris oscuro para iconos
+$background-color: #FFFFFF; // Fondo blanco
+$text-color: #222; // Texto más oscuro
+$hover-color: rgba(0, 0, 0, 0.05); // Sutil efecto de hover
+
+/* --- Sidebar General --- */
+.sidebar-menu {
+  background-color: $background-color;
+  border-radius: 0 16px 16px 0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+  /* --- Header --- */
+  .header {
+    position: relative; // Añade posicionamiento relativo
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #444, #222);
+    border-radius: 0 16px 0 0;
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .logo-icon {
+        font-size: 2rem;
+        color: white;
+      }
+
+      .logo-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.6rem;
+        font-weight: bold;
+        color: white;
+      }
+    }
+
+    .close-btn {
+      position: absolute; // Posicionamiento absoluto
+      top: 16px; // Ajusta la posición vertical
+      right: 16px; // Ajusta la posición horizontal
+      color: white;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: rotate(90deg) scale(1.1);
+      }
+
+      .close-icon {
+        font-size: 28px;
+      }
+    }
+  }
+
+  /* --- Menú --- */
+  .menu-list {
+    padding: 10px 0;
+  }
+
+  .menu-item,
+  .faq-item {
+    margin: 6px 16px;
+    border-radius: 10px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+
+    &:hover,
+    &.menu-item-active {
+      background-color: $hover-color;
+      transform: translateX(5px);
+    }
+
+    .menu-icon {
+      font-size: 1.4rem;
+      color: $primary-color;
+      transition: all 0.3s ease;
+    }
+
+    .menu-text {
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      color: $text-color;
+      margin-left: 16px;
+    }
+  }
+
+  /* --- Animaciones --- */
+  .v-enter-active,
+  .v-leave-active {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .v-enter-from,
+  .v-leave-to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}

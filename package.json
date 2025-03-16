@@ -14,7 +14,12 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
+    "@iconify/vue": "^4.3.0",
     "@mdi/font": "^7.4.47",
+    "@tsparticles/vue3": "^3.0.1",
+    "add": "^2.0.6",
+    "gsap": "^3.12.7",
+    "tsparticles": "^3.8.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
     "vuetify": "^3.7.0-beta.1"

@@ -24,6 +24,7 @@
   box-shadow: $sombra-suave;
   /* Añade una sombra suave */
   margin-top: auto;
+  z-index: 2;
   /* Empuja el footer hacia abajo si hay espacio */
 
   .footer-content {

@@ -1,6 +1,10 @@
 <template>
   <div class="home-view">
-    <HeroSection /> <!-- Se integra el HeroSection reutilizable -->
+    <!-- Fondo con diagonal -->
+    <div class="home-background"></div>
+
+    <!-- Sección Hero -->
+    <HeroSection />
 
     <main class="main-content">
       <div class="features">
@@ -8,17 +12,15 @@
           :description="feature.description" />
       </div>
     </main>
-
-    <Footer />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, onUnmounted } from 'vue';
-import HeroSection from '@/components/HeroSection.vue';
-import Footer from '@/components/Footer.vue';
-import FeatureCard from '@/components/FeatureCard.vue';
+import HeroSection from '@/components/home/HeroSection.vue';
+import FeatureCard from '@/components/home/FeatureCard.vue';
 
+// Datos de las características
 const features = [
   {
     icon: 'mdi-dumbbell',
@@ -42,10 +44,10 @@ const features = [
   },
 ];
 
-// Función para cargar el chatbot
+// Cargar script del chatbot
 onMounted(() => {
   if (!window.chatbase || window.chatbase("getState") !== "initialized") {
-    window.chatbase = (...args: any[]) => { // Renombramos 'arguments' a 'args'
+    window.chatbase = (...args: any[]) => {
       if (!window.chatbase.q) {
         window.chatbase.q = [];
       }
@@ -56,7 +58,7 @@ onMounted(() => {
         if (prop === "q") {
           return target.q;
         }
-        return (...args: any[]) => target(prop, ...args); // Usamos 'args' aquí también
+        return (...args: any[]) => target(prop, ...args);
       },
     });
   }
@@ -67,7 +69,6 @@ onMounted(() => {
   script.domain = "www.chatbase.co";
   document.body.appendChild(script);
 
-  // Limpia el script cuando el componente se desmonta
   onUnmounted(() => {
     document.body.removeChild(script);
   });
@@ -75,19 +76,20 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use 'sass:color';
-@use '@/styles/_variables.scss' as *; // Importa las variables SCSS
-@use '@/styles/_mixins.scss' as *; // Importa los mixins
+@use '@/styles/_variables.scss' as *;
 
 .home-view {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  position: relative;
+  z-index: 1; // Asegura que el contenido esté sobre el fondo
 }
 
 .main-content {
   flex: 1;
   padding: $espaciado-extra-grande;
+  z-index: 1;
 
   .features {
     display: grid;
@@ -95,7 +97,6 @@ onMounted(() => {
     gap: $espaciado-grande;
     margin-top: $espaciado-extra-grande;
     text-align: center;
-    /* Centra el contenido de las tarjetas */
   }
 }
 
