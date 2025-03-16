@@ -4,7 +4,7 @@
       <!-- Header con logo y nombre -->
       <v-list-item class="header">
         <div class="logo-container">
-          <v-icon size="36" :color="$color - amarillo - dorado">mdi-dumbbell</v-icon>
+          <v-icon size="36" style="color: var(--color-amarillo-dorado);">mdi-dumbbell</v-icon>
           <h2 class="logo-title">GYM BULLS</h2>
         </div>
       </v-list-item>
@@ -15,7 +15,7 @@
       <v-list-item v-for="(item, index) in menuItems" :key="index" @click="navigateTo(item.link)" class="menu-item"
         :class="{ 'menu-item-active': item.link === currentRoute }">
         <template v-slot:prepend>
-          <v-icon class="menu-icon" :color="$color - amarillo - dorado">{{ item.icon }}</v-icon>
+          <v-icon class="menu-icon" style="color: var(--color-amarillo-dorado);">{{ item.icon }}</v-icon>
         </template>
         <v-list-item-title class="menu-text">{{ item.title }}</v-list-item-title>
       </v-list-item>
@@ -27,7 +27,7 @@
       <v-list-item v-if="showSettings" @click="navigateTo('/settings')" class="menu-item"
         :class="{ 'menu-item-active': '/settings' === currentRoute }">
         <template v-slot:prepend>
-          <v-icon class="menu-icon" :color="$color - amarillo - dorado">mdi-cog</v-icon>
+          <v-icon class="menu-icon" style="color: var(--color-amarillo-dorado);">mdi-cog</v-icon>
         </template>
         <v-list-item-title class="menu-text">Ajustes</v-list-item-title>
       </v-list-item>
@@ -35,7 +35,7 @@
       <!-- Cerrar Sesión -->
       <v-list-item @click="logout" class="menu-item logout-item">
         <template v-slot:prepend>
-          <v-icon class="menu-icon" :color="$color - rojo - vibrante">mdi-logout</v-icon>
+          <v-icon class="menu-icon" style="color: var(--color-rojo-vibrante);">mdi-logout</v-icon>
         </template>
         <v-list-item-title class="menu-text">Cerrar Sesión</v-list-item-title>
       </v-list-item>

@@ -1,11 +1,23 @@
+/* _variables.scss */
+
 /* --- Colores --- */
+$color-negro: #000000; /* Negro sólido para el fondo */
+$color-gris-claro-brillante: #E0E0E0; /* Gris claro brillante para títulos */
+$color-gris-medio: #8D8D8D; /* Gris medio oscuro para texto */
+$color-rojo-botones: #E75556; /* Rojo vibrante para botones */
+$color-texto-botones: #E0E0E0; /* Texto blanco/gris claro para botones */
+
 $color-rojo-vibrante: #FF2B00; /* Rojo vibrante */
-$color-negro: #000000;
 $color-gris-oscuro: #333333;
 $color-amarillo-dorado: #FFD700; /* Amarillo dorado */
 $color-blanco: #FFFFFF; /* Blanco puro */
 $color-verde-lima: #32CD32;
 $color-gris-claro: #F5F5F5; /* Gris claro para fondos */
+
+/* Nuevos colores añadidos */
+$color-rojo-granate: #8B0000; /* Rojo granate principal */
+$color-gris-medio: #666666; /* Gris medio para gradientes */
+$color-rojo-calido: #FF4500; /* Rojo cálido para detalles */
 
 /* Colores adicionales */
 $color-azul-gimnasio: #0074D9;
@@ -18,16 +30,28 @@ $color-primario: $color-amarillo-dorado; /* Usamos el amarillo dorado como color
 $color-secundario: $color-rojo-vibrante; /* Usamos el rojo vibrante como color secundario */
 $color-fondo-sidebar: $color-gris-claro; /* Fondo claro para el sidebar */
 
-/* Tipografía */
-$fuente-titulo: 'Poppins', sans-serif; // Más moderna para títulos
-$fuente-principal: 'Roboto', sans-serif;
-$fuente-secundaria: 'Open Sans', sans-serif;
+/* Exportar variables SCSS como propiedades CSS */
+:root {
+  --color-texto-principal: #{$color-texto-principal};
+  --color-primario: #{$color-primario};
+  --color-secundario: #{$color-secundario};
+  --color-fondo-sidebar: #{$color-fondo-sidebar};
+  --color-rojo-granate: #{$color-rojo-granate}; /* Nuevo color añadido */
+  --color-gris-medio: #{$color-gris-medio}; /* Nuevo color añadido */
+  --color-rojo-calido: #{$color-rojo-calido}; /* Nuevo color añadido */
+
+  --color-fondo: #{$color-negro}; /* Fondo negro */
+  --color-titulos: #{$color-gris-claro-brillante}; /* Títulos en gris claro brillante */
+  --color-texto: #{$color-gris-medio}; /* Texto en gris medio oscuro */
+  --color-botones: #{$color-rojo-botones}; /* Botones en rojo vibrante */
+  --color-texto-botones: #{$color-texto-botones}; /* Texto de botones en gris claro brillante */
+}
 
 /* --- Espaciados --- */
 $espaciado-pequeño: 8px; /* Espaciado pequeño */
-$espaciado-base: 16px;
-$espaciado-grande: 24px;
-$espaciado-extra-grande: 32px;
+$espaciado-base: 16px; /* Espaciado base */
+$espaciado-grande: 24px; /* Espaciado grande */
+$espaciado-extra-grande: 32px; /* Espaciado extra grande */
 
 /* --- Bordes y Radios --- */
 $radio-borde: 4px;
@@ -37,3 +61,22 @@ $ancho-borde-grueso: 3px;
 /* --- Sombras --- */
 $sombra-suave: 0 2px 4px rgba(0, 0, 0, 0.1);
 $sombra-fuerte: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+/* --- Tipografía --- */
+$fuente-titulo: 'Poppins', sans-serif; // Más moderna para títulos
+$fuente-principal: 'Roboto', sans-serif; // Fuente principal para texto
+$fuente-secundaria: 'Open Sans', sans-serif; // Fuente secundaria para elementos menos importantes
+$fuente-landing: 'Bebas Neue', sans-serif;
+
+/* Exportar variables SCSS como propiedades CSS */
+:root {
+  --fuente-titulo: #{$fuente-titulo};
+  --fuente-principal: #{$fuente-principal};
+
+
+  --color-fondo: #{$color-negro}; /* Fondo negro */
+  --color-titulos: #{$color-gris-claro-brillante}; /* Títulos en gris claro brillante */
+  --color-texto: #{$color-gris-medio}; /* Texto en gris medio oscuro */
+  --color-botones: #{$color-rojo-botones}; /* Botones en rojo vibrante */
+  --color-texto-botones: #{$color-texto-botones}; /* Texto de botones en gris claro brillante */
+}

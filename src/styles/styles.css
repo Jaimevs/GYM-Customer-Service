@@ -1,0 +1,12 @@
+/* src/public/styles.css */
+body {
+  font-family: var(--fuente-principal); /* Fuente principal para texto */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--fuente-titulo); /* Fuente para títulos */
+}
+
+button, .v-btn {
+  font-family: var(--fuente-titulo); /* Botones usan la fuente de títulos */
+}
