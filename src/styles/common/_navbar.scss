@@ -1,0 +1,104 @@
+/* _navbar.scss */
+
+@use 'sass:color';
+@use '@/styles/_variables.scss' as vars; // Importa las variables usando @use
+
+/* --- Estilos de la barra de navegación --- */
+.fixed-navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: transparent !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+
+  /* Eliminamos el efecto hover del Navbar */
+  &:hover {
+    background-color: transparent !important;
+  }
+}
+
+/* Contenedor principal del Navbar */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Distribuye el contenido entre izquierda, centro y derecha */
+  width: 100%; /* Asegura que ocupe todo el ancho disponible */
+  padding: 0 24px; /* Añade un relleno horizontal para evitar que los elementos se peguen a los bordes */
+}
+
+/* Contenedor del logo */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+
+  .logo-image {
+    width: 80px; /* Tamaño más grande del logo */
+    height: auto; /* Mantener proporciones */
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1); /* Efecto hover suave para el logo */
+    }
+  }
+}
+
+/* Enlaces de navegación (Centro) */
+.nav-links {
+  position: absolute; /* Centra los enlaces de navegación */
+  left: 50%; /* Mueve el contenedor al centro horizontal */
+  transform: translateX(-50%); /* Ajusta el centro exacto */
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  .nav-link {
+    text-decoration: none;
+    color: vars.$color-gris-claro-brillante; /* Usamos gris claro brillante */
+    font-family: vars.$fuente-principal;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.3s ease;
+
+    &:link,
+    &:visited {
+      color: vars.$color-gris-claro-brillante; /* Color base */
+    }
+
+    &:hover {
+      color: vars.$color-rojo-botones; /* Cambia a rojo vibrante al pasar el mouse */
+    }
+  }
+}
+
+/* Botón de Iniciar Sesión (Derecha) */
+.v-btn--login {
+  margin-left: auto; /* Alinea el botón a la derecha */
+  background-color: vars.$color-rojo-botones !important; /* Usamos el rojo vibrante de los botones */
+  color: vars.$color-texto-botones !important; /* Texto blanco/gris claro */
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: color.adjust(vars.$color-rojo-botones, $lightness: -10%) !important; /* Oscurece ligeramente */
+  }
+
+  .v-icon {
+    color: vars.$color-texto-botones !important; /* Icono en gris claro */
+  }
+}
+
+/* Botón de Menú Hamburguesa (Solo en móviles) */
+.v-btn--menu {
+  margin-left: auto; /* Alinea el botón de menú a la derecha en móviles */
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  &:hover {
+    background-color: vars.$color-rojo-botones !important; /* Fondo rojo vibrante */
+    .v-icon {
+      color: vars.$color-texto-botones !important; /* Icono en gris claro */
+    }
+  }
+}

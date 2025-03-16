@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-view">
+  <div class="dashboard-layout">
     <!-- Sidebar -->
     <SidebarDashboard :isVisible="isSidebarVisible" @update:isVisible="updateSidebarVisibility" />
 
@@ -8,24 +8,26 @@
       <!-- Navbar -->
       <NavbarDashboard @toggle-sidebar="toggleSidebar" />
 
-      <!-- Título y contenido -->
-      <h1>Bienvenido al Dashboard</h1>
+      <!-- Slot para el contenido específico de cada vista -->
+      <slot></slot>
     </main>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import SidebarDashboard from '@/components/SidebarDashboard.vue';
-import NavbarDashboard from '@/components/NavbarDashboard.vue';
+import SidebarDashboard from '@/components/dashboard/SidebarDashboard.vue';
+import NavbarDashboard from '@/components/dashboard/NavbarDashboard.vue';
 
 // Estado para la visibilidad del sidebar
 const isSidebarVisible = ref(true);
 
+// Función para alternar la visibilidad del sidebar
 const toggleSidebar = () => {
   isSidebarVisible.value = !isSidebarVisible.value;
 };
 
+// Función para actualizar la visibilidad del sidebar desde el componente hijo
 const updateSidebarVisibility = (newValue: boolean) => {
   isSidebarVisible.value = newValue;
 };
@@ -34,7 +36,7 @@ const updateSidebarVisibility = (newValue: boolean) => {
 <style scoped lang="scss">
 @use '@/styles/_variables.scss' as *;
 
-.dashboard-view {
+.dashboard-layout {
   display: flex;
   min-height: 100vh;
 }
@@ -51,7 +53,7 @@ const updateSidebarVisibility = (newValue: boolean) => {
 }
 
 .sidebar-visible {
-  margin-left: 250px;
+  margin-left: 250px; // Ancho del sidebar
 }
 
 @include media-query(small) {

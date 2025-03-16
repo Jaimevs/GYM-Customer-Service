@@ -1,76 +1,7 @@
-<template>
-  <div class="container sign-up-mode">
-    <div class="forms-container">
-      <div class="signin-signup">
-        <form @submit.prevent="handleRegister" class="sign-up-form">
-          <h2 class="title">Registrarse</h2>
-          <div class="input-field">
-            <i class="fas fa-user"></i>
-            <input type="text" v-model="username" placeholder="Usuario" />
-          </div>
-          <div class="input-field">
-            <i class="fas fa-envelope"></i>
-            <input type="email" v-model="email" placeholder="Email" />
-          </div>
-          <div class="input-field">
-            <i class="fas fa-lock"></i>
-            <input type="password" v-model="password" placeholder="Contraseña" />
-          </div>
-          <input type="submit" class="btn" value="Registrarse" />
-          <p class="social-text">O regístrate con plataformas sociales</p>
-          <div class="social-media">
-            <a href="#" class="social-icon">
-              <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="#" class="social-icon">
-              <i class="fab fa-twitter"></i>
-            </a>
-            <a href="#" class="social-icon">
-              <i class="fab fa-google"></i>
-            </a>
-            <a href="#" class="social-icon">
-              <i class="fab fa-linkedin-in"></i>
-            </a>
-          </div>
-        </form>
-      </div>
-    </div>
-    <div class="panels-container">
-      <div class="panel left-panel">
-        <div class="content">
-          <h3>¿Ya eres uno de nosotros?</h3>
-          <p>
-            Inicia sesión para acceder a tu cuenta y continuar donde lo dejaste
-          </p>
-          <button class="btn transparent" @click="goToLogin">
-            Iniciar Sesión
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script lang="ts" setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-const username = ref('');
-const email = ref('');
-const password = ref('');
-
-const handleRegister = () => {
-  console.log('Registrando con:', username.value, email.value, password.value);
-  // Aquí iría la lógica de registro
-};
-
-const goToLogin = () => {
-  router.push('/login');
-};
-</script>
-
-<style scoped>
+/* Importar módulo color de Sass */
+@use "sass:color";
+// @use './_dashboard-layout.scss' as *; // Estilos para DashboardLayout
+/* Importar fuentes */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
 
 * {
@@ -122,12 +53,6 @@ form {
   overflow: hidden;
   grid-column: 1 / 2;
   grid-row: 1 / 2;
-  z-index: 2;
-}
-
-.sign-up-form {
-  opacity: 1;
-  z-index: 2;
 }
 
 .title {
@@ -209,7 +134,7 @@ form {
   outline: none;
   height: 49px;
   border-radius: 49px;
-  color: #fff;
+  color: #fff !important;
   text-transform: uppercase;
   font-weight: 600;
   margin: 10px 0;
@@ -218,7 +143,7 @@ form {
 }
 
 .btn:hover {
-  background-color: #d10000;
+  background-color: color.scale(#ff0000, $lightness: -10%);
 }
 
 .panels-container {
@@ -275,13 +200,11 @@ form {
   font-weight: 600;
   line-height: 1;
   font-size: 1.5rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .panel p {
   font-size: 0.95rem;
   padding: 0.7rem 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .btn.transparent {
@@ -294,22 +217,18 @@ form {
   font-size: 0.8rem;
 }
 
-.btn.transparent:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
 @media (max-width: 870px) {
   .container {
     min-height: 800px;
     height: 100vh;
   }
-  
+
   .signin-signup {
     width: 100%;
-    top: 95px;
-    transform: translate(-50%, 0);
-    left: 50%;
+    top: 95%;
+    transform: translate(-50%, -100%);
     transition: 1s 0.8s ease-in-out;
+    left: 50%;
   }
 
   .panels-container {
@@ -322,93 +241,23 @@ form {
     justify-content: space-around;
     align-items: center;
     padding: 2.5rem 8%;
-    grid-column: 1 / 2;
-  }
-
-  .left-panel {
-    grid-row: 1 / 2;
-  }
-
-  .image {
-    width: 200px;
-    transition: transform 0.9s ease-in-out;
-    transition-delay: 0.6s;
-  }
-
-  .panel .content {
-    padding-right: 15%;
-    transition: transform 0.9s ease-in-out;
-    transition-delay: 0.8s;
   }
 
   .panel h3 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   .panel p {
-    font-size: 0.7rem;
-    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    margin: 1.1rem 0;
   }
 
   .btn.transparent {
-    width: 110px;
-    height: 35px;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
+    margin-top: 20px;
   }
 
-  .container:before {
-    width: 1500px;
-    height: 1500px;
-    transform: translateX(-50%);
-    left: 30%;
-    bottom: 80%;
-    right: initial;
-    top: initial;
-    transition: 2s ease-in-out;
-    z-index: 0;
-  }
-
-  .sign-up-form {
-    z-index: 3;
+  .input-field {
+    margin-bottom: 1rem;
   }
 }
-
-@media (max-width: 570px) {
-  form {
-    padding: 0 1.5rem;
-  }
-
-  .image {
-    display: none;
-  }
-  
-  .panel .content {
-    padding: 0.5rem 1rem;
-  }
-  
-  .container {
-    padding: 1.5rem;
-  }
-
-  .container:before {
-    bottom: 85%;
-    left: 50%;
-    opacity: 0.8;
-  }
-
-  .signin-signup {
-    top: 150px;
-    padding-top: 20px;
-  }
-}
-
-@media (max-width: 400px) {
-  .container:before {
-    bottom: 90%;
-  }
-  
-  .signin-signup {
-    top: 120px;
-  }
-}
-</style>

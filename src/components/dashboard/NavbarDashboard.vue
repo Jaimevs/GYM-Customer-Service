@@ -2,80 +2,27 @@
   <v-app-bar color="white" elevation="0" class="navbar-dashboard">
     <!-- Botón de Hamburguesa -->
     <v-btn icon variant="text" @click="toggleSidebar">
-      <v-icon size="24" :color="$color-texto-principal">mdi-menu</v-icon>
+      <v-icon size="24" class="texto-principal">mdi-menu</v-icon>
     </v-btn>
 
     <!-- Logo -->
     <div class="logo-container" @click="navigateTo('/')">
-      <v-icon size="36" :color="$color-primario">mdi-dumbbell</v-icon>
+      <v-icon size="36" class="primario">mdi-dumbbell</v-icon>
       <h2 class="logo-title">GYM BULLS</h2>
     </div>
-
-    <!-- Espaciador para separar el logo de los enlaces -->
-    <v-spacer></v-spacer>
-
-    <!-- Enlaces de Navegación -->
-    <div class="nav-links">
-      <v-btn
-        v-for="(item, index) in navItems"
-        :key="index"
-        :to="item.link"
-        variant="text"
-        class="nav-link"
-        :class="{ 'nav-link-active': item.link === currentRoute }"
-      >
-        {{ item.title }}
-      </v-btn>
-    </div>
-
-    <!-- Espaciador para separar los enlaces del menú de usuario -->
-    <v-spacer></v-spacer>
 
     <!-- Botón de Notificaciones -->
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
         <v-btn icon variant="text" class="notification-btn" v-bind="props">
           <v-badge :content="notificationsCount" color="error" overlap>
-            <v-icon size="24" :color="$color-texto-principal">mdi-bell</v-icon>
+            <v-icon size="24" class="texto-principal">mdi-bell</v-icon>
           </v-badge>
         </v-btn>
       </template>
       <v-list>
         <v-list-item v-for="(notification, index) in notifications" :key="index">
           <v-list-item-title>{{ notification }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-
-    <!-- Menú Desplegable del Usuario -->
-    <v-menu offset-y>
-      <template v-slot:activator="{ props }">
-        <v-avatar size="40" class="user-avatar" v-bind="props">
-          <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
-        </v-avatar>
-      </template>
-      <v-list class="user-menu">
-        <v-list-item @click="navigateTo('/profile')">
-          <template v-slot:prepend>
-            <v-icon :color="$color-primario">mdi-account</v-icon>
-          </template>
-          <v-list-item-title>Perfil</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item @click="navigateTo('/settings')">
-          <template v-slot:prepend>
-            <v-icon :color="$color-primario">mdi-cog</v-icon>
-          </template>
-          <v-list-item-title>Configuración</v-list-item-title>
-        </v-list-item>
-
-        <v-divider></v-divider>
-
-        <v-list-item @click="logout">
-          <template v-slot:prepend>
-            <v-icon :color="$color-secundario">mdi-logout</v-icon>
-          </template>
-          <v-list-item-title>Cerrar Sesión</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
