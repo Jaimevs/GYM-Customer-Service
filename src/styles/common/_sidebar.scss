@@ -26,17 +26,16 @@ $hover-color: rgba(0, 0, 0, 0.05); // Sutil efecto de hover
       display: flex;
       align-items: center;
       gap: 10px;
+      cursor: pointer;
 
-      .logo-icon {
-        font-size: 2rem;
-        color: white;
-      }
+      .logo-image {
+        width: 120px; // Ancho fijo del logo
+        height: auto; // Mantener proporciones
+        transition: transform 0.3s ease;
 
-      .logo-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: 1.6rem;
-        font-weight: bold;
-        color: white;
+        &:hover {
+          transform: scale(1.1); // Efecto hover suave para el logo
+        }
       }
     }
 
