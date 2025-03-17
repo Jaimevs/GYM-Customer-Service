@@ -44,7 +44,9 @@ const toggleSidebar = () => {
 
 .public-main {
   flex: 1;
-  padding: $espaciado-base;
+  /* Ocupa el espacio restante */
+  padding: 0;
+  /* Elimina el padding para que el HeroSection ocupe toda la pantalla */
   background-color: transparent;
 }
 </style>

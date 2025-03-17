@@ -1,0 +1,212 @@
+@use 'sass:color';
+@use '@/styles/_variables.scss' as *;
+@use '@/styles/_mixins.scss' as *;
+/* Importa los mixins */
+@use '@/styles/_mixins.scss' as *;
+
+.hero-container {
+  padding: 128px 16px 64px;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('@/assets/background.jpg') center/cover fixed;
+  position: relative;
+  z-index: 1;
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  @include media-query(small) {
+    padding: 96px 16px 32px;
+  }
+}
+
+/* Título Hero */
+.hero-title {
+  font-family: $fuente-landing;
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--color-titulos);
+  margin-bottom: 16px;
+  line-height: 1.2;
+  text-align: left;
+
+  .animated-text {
+    display: inline-block;
+  }
+
+  .gymbulls-text {
+    display: block;
+    color: $color-rojo-vibrante;
+    font-size: 3.5rem;
+    margin-top: 8px;
+  }
+
+  @include media-query(small) {
+    font-size: 2rem;
+
+    .gymbulls-text {
+   font-size: 2.5rem;
+    }
+  }
+}
+
+/* Subtítulo Hero */
+.hero-subtitle {
+  font-family: $fuente-principal;
+  font-size: 1.25rem;
+  color: var(--color-texto);
+  line-height: 1.6;
+  margin-bottom: 32px;
+
+  @include media-query(small) {
+    font-size: 1rem;
+  }
+}
+/* Subtítulo Secundario */
+.hero-secondary-subtitle {
+font-family: $fuente-principal;
+font-size: 1rem;
+color: $color-gris-medio;
+line-height: 1.4;
+margin-bottom: 32px;
+max-width: 80%;
+
+@include media-query(small) {
+font-size: 0.9rem;
+}
+}
+
+/* Botón CTA */
+.hero-button-wrapper {
+display: flex;
+justify-content: flex-start;
+z-index: 2;
+
+.cta-button {
+padding: 12px 24px;
+font-family: $fuente-titulo;
+font-size: 1rem;
+font-weight: bold;
+color: var(--color-texto-botones);
+background-color: var(--color-botones);
+border: none;
+border-radius: 30px;
+cursor: pointer;
+box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+transition: all 0.3s ease;
+position: relative;
+overflow: hidden;
+
+&::before {
+content: '';
+position: absolute;
+top: 0;
+left: -100%;
+width: 100%;
+height: 100%;
+background: rgba(255, 255, 255, 0.3);
+transition: left 0.5s ease;
+}
+
+&:hover {
+transform: scale(1.05);
+box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+background-color: color.adjust($color-rojo-botones, $lightness: -10%);
+
+&::before {
+left: 100%;
+}
+}
+
+&:active {
+transform: scale(0.95);
+}
+}
+
+@include media-query(small) {
+justify-content: center;
+
+.cta-button {
+font-size: 0.9rem;
+padding: 10px 20px;
+}
+}
+}
+
+/* Íconos de Redes Sociales */
+.social-icons {
+display: flex;
+gap: 16px;
+margin-top: 16px;
+}
+
+.social-icon {
+font-size: 1.5rem;
+color: $color-blanco !important;
+background: rgba(255, 255, 255, 0.1);
+border-radius: 50%;
+padding: 8px;
+transition: all 0.3s ease;
+
+&:hover {
+background: $color-rojo-vibrante;
+color: $color-blanco !important;
+transform: scale(1.2);
+}
+}
+
+/* Carousel de Imágenes */
+.hero-carousel {
+  width: 100%;
+  max-width: 700px; /* Ancho máximo en escritorio */
+  height: 400px; /* Altura fija en escritorio */
+  border-radius: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+
+  /* En pantallas grandes, mover el carousel más a la derecha */
+  margin-left: 128px; /* Aumenta el margen izquierdo */
+
+  @include media-query(small) {
+    max-width: none !important; /* Elimina el límite de ancho */
+    width: 100% !important; /* Ocupa todo el ancho en móviles */
+    height: 300px !important; /* Altura reducida en móviles */
+    margin-left: 0 !important; /* Elimina el margen izquierdo */
+    margin-right: 0 !important; /* Elimina cualquier margen derecho */
+    margin-top: 32px !important; /* Espaciado superior para separar del texto */
+    margin: 0 auto !important; /* Centra el carousel horizontalmente */
+    transform: none !important; /* Elimina cualquier transformación */
+    translate: none !important; /* Elimina cualquier traslación */
+  }
+
+  /* Contenedor interno del carousel */
+  .v-window__container {
+    width: 100% !important; /* Asegura que ocupe todo el ancho */
+    margin: 0 auto !important; /* Centra el contenido interno */
+  }
+
+  /* Elemento activo del carousel */
+  .v-window-item {
+    width: 100% !important; /* Asegura que ocupe todo el ancho */
+    margin: 0 auto !important; /* Centra el contenido interno */
+  }
+
+  /* Imagen dentro del carousel */
+  .v-img {
+    width: 100% !important; /* Asegura que la imagen ocupe todo el ancho */
+    margin: 0 auto !important; /* Centra la imagen */
+  }
+}
+
+/* Contenedor de las Feature Cards */
+.home-view .features {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; /* Columnas responsivas */
+  gap: $espaciado-grande !important; /* Espacio entre las tarjetas */
+  margin-top: $espaciado-extra-grande !important; /* Espaciado superior */
+  text-align: center !important; /* Alinea el texto al centro */
+  justify-content: center !important; /* Centra las tarjetas horizontalmente */
+  width: 100% !important; /* Ocupa todo el ancho disponible */
+  max-width: 1200px !important; /* Límite máximo de ancho */
+  margin: 0 auto !important; /* Centra el contenedor padre */
+  padding: 0 $espaciado-base !important; /* Añade un poco de padding horizontal */
+}
