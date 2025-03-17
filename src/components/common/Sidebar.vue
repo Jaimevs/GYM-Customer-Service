@@ -4,9 +4,8 @@
     <v-list class="sidebar-content pa-0">
       <!-- Header -->
       <v-list-item class="header">
-        <div class="logo-container">
-          <Icon icon="icon-park-outline:muscle" class="logo-icon" />
-          <h2 class="logo-title">GYM BULLS</h2>
+        <div class="logo-container" @click="navigateToHome">
+          <img src="@/assets/img/gymbulls.png" alt="GYM BULLS Logo" class="logo-image" />
         </div>
         <v-btn icon @click="closeMenu" class="close-btn" variant="text">
           <Icon icon="solar:close-circle-outline" class="close-icon" />
@@ -28,8 +27,6 @@
         </v-list-item>
       </v-list>
 
-      <v-divider class="my-4"></v-divider>
-
       <!-- Preguntas Frecuentes -->
       <v-list-item @click="navigateTo('/faq')" class="faq-item">
         <template #prepend>
@@ -46,13 +43,14 @@
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
 import { computed, defineProps, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps<{ modelValue: boolean }>();
 const emit = defineEmits(["update:modelValue"]);
-const menuVisible = ref(props.modelValue);
+const router = useRouter();
 const route = useRoute();
 
+const menuVisible = ref(props.modelValue);
 const currentRoute = computed(() => route.path);
 
 watch(
@@ -67,6 +65,7 @@ const menuItems = ref([
   { title: "Inicio", link: "/", icon: "solar:home-outline" },
   { title: "Gimnasios", link: "/gimnasios", icon: "solar:dumbbell-outline" },
   { title: "Planes", link: "/planes", icon: "solar:money-bag-outline" },
+  { title: "Instalaciones", link: "/instalaciones", icon: "solar:dumbbell-outline" },
   { title: "Conoce GYM BULLS", link: "/nosotros", icon: "solar:info-circle-outline" },
   { title: "Contáctanos", link: "/contacto", icon: "solar:letter-outline" }
 ]);
@@ -79,6 +78,11 @@ const closeMenu = () => {
 const navigateTo = (link: string) => {
   console.log("Navegar a:", link);
   closeMenu();
+};
+
+// Función para navegar al inicio
+const navigateToHome = () => {
+  router.push("/");
 };
 </script>
 

@@ -1,0 +1,200 @@
+/* _footer.scss */
+
+@use 'sass:color';
+@use '@/styles/_variables.scss' as *;
+@use '@/styles/_mixins.scss' as *;
+
+.footer {
+  background: linear-gradient(135deg, $color-negro, color.adjust($color-negro, $lightness: -10%)); /* Gradiente dinámico */
+  color: $color-blanco;
+  padding: $espaciado-extra-grande $espaciado-grande;
+  font-family: $fuente-secundaria;
+  box-shadow: $sombra-fuerte;
+  margin-top: auto;
+  z-index: 2;
+
+  .footer-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $espaciado-grande;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $espaciado-base;
+
+    @include media-query(small) {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: $espaciado-base;
+      padding: $espaciado-pequeño;
+    }
+  }
+
+  .footer-logo {
+    flex: 1;
+    max-width: 150px;
+
+    .logo-image {
+      width: 100%;
+      height: auto;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.1); /* Efecto hover suave */
+      }
+
+      @include media-query(small) {
+        max-width: 120px; /* Reducimos el tamaño del logo en móviles */
+      }
+    }
+  }
+
+  .footer-links {
+    flex: 1;
+    text-align: left;
+
+    @include media-query(small) {
+      text-align: center; /* Centramos los enlaces en móviles */
+    }
+
+    .footer-title {
+      font-family: $fuente-titulo;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: $espaciado-pequeño;
+      color: $color-rojo-vibrante;
+
+      @include media-query(small) {
+        font-size: 1rem; /* Reducimos el tamaño del título en móviles */
+      }
+    }
+
+    .footer-link-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: $espaciado-pequeño;
+
+        a {
+          color: $color-gris-claro-brillante;
+          text-decoration: none;
+          font-size: 0.9rem; /* Tamaño base para los enlaces */
+          transition: color 0.3s ease;
+
+          &:hover {
+            color: $color-rojo-botones;
+          }
+
+          @include media-query(small) {
+            font-size: 1rem; /* Aumentamos el tamaño del texto en móviles */
+          }
+        }
+      }
+    }
+  }
+
+  .footer-social {
+    flex: 1;
+    text-align: left;
+
+    @include media-query(small) {
+      text-align: center; /* Centramos los íconos en móviles */
+    }
+
+    .footer-title {
+      font-family: $fuente-titulo;
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: $espaciado-pequeño;
+      color: $color-rojo-vibrante;
+
+      @include media-query(small) {
+        font-size: 1rem; /* Reducimos el tamaño del título en móviles */
+      }
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 16px; /* Espacio entre los íconos */
+      margin-top: 16px; /* Espaciado desde el botón */
+
+      @include media-query(small) {
+        gap: 12px; /* Reducimos el espacio entre íconos en móviles */
+      }
+    }
+
+    .social-icon {
+      font-size: 1.5rem; /* Tamaño de los íconos */
+      color: $color-blanco !important; /* Color inicial blanco (visible) */
+      background: rgba(255, 255, 255, 0.1); /* Fondo ligeramente visible */
+      border-radius: 50%;
+      padding: 8px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: $color-rojo-vibrante; /* Cambia el fondo al hacer hover */
+        color: $color-blanco !important; /* Mantén el texto blanco */
+        transform: scale(1.2); /* Efecto de agrandamiento */
+      }
+
+      @include media-query(small) {
+        font-size: 1.2rem; /* Reducimos el tamaño de los íconos en móviles */
+        padding: 6px; /* Menor padding en móviles */
+      }
+    }
+  }
+
+  .footer-cta {
+    flex: 1;
+    text-align: center;
+
+    .cta-button {
+      padding: $espaciado-pequeño $espaciado-base;
+      font-family: $fuente-titulo;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: $color-texto-botones;
+      background-color: $color-rojo-botones;
+      border: none;
+      border-radius: $radio-borde;
+      cursor: pointer;
+      box-shadow: $sombra-suave;
+      transition: all 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: $sombra-fuerte;
+        background: linear-gradient(135deg, $color-negro, color.adjust($color-negro, $lightness: -10%));
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      @include media-query(small) {
+        font-size: 1rem; /* Aumentamos el tamaño del texto en móviles */
+        padding: $espaciado-base; /* Mayor padding en móviles */
+      }
+    }
+  }
+
+  .footer-copyright {
+    flex: 1;
+    text-align: center;
+
+    .footer-text {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin: 0;
+      color: $color-gris-medio;
+
+      @include media-query(small) {
+        font-size: 0.95rem; /* Aumentamos el tamaño del texto en móviles */
+      }
+    }
+  }
+}

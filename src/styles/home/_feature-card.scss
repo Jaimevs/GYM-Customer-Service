@@ -1,0 +1,88 @@
+@use 'sass:color';
+@use '@/styles/_variables.scss' as *; // Importa las variables SCSS
+@use '@/styles/_mixins.scss' as *; // Importa los mixins
+
+/* Contenedor de las Feature Cards */
+.home-view .features {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; /* Columnas responsivas */
+  gap: $espaciado-grande !important; /* Espacio entre las tarjetas */
+  margin-top: $espaciado-extra-grande !important; /* Espaciado superior */
+  text-align: center !important; /* Alinea el texto al centro */
+  justify-content: center !important; /* Centra las tarjetas horizontalmente */
+  width: 100% !important; /* Ocupa todo el ancho disponible */
+  max-width: 1200px !important; /* Límite máximo de ancho */
+  margin: 0 auto !important; /* Centra el contenedor padre */
+  padding: 0 $espaciado-base !important; /* Añade un poco de padding horizontal */
+}
+
+/* Estilos de las Feature Cards */
+.feature-card {
+  width: 100% !important;
+  max-width: 350px !important;
+  min-height: 280px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  border-radius: $radio-borde !important;
+  padding: $espaciado-base !important;
+  background-color: $color-blanco !important;
+  transition: transform 0.3s ease-in-out !important, box-shadow 0.3s ease-in-out !important;
+  box-shadow: $sombra-suave !important;
+
+  &:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: $sombra-fuerte !important;
+
+    .custom-title {
+      color: $color-rojo-vibrante !important; /* Cambia el color del título al pasar el mouse */
+    }
+
+    .custom-description {
+      color: $color-texto-principal !important; /* Cambia el color de la descripción al pasar el mouse */
+    }
+  }
+}
+
+.feature-icon-container {
+  margin-bottom: $espaciado-base !important;
+
+  .feature-icon {
+    font-size: 60px !important;
+    color: $color-rojo-vibrante !important;
+    transition: transform 0.3s ease-in-out !important, color 0.3s ease-in-out !important;
+
+    /* Cambia el color del ícono al pasar el mouse */
+    .feature-card:hover & {
+      transform: scale(1.2) !important;
+      color: $color-negro !important; /* Cambia el color del ícono a negro */
+    }
+  }
+}
+.custom-title {
+  font-family: $fuente-titulo !important;
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  color: $color-negro !important;
+  margin-bottom: $espaciado-pequeño !important;
+  transition: color 0.3s ease-in-out !important; /* Agrega una transición para el color */
+
+  @include media-query(small) {
+    font-size: 1.2rem !important;
+  }
+}
+
+.custom-description {
+  font-family: $fuente-principal !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: $color-texto-secundario !important;
+  line-height: 1.6 !important;
+  text-align: center !important;
+  transition: color 0.3s ease-in-out !important; /* Agrega una transición para el color */
+
+  @include media-query(small) {
+    font-size: 0.9rem !important;
+  }
+}

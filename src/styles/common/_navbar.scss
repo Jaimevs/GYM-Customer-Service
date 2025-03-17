@@ -1,7 +1,8 @@
 /* _navbar.scss */
 
 @use 'sass:color';
-@use '@/styles/_variables.scss' as vars; // Importa las variables usando @use
+@use '@/styles/_variables.scss' as *; // Importa las variables usando @use
+@use '@/styles/_mixins.scss' as *;
 
 /* --- Estilos de la barra de navegación --- */
 .fixed-navbar {
@@ -9,13 +10,13 @@
   top: 0;
   width: 100%;
   z-index: 1000;
-  background-color: transparent !important;
+  background-color: $color-negro !important;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
 
   /* Eliminamos el efecto hover del Navbar */
   &:hover {
-    background-color: transparent !important;
+    background-color: $color-negro !important;
   }
 }
 
@@ -36,12 +37,16 @@
   cursor: pointer;
 
   .logo-image {
-    width: 80px; /* Tamaño más grande del logo */
+    width: 130px; /* Ancho fijo del logo */
     height: auto; /* Mantener proporciones */
     transition: transform 0.3s ease;
 
     &:hover {
       transform: scale(1.1); /* Efecto hover suave para el logo */
+    }
+
+    @include media-query(small) {
+      width: 120px; /* Tamaño reducido para pantallas pequeñas */
     }
   }
 }
@@ -57,19 +62,19 @@
 
   .nav-link {
     text-decoration: none;
-    color: vars.$color-gris-claro-brillante; /* Usamos gris claro brillante */
-    font-family: vars.$fuente-principal;
+    color: $color-gris-claro-brillante; /* Usamos gris claro brillante */
+    font-family: $fuente-principal;
     font-size: 0.875rem;
     font-weight: 500;
     transition: color 0.3s ease;
 
     &:link,
     &:visited {
-      color: vars.$color-gris-claro-brillante; /* Color base */
+      color: $color-gris-claro-brillante; /* Color base */
     }
 
     &:hover {
-      color: vars.$color-rojo-botones; /* Cambia a rojo vibrante al pasar el mouse */
+      color: $color-rojo-botones; /* Cambia a rojo vibrante al pasar el mouse */
     }
   }
 }
@@ -77,28 +82,48 @@
 /* Botón de Iniciar Sesión (Derecha) */
 .v-btn--login {
   margin-left: auto; /* Alinea el botón a la derecha */
-  background-color: vars.$color-rojo-botones !important; /* Usamos el rojo vibrante de los botones */
-  color: vars.$color-texto-botones !important; /* Texto blanco/gris claro */
+  background-color: $color-rojo-botones !important; /* Usamos el rojo vibrante de los botones */
+  color: $color-texto-botones !important; /* Texto blanco/gris claro */
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: color.adjust(vars.$color-rojo-botones, $lightness: -10%) !important; /* Oscurece ligeramente */
+    background-color: color.adjust($color-rojo-botones, $lightness: -10%) !important; /* Oscurece ligeramente */
   }
 
   .v-icon {
-    color: vars.$color-texto-botones !important; /* Icono en gris claro */
+    color: $color-texto-botones !important; /* Icono en gris claro */
   }
 }
 
 /* Botón de Menú Hamburguesa (Solo en móviles) */
 .v-btn--menu {
   margin-left: auto; /* Alinea el botón de menú a la derecha en móviles */
+  background-color: transparent !important; /* Fondo transparente por defecto */
   transition: background-color 0.3s ease, color 0.3s ease;
+  position: relative;
+  z-index: 1100;
+
+  .v-icon {
+    color: $color-blanco !important; /* Ícono blanco */
+    font-size: 32px; /* Tamaño más grande para mejor visibilidad */
+    transition: transform 0.3s ease;
+  }
 
   &:hover {
-    background-color: vars.$color-rojo-botones !important; /* Fondo rojo vibrante */
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Fondo ligeramente visible al pasar el mouse */
     .v-icon {
-      color: vars.$color-texto-botones !important; /* Icono en gris claro */
+      transform: scale(1.2); /* Efecto de agrandamiento del ícono */
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .v-btn--menu {
+    margin-left: 8px; // Ajusta la separación del menú
+  }
+
+  .v-btn--login {
+    font-size: 14px; // Reduce el tamaño del texto en móvil
+    padding: 6px 12px;
   }
 }
