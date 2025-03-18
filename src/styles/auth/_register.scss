@@ -1,0 +1,146 @@
+/* _register.scss */
+@use "sass:color";
+@use "@/styles/_variables" as *;
+
+/* Contenedor Principal */
+.register-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px; /* Ancho máximo */
+  min-width: 350px; /* Ancho mínimo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: $color-blanco; /* Fondo claro para contraste */
+  border-radius: 15px; /* Bordes redondeados */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra para destacar */
+  z-index: 10; /* Asegura que esté sobre otros elementos */
+
+  /* Animaciones GSAP */
+  .input-field,
+  .btn,
+  .login-text {
+    opacity: 0; /* Inicialmente invisible */
+    transform: translateY(-50px); /* Movido hacia arriba */
+    transition: opacity 0.5s, transform 0.5s; /* Transición suave */
+  }
+}
+
+/* Formulario de Registro */
+.register-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Filas de Campos (Columnas de Dos) */
+.form-row {
+  display: flex;
+  gap: 1rem; /* Espacio entre los campos */
+  width: 100%;
+
+  .input-field {
+    flex: 1; /* Cada campo ocupa la mitad del espacio disponible */
+    max-width: calc(50% - 0.5rem); /* Asegura que los campos no se desborden */
+    width: 100%; /* Ocupa todo el espacio disponible */
+  }
+}
+
+/* Campos de Entrada */
+.input-field {
+  width: 100%;
+  background-color: $color-gris-claro-brillante;
+  margin: 0.5rem 0;
+  height: 50px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+
+  i {
+    color: $color-gris-medio !important; /* Forzamos el color del ícono */
+    font-size: 1.2rem;
+    margin-right: 1rem; /* Espacio entre el ícono y el campo */
+  }
+
+  input,
+  select {
+    background: none;
+    outline: none;
+    border: none;
+    flex: 1;
+    font-size: 1rem;
+    color: $color-gris-medio;
+    width: 100%; /* Aseguramos que el campo ocupe todo el espacio restante */
+    box-sizing: border-box; /* Evita problemas con padding y bordes */
+  }
+
+  /* Estilo específico para el campo de selección */
+  &.select-field {
+    select {
+      appearance: none; /* Elimina el estilo predeterminado del navegador */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background: transparent;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}
+
+/* Botones */
+.btn.solid {
+  width: 100%;
+  background-color: $color-rojo-botones;
+  border: none;
+  outline: none;
+  height: 54px;
+  border-radius: 8px;
+  color: $color-texto-botones;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    background-color: color.adjust($color-rojo-botones, $lightness: -10%);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Texto de Login */
+.login-text {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: $color-gris-medio;
+  text-align: center;
+
+  .login-link {
+    color: $color-rojo-botones; /* Color llamativo para el enlace */
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+
+    &:hover {
+      color: color.scale($color-rojo-botones, $lightness: -10%); /* Oscurece el color al pasar el ratón */
+    }
+  }
+}

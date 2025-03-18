@@ -1,0 +1,261 @@
+/* _auth.scss */
+@use "sass:color";
+@use "@/styles/_variables" as *;
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+/* --- Estilos Específicos del AuthLayout --- */
+
+/* Contenedor Principal */
+.container {
+  position: relative;
+  width: 100%;
+  background-color: $color-negro; /* Fondo oscuro */
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Encabezado */
+.auth-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  z-index: 10;
+
+  .back-button {
+    background: none;
+    border: none;
+    color: $color-gris-claro-brillante;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s;
+
+    &:hover {
+      color: $color-rojo-botones;
+    }
+  }
+
+  .logo {
+    width: 100px;
+    height: auto;
+  }
+}
+
+/* Contenido Principal */
+.forms-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+
+  > * {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+/* Texto de Registro */
+.register-text {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: $color-gris-medio;
+  text-align: center;
+
+  .register-link {
+    color: $color-rojo-vibrante; /* Color llamativo para el enlace */
+    text-decoration: none;
+    font-weight: 300;
+    transition: color 0.3s;
+
+    &:hover {
+      color: color.scale($color-rojo-vibrante, $lightness: -10%); /* Oscurece el color al pasar el ratón */
+    }
+  }
+}
+/* --- Estilos Reutilizables --- */
+
+/* Títulos */
+.title {
+  font-size: 2.5rem;
+  color: $color-texto-principal;
+  margin-bottom: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Campos de Entrada */
+.input-field {
+  width: 100%;
+  background-color: $color-gris-claro-brillante;
+  margin: 0.5rem 0;
+  height: 50px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+
+  /* Forzamos el color del ícono con !important */
+  .iconify {
+    color: $color-gris-medio !important; /* Aplicamos !important para sobrescribir estilos */
+    font-size: 1.2rem; /* Tamaño del ícono */
+    margin-right: 1.5rem; /* Espacio entre el ícono y el placeholder */
+  }
+
+  input {
+    background: none;
+    outline: none;
+    border: none;
+    flex: 1;
+    font-size: 1rem;
+    color: $color-gris-medio;
+
+    &::placeholder {
+      color: $color-gris-medio;
+    }
+  }
+}
+
+
+/* Botones */
+.btn {
+  width: 100%;
+  background-color: $color-rojo-botones;
+  border: none;
+  outline: none;
+  height: 54px;
+  border-radius: 8px;
+  color: $color-texto-botones;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 10px 0;
+  cursor: pointer;
+  transition: all 0.3s ease; /* Transición general */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  position: relative; /* Necesario para el efecto ::before */
+  overflow: hidden; /* Asegura que el efecto no se desborde */
+
+  /* Efecto de deslizamiento con ::before */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%; /* Inicia fuera del botón */
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3); /* Resplandor blanco */
+    transition: left 0.5s ease; /* Animación suave */
+    z-index: 1; /* Detrás del texto */
+  }
+
+  &:hover {
+    transform: scale(1.05); /* Escala el botón */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
+    background-color: color.adjust($color-rojo-botones, $lightness: -10%); /* Oscurece el fondo */
+
+    &::before {
+      left: 100%; /* Desliza el resplandor hacia la derecha */
+    }
+  }
+
+  &:active {
+    transform: scale(0.95); /* Reduce el tamaño al hacer clic */
+  }
+
+  &.google {
+    background-color: $color-blanco;
+    color: #000000;
+    border: 1px solid #c2c8d0;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: none;
+    display: flex; /* Usamos flexbox para alinear ícono y texto */
+    align-items: center; /* Centramos verticalmente */
+    justify-content: flex-start; /* Pegamos el contenido a la izquierda */
+
+    /* Forzamos el color del ícono con !important */
+    .iconify {
+      margin-left: 1rem; /* Espacio desde el borde izquierdo */
+      margin-right: 1rem; /* Espacio entre el ícono y el texto */
+      color: $color-gris-medio !important; /* Aplicamos !important para sobrescribir estilos */
+    }
+
+    &:hover {
+      background-color: #f0f0f0;
+      transform: scale(1.03);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+
+/* Texto Social */
+.social-text {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: $color-gris-medio;
+  text-align: center;
+}
+
+
+
+/* Divider Wrapper */
+.divider-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1.5rem 0;
+  width: 100%; /* Asegura que ocupe todo el ancho disponible */
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1; /* Asegura que las líneas ocupen todo el espacio disponible */
+    height: 1px;
+    background-color: $color-gris-claro-brillante; /* Color de las líneas */
+    margin: 0 1rem; /* Espacio entre el texto y las líneas */
+  }
+
+  span {
+    font-size: 0.9rem;
+    color: $color-gris-medio; /* Color del texto */
+    white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+    z-index: 1; /* Asegura que el texto esté encima de las líneas */
+    padding: 0 0.5rem; /* Espacio alrededor del texto */
+  }
+}
+
+/* Separator */
+.separator {
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  color: $color-gris-medio;
+  text-align: center;
+
+  a {
+    color: $color-rojo-vibrante;
+    text-decoration: none;
+    transition: color 0.3s;
+
+    &:hover {
+      color: color.scale($color-rojo-botones, $lightness: -10%);
+    }
+  }
+}

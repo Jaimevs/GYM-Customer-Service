@@ -1,0 +1,37 @@
+/* _login.scss */
+@use "sass:color";
+@use "@/styles/_variables" as *;
+/* _login.scss */
+
+/* Contenedor Principal */
+.login-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: $color-blanco; /* Fondo oscuro para contraste */
+  border-radius: 15px; /* Bordes redondeados */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra para destacar */
+  z-index: 10; /* Asegura que esté sobre otros elementos */
+
+  /* Animaciones GSAP */
+  .input-field,
+  .btn,
+  .social-text {
+    opacity: 0; /* Inicialmente invisible */
+    transform: translateY(-50px); /* Movido hacia arriba */
+    transition: opacity 0.5s, transform 0.5s; /* Transición suave */
+  }
+}
+
+/* Formulario de Login */
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

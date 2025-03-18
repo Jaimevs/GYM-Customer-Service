@@ -1,41 +1,30 @@
 <template>
-  <div class="container" :class="{ 'sign-up-mode': isSignUpMode }">
-    <!-- Contenedor de Formularios -->
-    <div class="forms-container">
-      <div class="signin-signup">
-        <router-view></router-view> <!-- Aquí se inserta el contenido específico -->
-      </div>
-    </div>
+  <div class="container">
+    <!-- Barra Superior -->
+    <header class="auth-header" ref="authHeader">
+      <button class="back-button" @click="goBack">
+        <i class="fas fa-arrow-left"></i> <!-- Ícono de retroceso -->
+      </button>
+      <img src="@/assets/img/gymbulls.png" alt="Gymmbulls Logo" class="logo" />
+    </header>
 
-    <!-- Paneles Laterales -->
-    <div class="panels-container">
-      <!-- Panel Izquierdo -->
-      <div class="panel left-panel">
-        <div class="content">
-          <h3>{{ isSignUpMode ? '¿Ya eres uno de nosotros?' : '¿Eres nuevo aquí?' }}</h3>
-          <p>
-            {{
-              isSignUpMode
-                ? 'Inicia sesión para acceder a tu cuenta.'
-                : 'Regístrate para acceder a todas las funcionalidades.'
-            }}
-          </p>
-          <button class="btn transparent" @click="toggleView">
-            {{ isSignUpMode ? 'Iniciar Sesión' : 'Registrarse' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Contenido Principal -->
+    <main class="forms-container" ref="formsContainer">
+      <router-view></router-view> <!-- Aquí se inserta el contenido específico -->
+    </main>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-
-console.log('AuthLayout cargado'); // Depuración: Confirmar que AuthLayout se carga
+import gsap from 'gsap';
 
 const router = useRouter();
+
+// Referencias para las animaciones
+const authHeader = ref(null);
+const formsContainer = ref(null);
 
 // Estado para determinar si estamos en modo registro
 const isSignUpMode = ref(false);
@@ -56,9 +45,37 @@ const toggleView = () => {
 watch(
   () => router.currentRoute.value.path,
   (newPath) => {
-    console.log('Nueva ruta detectada:', newPath); // Depuración: Mostrar la nueva ruta
     isSignUpMode.value = newPath.includes('register');
   },
   { immediate: true }
 );
+
+// Función para retroceder al inicio
+const goBack = () => {
+  router.push('/');
+};
+
+// Animaciones GSAP
+onMounted(() => {
+  // Animación del encabezado
+  gsap.from(authHeader.value, {
+    y: -50,
+    opacity: 0,
+    duration: 0.8,
+    ease: 'power3.out',
+  });
+
+  // Animación del contenido principal
+  gsap.from(formsContainer.value, {
+    y: 50,
+    opacity: 0,
+    duration: 0.8,
+    ease: 'power3.out',
+    delay: 0.6,
+  });
+});
 </script>
+
+<style scoped lang="scss">
+@use '@/styles/auth/_auth.scss'; // Importa los estilos específicos para autenticación
+</style>

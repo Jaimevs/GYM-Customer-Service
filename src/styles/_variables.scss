@@ -30,23 +30,6 @@ $color-primario: $color-amarillo-dorado; /* Usamos el amarillo dorado como color
 $color-secundario: $color-rojo-vibrante; /* Usamos el rojo vibrante como color secundario */
 $color-fondo-sidebar: $color-gris-claro; /* Fondo claro para el sidebar */
 
-/* Exportar variables SCSS como propiedades CSS */
-:root {
-  --color-texto-principal: #{$color-texto-principal};
-  --color-primario: #{$color-primario};
-  --color-secundario: #{$color-secundario};
-  --color-fondo-sidebar: #{$color-fondo-sidebar};
-  --color-rojo-granate: #{$color-rojo-granate}; /* Nuevo color añadido */
-  --color-gris-medio: #{$color-gris-medio}; /* Nuevo color añadido */
-  --color-rojo-calido: #{$color-rojo-calido}; /* Nuevo color añadido */
-
-  --color-fondo: #{$color-negro}; /* Fondo negro */
-  --color-titulos: #{$color-gris-claro-brillante}; /* Títulos en gris claro brillante */
-  --color-texto: #{$color-gris-medio}; /* Texto en gris medio oscuro */
-  --color-botones: #{$color-rojo-botones}; /* Botones en rojo vibrante */
-  --color-texto-botones: #{$color-texto-botones}; /* Texto de botones en gris claro brillante */
-}
-
 /* --- Espaciados --- */
 $espaciado-pequeño: 8px; /* Espaciado pequeño */
 $espaciado-base: 16px; /* Espaciado base */
@@ -70,13 +53,23 @@ $fuente-landing: 'Bebas Neue', sans-serif;
 
 /* Exportar variables SCSS como propiedades CSS */
 :root {
-  --fuente-titulo: #{$fuente-titulo};
-  --fuente-principal: #{$fuente-principal};
-
-
+  /* Colores */
+  --color-texto-principal: #{$color-texto-principal};
+  --color-primario: #{$color-primario};
+  --color-secundario: #{$color-secundario};
+  --color-fondo-sidebar: #{$color-fondo-sidebar};
+  --color-rojo-granate: #{$color-rojo-granate}; /* Nuevo color añadido */
+  --color-gris-medio: #{$color-gris-medio}; /* Nuevo color añadido */
+  --color-rojo-calido: #{$color-rojo-calido}; /* Nuevo color añadido */
   --color-fondo: #{$color-negro}; /* Fondo negro */
   --color-titulos: #{$color-gris-claro-brillante}; /* Títulos en gris claro brillante */
   --color-texto: #{$color-gris-medio}; /* Texto en gris medio oscuro */
   --color-botones: #{$color-rojo-botones}; /* Botones en rojo vibrante */
   --color-texto-botones: #{$color-texto-botones}; /* Texto de botones en gris claro brillante */
+
+  /* Tipografía */
+  --fuente-titulo: #{$fuente-titulo};
+  --fuente-principal: #{$fuente-principal};
+  --fuente-secundaria: #{$fuente-secundaria};
+  --fuente-landing: #{$fuente-landing};
 }

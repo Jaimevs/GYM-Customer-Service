@@ -1,3 +1,4 @@
+/* feature-card.scss */
 @use 'sass:color';
 @use '@/styles/_variables.scss' as *; // Importa las variables SCSS
 @use '@/styles/_mixins.scss' as *; // Importa los mixins
@@ -14,13 +15,19 @@
   max-width: 1200px !important; /* Límite máximo de ancho */
   margin: 0 auto !important; /* Centra el contenedor padre */
   padding: 0 $espaciado-base !important; /* Añade un poco de padding horizontal */
+
+  /* Mejora para dispositivos móviles */
+  @include media-query(small) {
+    grid-template-columns: 1fr !important; /* Una sola columna en dispositivos pequeños */
+    padding: 0 $espaciado-pequeño !important; /* Reduce el padding en móviles */
+  }
 }
 
 /* Estilos de las Feature Cards */
 .feature-card {
-  width: 100% !important;
-  max-width: 350px !important;
-  min-height: 280px !important;
+  width: 100% !important; /* Ocupa todo el ancho disponible */
+  max-width: none !important; /* Elimina el límite máximo de ancho */
+  min-height: 280px !important; /* Altura mínima */
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -30,6 +37,11 @@
   background-color: $color-blanco !important;
   transition: transform 0.3s ease-in-out !important, box-shadow 0.3s ease-in-out !important;
   box-shadow: $sombra-suave !important;
+
+  /* Mejora para dispositivos móviles */
+  @include media-query(small) {
+    padding: $espaciado-pequeño !important; /* Reduce el padding en móviles */
+  }
 
   &:hover {
     transform: translateY(-8px) !important;
@@ -60,13 +72,14 @@
     }
   }
 }
+
 .custom-title {
   font-family: $fuente-titulo !important;
   font-size: 1.5rem !important;
   font-weight: bold !important;
   color: $color-negro !important;
   margin-bottom: $espaciado-pequeño !important;
-  transition: color 0.3s ease-in-out !important; /* Agrega una transición para el color */
+  transition: color 0.3s ease-in-out !important;
 
   @include media-query(small) {
     font-size: 1.2rem !important;
@@ -80,7 +93,7 @@
   color: $color-texto-secundario !important;
   line-height: 1.6 !important;
   text-align: center !important;
-  transition: color 0.3s ease-in-out !important; /* Agrega una transición para el color */
+  transition: color 0.3s ease-in-out !important;
 
   @include media-query(small) {
     font-size: 0.9rem !important;
