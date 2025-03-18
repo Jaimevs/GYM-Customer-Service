@@ -69,16 +69,26 @@ onMounted(() => {
 
   // Animación del título
   if (titleContainer.value) {
-    gsap.from(titleContainer.value.querySelector('.section-title'), {
+    const titleElement = titleContainer.value.querySelector('.section-title');
+
+    gsap.from(titleElement, {
       scrollTrigger: {
         trigger: titleContainer.value,
         start: 'top 80%', // Activa la animación cuando el título está al 80% en la pantalla
         toggleActions: 'play none none reverse', // Reproduce la animación solo una vez
       },
       opacity: 0, // Comienza invisible
-      y: 50, // Comienza desplazado hacia abajo
-      duration: 0.6, // Duración de la animación
+      y: 50, // Desplazamiento hacia abajo
+      duration: 1, // Duración de la animación
       ease: 'power3.out', // Función de tiempo suave
+      onComplete: () => {
+        // Efecto de iluminación final
+        gsap.to(titleElement, {
+          boxShadow: '0 0 15px rgba(0, 0, 0, 0.2)', // Sombra ligera
+          duration: 0.6,
+          ease: 'power2.inOut',
+        });
+      },
     });
   }
 
@@ -93,13 +103,27 @@ onMounted(() => {
         toggleActions: 'play none none reverse', // Reproduce la animación solo una vez
       },
       opacity: 0, // Comienza invisible
-      y: 50, // Comienza desplazado hacia abajo
-      duration: 0.6, // Duración de la animación
+      y: 50, // Desplazamiento hacia abajo
+      scale: 0.9, // Escalado inicial
+      duration: 0.8, // Duración de la animación
       stagger: 0.2, // Retraso entre cada tarjeta
       ease: 'power3.out', // Función de tiempo suave
       onComplete: () => {
         gsap.set(cards, { clearProps: 'all' }); // Limpia las propiedades después de la animación
       },
+    });
+
+    // Efecto de sombra dinámica
+    gsap.to(cards, {
+      scrollTrigger: {
+        trigger: featuresContainer.value,
+        start: 'top 80%',
+        toggleActions: 'play none none reverse',
+      },
+      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)', // Sombra dinámica
+      duration: 0.6,
+      stagger: 0.2,
+      ease: 'power2.inOut',
     });
   }
 });
