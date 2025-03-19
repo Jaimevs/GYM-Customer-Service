@@ -1,0 +1,187 @@
+/* --- _navbar-dashboard.vue --- */
+@use "@/styles/_variables.scss" as *;
+
+/* --- Navbar General --- */
+.navbar-dashboard {
+  background-color: $color-negro !important; // Fondo negro
+  padding: 0 $espaciado-base;
+  box-shadow: $sombra-suave; // Sombra suave
+  display: flex;
+  align-items: center;
+  height: 64px;
+
+  /* --- Botón de Menú --- */
+  .menu-btn {
+    margin-left: $espaciado-pequeño;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    .icon-menu {
+      color: white !important; // Forzamos el color blanco
+      font-size: 28px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: $color-primario; // Amarillo dorado al pasar el ratón
+      }
+    }
+  }
+
+  /* --- Logo --- */
+  .logo-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-left: $espaciado-grande;
+
+    .logo-image {
+      width: 120px;
+      height: auto;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  /* --- Barra de Búsqueda --- */
+  .search-bar {
+    margin-left: $espaciado-grande;
+    max-width: 300px;
+    background-color: $color-fondo-sidebar;
+    border-radius: $radio-borde;
+    box-shadow: $sombra-suave;
+
+    .v-field {
+      padding: $espaciado-pequeño;
+      border-radius: $radio-borde;
+
+      &:hover {
+        background-color: $color-gris-medio;
+      }
+    }
+
+    .v-icon {
+      color: white !important; // Forzamos el color blanco
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: $color-primario; // Amarillo dorado al pasar el ratón
+      }
+    }
+  }
+
+  /* --- Botón de Configuración --- */
+  .settings-btn {
+    margin-left: $espaciado-grande;
+
+    .icon-settings {
+      color: white !important; // Forzamos el color blanco
+      font-size: 24px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: $color-secundario; // Rojo vibrante al pasar el ratón
+      }
+    }
+  }
+
+  /* --- Botón de Notificaciones --- */
+  .notification-btn {
+    margin-left: $espaciado-grande;
+    position: relative;
+
+    .icon-bell {
+      color: white !important; // Forzamos el color blanco
+      font-size: 24px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: $color-secundario; // Rojo vibrante al pasar el ratón
+      }
+    }
+
+    .v-badge__badge {
+      top: -6px;
+      right: -6px;
+      font-size: 10px;
+      padding: 4px;
+      border-radius: 50%;
+      background-color: $color-secundario; // Rojo vibrante
+      color: $color-texto-botones; // Texto blanco
+    }
+  }
+
+  /* --- Lista de Notificaciones --- */
+  .notification-list {
+    background-color: $color-fondo-sidebar;
+    border-radius: $radio-borde;
+    box-shadow: $sombra-fuerte;
+    min-width: 200px;
+
+    .v-list-item {
+      padding: $espaciado-pequeño $espaciado-base;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: $color-gris-medio;
+      }
+
+      .v-list-item-title {
+        font-family: $fuente-principal;
+        font-size: 0.9rem;
+        color: $color-texto-principal;
+      }
+    }
+  }
+
+  /* --- Avatar de Usuario --- */
+  .user-avatar {
+    margin-left: $espaciado-grande;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    .avatar-image {
+      width: 100%; // Asegura que la imagen ocupe todo el contenedor
+      height: 100%; // Asegura que la imagen ocupe todo el contenedor
+      object-fit: cover; // Ajusta la imagen manteniendo su proporción
+      border: $ancho-borde solid $color-primario; // Borde amarillo dorado
+      border-radius: 50%; // Forma circular
+    }
+  }
+
+  /* --- Menú de Usuario --- */
+  .user-menu {
+    background-color: $color-fondo-sidebar;
+    border-radius: $radio-borde;
+    box-shadow: $sombra-fuerte;
+    min-width: 200px;
+
+    .v-list-item {
+      padding: $espaciado-pequeño $espaciado-base;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: $color-gris-medio;
+      }
+
+      .v-list-item-title {
+        font-family: $fuente-principal;
+        font-size: 0.9rem;
+        color: $color-texto-principal;
+      }
+    }
+
+    .v-divider {
+      margin: $espaciado-pequeño 0;
+    }
+  }
+}

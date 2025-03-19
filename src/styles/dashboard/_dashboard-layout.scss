@@ -1,0 +1,48 @@
+/* _dashboard-layout.scss */
+@use "@/styles/_variables.scss" as *;
+@use "@/styles/_mixins.scss" as mixins; // Agregar el namespace
+
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  color: $color-texto-principal; // Texto principal
+
+  /* --- Contenedor Principal --- */
+  .dashboard-container {
+    display: flex;
+    flex: 1;
+  }
+
+  /* --- Sidebar --- */
+  .dashboard-sidebar {
+    width: 250px; // Ancho por defecto
+    transition: width 0.3s ease, transform 0.3s ease;
+
+    &.collapsed {
+      width: 70px; // Ancho reducido en modo contraído
+    }
+  }
+
+  /* --- Contenido Principal --- */
+  .dashboard-main {
+    flex: 1;
+    padding: $espaciado-grande;
+    margin-left: 250px; // Margen inicial para el sidebar
+    transition: margin-left 0.3s ease;
+
+    &.sidebar-collapsed {
+      margin-left: 70px; // Margen reducido cuando el sidebar está contraído
+    }
+
+    &.sidebar-expanded {
+      margin-left: 250px; // Margen normal cuando el sidebar está expandido
+    }
+
+    /* --- Media Query para Dispositivos Pequeños --- */
+    @include mixins.media-query(small) { // Usar el namespace
+      margin-left: 0;
+      padding: $espaciado-base;
+    }
+  }
+}
