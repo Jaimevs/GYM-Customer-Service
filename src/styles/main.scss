@@ -1,64 +1,64 @@
-/* main.scss */
+// /* main.scss */
 
-/* Importación de módulos de Sass */
-@use 'sass:color'; // Importa el módulo de colores
-@use './variables' as *;
-@use './mixins' as mix;
-@use './dashboard-layout';
-@use './common/_sidebar';
-@use './common/_navbar';
+// /* Importación de módulos de Sass */
+// @use 'sass:color'; // Importa el módulo de colores
+// @use './variables' as *;
+// @use './mixins' as mix;
+// @use './dashboard/dashboard-layout';
+// @use './common/_sidebar';
+// @use './common/_navbar';
 
-/* --- Estilos globales --- */
-/* --- Estilos globales --- */
-body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--color-fondo); // Usa el color negro (#000000)
-  color: var(--color-texto); // Usa el color gris medio (#8D8D8D) para el texto general
-  font-family: var(--fuente-principal); // Fuente principal para todo el texto
-}
+// /* --- Estilos globales --- */
+// /* --- Estilos globales --- */
+// body {
+//   margin: 0;
+//   padding: 0;
+//   background-color: var(--color-fondo); // Usa el color negro (#000000)
+//   color: var(--color-texto); // Usa el color gris medio (#8D8D8D) para el texto general
+//   font-family: var(--fuente-principal); // Fuente principal para todo el texto
+// }
 
-/* --- Estilos generales para los botones --- */
-button {
-  background-color: $color-rojo-vibrante;
-  color: $color-blanco;
-  border: none;
-  padding: $espaciado-base $espaciado-grande;
-  border-radius: $radio-borde;
-  cursor: pointer;
-  font-size: 16px;
+// /* --- Estilos generales para los botones --- */
+// button {
+//   background-color: $color-rojo-vibrante;
+//   color: $color-blanco;
+//   border: none;
+//   padding: $espaciado-base $espaciado-grande;
+//   border-radius: $radio-borde;
+//   cursor: pointer;
+//   font-size: 16px;
 
-  &:hover {
-    background-color: color.adjust($color-rojo-vibrante, $lightness: -10%);
-  }
+//   &:hover {
+//     background-color: color.adjust($color-rojo-vibrante, $lightness: -10%);
+//   }
 
-  &:active {
-    background-color: color.adjust($color-rojo-vibrante, $lightness: -20%);
-  }
+//   &:active {
+//     background-color: color.adjust($color-rojo-vibrante, $lightness: -20%);
+//   }
 
-  @include mix.transición(background-color, 0.3s);
-}
+//   @include mix.transición(background-color, 0.3s);
+// }
 
-/* --- Estilos para el navbar --- */
-.navbar {
-  background-color: $color-negro;
-  color: $color-blanco;
-  padding: $espaciado-base;
-}
+// /* --- Estilos para el navbar --- */
+// .navbar {
+//   background-color: $color-negro;
+//   color: $color-blanco;
+//   padding: $espaciado-base;
+// }
 
-/* --- Layouts responsivos usando mixin --- */
-.container {
-  @include mix.centrar-flex;
-  flex-direction: column;
-  padding: $espaciado-grande;
-}
+// /* --- Layouts responsivos usando mixin --- */
+// .container {
+//   @include mix.centrar-flex;
+//   flex-direction: column;
+//   padding: $espaciado-grande;
+// }
 
-@include mix.media-query(small) {
-  .container {
-    flex-direction: row;
-  }
-}
+// @include mix.media-query(small) {
+//   .container {
+//     flex-direction: row;
+//   }
+// }
 
-* {
-  scroll-behavior: smooth;
-}
+// * {
+//   scroll-behavior: smooth;
+// }

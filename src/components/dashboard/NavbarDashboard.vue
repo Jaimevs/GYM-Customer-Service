@@ -1,28 +1,60 @@
 <template>
-  <v-app-bar color="white" elevation="0" class="navbar-dashboard">
+  <v-app-bar color="transparent" elevation="0" class="navbar-dashboard">
     <!-- Botón de Hamburguesa -->
-    <v-btn icon variant="text" @click="toggleSidebar">
-      <v-icon size="24" class="texto-principal">mdi-menu</v-icon>
+    <v-btn icon variant="text" @click="toggleSidebar" class="menu-btn">
+      <Icon icon="solar:hamburger-menu-outline" class="icon-menu" />
     </v-btn>
 
     <!-- Logo -->
     <div class="logo-container" @click="navigateTo('/')">
-      <v-icon size="36" class="primario">mdi-dumbbell</v-icon>
-      <h2 class="logo-title">GYM BULLS</h2>
+      <img src="@/assets/img/gymbulls.png" alt="GYM BULLS Logo" class="logo-image" />
     </div>
+
+    <!-- Barra de Búsqueda -->
+    <v-text-field v-model="searchQuery" placeholder="Buscar..." prepend-inner-icon="mdi-magnify" variant="outlined"
+      density="compact" hide-details single-line class="search-bar"></v-text-field>
+
+    <!-- Espaciador -->
+    <v-spacer></v-spacer>
+
+    <!-- Botón de Configuración -->
+    <v-btn icon variant="text" class="settings-btn" @click="openSettings">
+      <Icon icon="solar:settings-outline" class="icon-settings" />
+    </v-btn>
 
     <!-- Botón de Notificaciones -->
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
         <v-btn icon variant="text" class="notification-btn" v-bind="props">
           <v-badge :content="notificationsCount" color="error" overlap>
-            <v-icon size="24" class="texto-principal">mdi-bell</v-icon>
+            <Icon icon="solar:bell-bing-outline" class="icon-bell" />
           </v-badge>
         </v-btn>
       </template>
-      <v-list>
+      <v-list class="notification-list">
         <v-list-item v-for="(notification, index) in notifications" :key="index">
           <v-list-item-title>{{ notification }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
+    <!-- Menú de Usuario -->
+    <v-menu offset-y>
+      <template v-slot:activator="{ props }">
+        <v-avatar size="40" class="user-avatar" v-bind="props">
+          <img src="https://randomuser.me/api/portraits/men/71.jpg" alt="User Avatar" class="avatar-image" />
+        </v-avatar>
+      </template>
+      <v-list class="user-menu">
+        <v-list-item @click="navigateToProfile">
+          <v-list-item-title>Perfil</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="navigateToSettings">
+          <v-list-item-title>Configuración</v-list-item-title>
+        </v-list-item>
+        <v-divider></v-divider>
+        <v-list-item @click="logout">
+          <v-list-item-title>Cerrar Sesión</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
@@ -30,129 +62,57 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { Icon } from "@iconify/vue";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const route = useRoute();
 const router = useRouter();
-
-// Estado actual de la ruta
-const currentRoute = computed(() => route.path);
-
-// Elementos del navbar
-const navItems = ref([
-  { title: 'Inicio', link: '/home' },
-  { title: 'Membresias', link: '/memberships' },
-  { title: 'Chat', link: '/chat' },
-]);
 
 // Estado de las notificaciones
 const notificationsCount = ref(3); // Ejemplo: 3 notificaciones
-const notifications = ref(['Notificación 1', 'Notificación 2', 'Notificación 3']);
+const notifications = ref(["Notificación 1", "Notificación 2", "Notificación 3"]);
 
-// Función para navegar a una ruta
+// Estado de la barra de búsqueda
+const searchQuery = ref("");
+
+// Funciones de navegación
 const navigateTo = (link: string) => {
   router.push(link);
 };
 
+const navigateToProfile = () => {
+  console.log("Navegando al perfil...");
+  router.push("/profile");
+};
+
+const navigateToSettings = () => {
+  console.log("Navegando a la configuración...");
+  router.push("/settings");
+};
+
+const openSettings = () => {
+  console.log("Abriendo configuración global...");
+  router.push("/global-settings");
+};
+
 // Función para cerrar sesión
 const logout = () => {
-  console.log('Cerrando sesión...');
-  // Aquí puedes agregar la lógica para cerrar sesión
-  router.push('/login'); // Redirige al login después de cerrar sesión
+  console.log("Cerrando sesión...");
+  router.push("/login"); // Redirige al login después de cerrar sesión
 };
 
 // Emite un evento para alternar el sidebar
-const emit = defineEmits(['toggle-sidebar']);
+const emit = defineEmits(["toggle-sidebar", "toggle-expand"]);
 const toggleSidebar = () => {
-  emit('toggle-sidebar');
+  emit("toggle-sidebar");
+};
+
+// Emite un evento para alternar el modo expandido/contraído
+const toggleSidebarExpand = () => {
+  emit("toggle-expand");
 };
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/_variables.scss' as *; // Importa las variables SCSS
-
-.navbar-dashboard {
-  padding: 0 $espaciado-base;
-  box-shadow: $sombra-suave;
-
-  .logo-container {
-    display: flex;
-    align-items: center;
-    gap: $espaciado-pequeño;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.05);
-    }
-
-    .logo-title {
-      font-family: $fuente-titulo;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: $color-texto-principal;
-    }
-  }
-
-  .nav-links {
-    display: flex;
-    gap: $espaciado-grande;
-
-    .nav-link {
-      font-family: $fuente-principal;
-      font-size: 1rem;
-      color: $color-texto-principal;
-      transition: color 0.3s ease;
-
-      &.nav-link-active {
-        color: $color-primario;
-        font-weight: bold;
-      }
-
-      &:hover {
-        color: $color-primario;
-      }
-    }
-  }
-
-  .notification-btn {
-    margin-left: $espaciado-grande;
-
-    .v-badge__badge {
-      top: -8px;
-      right: -8px;
-    }
-  }
-
-  .user-avatar {
-    margin-left: $espaciado-grande;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
-
-  .user-menu {
-    background-color: $color-blanco;
-    border-radius: $radio-borde;
-
-    .v-list-item {
-      padding: $espaciado-pequeño $espaciado-base;
-      transition: background-color 0.3s ease;
-
-      &:hover {
-        background-color: $color-gris-claro;
-      }
-
-      .v-list-item-title {
-        font-family: $fuente-principal;
-        font-size: 0.9rem;
-        color: $color-texto-principal;
-      }
-    }
-  }
-}
+@use "@/styles/common/_navbar-dashboard.scss";
 </style>

@@ -1,0 +1,73 @@
+/* --- _sidebar-dashboard.vue --- */
+
+@use "@/styles/_variables.scss" as *;
+
+.dashboard-sidebar {
+  background-color: var(--color-fondo-sidebar);
+  border-radius: $radio-borde;
+  box-shadow: $sombra-fuerte;
+  overflow: hidden;
+  transition: width 0.3s ease;
+
+  .menu-list {
+    padding: $espaciado-base 0;
+
+    .menu-item {
+      margin: $espaciado-pequeño $espaciado-base;
+      border-radius: $radio-borde;
+      padding: $espaciado-pequeño $espaciado-base;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      align-items: center;
+      position: relative;
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--color-secundario);
+        transform: scaleY(0);
+        transform-origin: bottom;
+        transition: transform 0.3s ease;
+        border-radius: $radio-borde;
+      }
+
+      &:hover {
+        background-color: rgba(var(--color-primario), 0.1);
+        box-shadow: $sombra-suave;
+      }
+
+      &.menu-item-active {
+        background-color: rgba(var(--color-secundario), 0.15);
+
+        &::before {
+          transform: scaleY(1);
+        }
+      }
+
+      .menu-icon {
+        font-size: 1.6rem;
+        color: var(--color-texto-principal);
+        transition: color 0.3s ease;
+      }
+
+      .menu-text {
+        font-size: 1rem;
+        color: var(--color-texto-principal);
+        margin-left: $espaciado-base;
+        transition: opacity 0.3s ease;
+      }
+
+      &.collapsed {
+        justify-content: center;
+
+        .menu-text {
+          display: none; // Ocultar texto en modo contraído
+        }
+      }
+    }
+  }
+}

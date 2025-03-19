@@ -158,4 +158,5 @@ onMounted(() => {
 <style scoped lang="scss">
 @use '@/styles/auth/_auth.scss'; // Estilos generales
 @use '@/styles/auth/_register.scss'; // Estilos específicos para registro
+
 </style>
