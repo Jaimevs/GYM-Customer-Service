@@ -54,7 +54,7 @@ import gsap from 'gsap';
 import axios from 'axios';
 
 // Configura la URL de tu API
-const API_URL = 'http://gymtoday12.com:8000';
+const API_URL = 'https://gymtoday12.com';
 
 const router = useRouter();
 const route = useRoute();
@@ -151,7 +151,7 @@ const handleSubmit = async () => {
 const handleGoogleLogin = () => {
   console.log('Iniciando login con Google');
   // Usa la URL correcta para redirigir a la autenticación de Google
-  window.location.href = `${API_URL}/api/auth/google`;
+  window.location.href = `${API_URL}/auth/google`;
 };
 
 onMounted(() => {
