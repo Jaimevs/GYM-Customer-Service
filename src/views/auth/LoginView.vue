@@ -54,7 +54,7 @@ import gsap from 'gsap';
 import axios from 'axios';
 
 // Configura la URL de tu API
-const API_URL = 'http://18.191.218.80:8000';
+const API_URL = 'http://gymtoday12.com:8000';
 
 const router = useRouter();
 const route = useRoute();
