@@ -1,5 +1,6 @@
+/* --- SidebarDashboard.vue --- */
 <template>
-  <v-navigation-drawer v-model="menuVisible" temporary :width="isExpanded ? 320 : 70"
+  <v-navigation-drawer v-model="menuVisible" permanent :width="isExpanded ? 320 : 70"
     class="dashboard-sidebar elevation-3">
     <v-list class="sidebar-content pa-0">
       <!-- Menú -->
@@ -30,10 +31,12 @@ const props = defineProps<{
 const emit = defineEmits(["update:modelValue"]);
 const route = useRoute();
 
+// Estado del sidebar
 const menuVisible = ref(props.modelValue);
 const isExpanded = ref(props.expanded);
 const currentRoute = computed(() => route.path);
 
+// Actualizar estado desde props
 watch(() => props.modelValue, (newValue) => {
   menuVisible.value = newValue;
 });
@@ -42,6 +45,7 @@ watch(() => props.expanded, (newValue) => {
   isExpanded.value = newValue;
 });
 
+// Lista de ítems del menú
 const menuItems = ref([
   { title: "Inicio", link: "/dashboard", icon: "mage:dashboard-chart-notification" },
   { title: "Gestión de Servicios", link: "/services", icon: "solar:clipboard-outline" },
@@ -58,6 +62,7 @@ const menuItems = ref([
   { title: "Sucursales", link: "/branches", icon: "solar:buildings-outline" }, // Nueva opción
 ]);
 
+// Función para cerrar el sidebar
 const closeMenu = () => {
   menuVisible.value = false;
   emit("update:modelValue", false);
@@ -66,15 +71,4 @@ const closeMenu = () => {
 
 <style scoped lang="scss">
 @use "@/styles/common/_sidebar-dashboard.scss";
-// .menu-text {
-//   transition: opacity 0.3s ease, visibility 0.3s ease;
-//   white-space: nowrap;
-// }
-
-// .collapsed .menu-text {
-//   opacity: 0;
-//   visibility: hidden;
-//   width: 0;
-//   overflow: hidden;
-// }
 </style>

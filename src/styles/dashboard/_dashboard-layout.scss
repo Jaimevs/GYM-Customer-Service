@@ -1,23 +1,36 @@
 /* _dashboard-layout.scss */
 @use "@/styles/_variables.scss" as *;
-@use "@/styles/_mixins.scss" as mixins; // Agregar el namespace
+@use "@/styles/_mixins.scss" as mixins;
 
 .dashboard-layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  color: $color-texto-principal; // Texto principal
+  color: $color-texto-principal;
+
+  /* --- Navbar --- */
+  .navbar-dashboard {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 64px;
+    background-color: var(--color-fondo-navbar);
+    box-shadow: $sombra-suave;
+  }
 
   /* --- Contenedor Principal --- */
   .dashboard-container {
     display: flex;
     flex: 1;
+    position: relative; // Asegura que el contenido principal esté posicionado correctamente
   }
 
   /* --- Sidebar --- */
   .dashboard-sidebar {
     width: 250px; // Ancho por defecto
     transition: width 0.3s ease, transform 0.3s ease;
+    z-index: 999;
 
     &.collapsed {
       width: 70px; // Ancho reducido en modo contraído
@@ -28,21 +41,23 @@
   .dashboard-main {
     flex: 1;
     padding: $espaciado-grande;
-    margin-left: 250px; // Margen inicial para el sidebar
+    margin-top: 64px; // Margen superior para el navbar
+    margin-left: 280px; // Margen inicial para el sidebar expandido (250px + 30px de espacio extra)
     transition: margin-left 0.3s ease;
+    overflow-y: auto;
+    z-index: 1; // Asegura que el contenido principal esté detrás del navbar y sidebar
 
     &.sidebar-collapsed {
-      margin-left: 70px; // Margen reducido cuando el sidebar está contraído
+      margin-left: 100px; // Margen reducido cuando el sidebar está contraído (70px + 30px de espacio extra)
     }
 
     &.sidebar-expanded {
-      margin-left: 250px; // Margen normal cuando el sidebar está expandido
+      margin-left: 280px; // Margen normal cuando el sidebar está expandido (250px + 30px de espacio extra)
     }
 
-    /* --- Media Query para Dispositivos Pequeños --- */
-    @include mixins.media-query(small) { // Usar el namespace
-      margin-left: 0;
-      padding: $espaciado-base;
+    /* Ajuste para cuando el sidebar está completamente oculto */
+    &.sidebar-hidden {
+      margin-left: 0; // Ocupa todo el ancho si el sidebar está oculto
     }
   }
 }

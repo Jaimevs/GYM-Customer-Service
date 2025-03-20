@@ -1,5 +1,4 @@
-DashboardLayout.vue:
-
+/* --- DashboardLayout.vue --- */
 <template>
   <div class="dashboard-layout">
     <!-- Navbar -->
@@ -11,10 +10,14 @@ DashboardLayout.vue:
         @update:model-value="updateSidebarVisibility" />
 
       <!-- Contenido principal -->
-      <main class="dashboard-main"
-        :class="{ 'sidebar-collapsed': !isSidebarVisible, 'sidebar-expanded': isSidebarExpanded }">
+      <main class="dashboard-main" :class="{
+        'sidebar-collapsed': !isSidebarExpanded,
+        'sidebar-expanded': isSidebarExpanded && isSidebarVisible,
+        'sidebar-hidden': !isSidebarVisible
+      }">
         <slot></slot>
       </main>
+
     </div>
   </div>
 </template>
