@@ -4,16 +4,26 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/public/HomeView.vue";
 import LoginView from "../views/auth/LoginView.vue";
 import RegisterView from "../views/auth/RegisterView.vue";
-import DashboardView from "../views/dashboard/DashboardView.vue";
 import ProfileView from "../views/dashboard/ProfileView.vue";
 import SettingsView from "../views/dashboard/SettingsView.vue";
 import ErrorPage from "../views/public/ErrorView.vue";
 import FeedbackView from "../views/dashboard/FeedbackView.vue";
 import TrainersView from "../views/dashboard/TrainersView.vue";
+
+// Importar vistas específicas para administradores
+import DashboardView from "../views/dashboard/DashboardView.vue";
 import ServiceManagementView from "../views/dashboard/ServiceManagementView.vue";
 import MembershipsView from "../views/dashboard/MembershipsView.vue";
 import ValidityControlView from "../views/dashboard/ValidityControlView.vue";
 import ServiceRatingView from "../views/dashboard/ServiceRatingView.vue";
+import AdditionalServicesPaymentView from "../views/dashboard/AdditionalServicesPaymentView.vue";
+import MaterialLoansView from "../views/dashboard/MaterialLoansView.vue";
+import ConsumablesControlView from "../views/dashboard/ConsumablesControlView.vue";
+import AppointmentsView from "../views/dashboard/AppointmentsView.vue";
+import ClientTrainingView from "../views/dashboard/ClientTrainingView.vue";
+import SupportResolutionView from "../views/dashboard/SupportResolutionView.vue";
+import UsersManagementView from "../views/dashboard/UsersManagementView.vue";
+import BranchesView from "../views/dashboard/BranchesView.vue";
 
 import UsersView from "../views/user/UsersView.vue"; // Para usuario normal
 import CoachView from "../views/coach/CoachView.vue"; // Para entrenador
@@ -33,7 +43,7 @@ const getUserRoles = (): string[] => {
   try {
     const userStr = localStorage.getItem('user');
     if (!userStr) return [];
-    
+
     const user = JSON.parse(userStr);
     console.log("Datos de usuario en localStorage:", user);
     return user.roles || [];
@@ -81,12 +91,12 @@ const authRoutes = [
       const token = to.query.token as string;
       if (token) {
         localStorage.setItem('token', token);
-        
+
         try {
           // Decodificar el token para obtener roles
           const tokenParts = token.split('.');
           const payload = JSON.parse(atob(tokenParts[1]));
-          
+
           // Guardar en localStorage y loguear para depuración
           const userData = {
             id: payload.user_id,
@@ -94,15 +104,15 @@ const authRoutes = [
             email: payload.email,
             roles: payload.roles || []
           };
-          
+
           localStorage.setItem('user', JSON.stringify(userData));
           console.log("Token decodificado:", payload);
           console.log("Datos de usuario guardados:", userData);
-          
+
           // Redirigir según rol
           const roles = payload.roles || [];
           console.log("Roles detectados:", roles);
-          
+
           if (roles.includes('admin')) {
             console.log("Redirigiendo a /dashboard (admin)");
             return { path: '/dashboard' }; // Admin va al dashboard
@@ -161,7 +171,7 @@ const userRoutes = [
     path: "/user-dashboard",
     name: "UserDashboard",
     component: UsersView,
-    meta: { 
+    meta: {
       requiresAuth: true,
       role: 'usuario'
     },
@@ -174,7 +184,7 @@ const trainerRoutes = [
     path: "/coach-dashboard",
     name: "CoachDashboard",
     component: CoachView,
-    meta: { 
+    meta: {
       requiresAuth: true,
       role: 'entrenador'
     },
@@ -187,51 +197,79 @@ const adminRoutes = [
     path: "/dashboard",
     name: "Dashboard",
     component: DashboardView,
-    meta: { 
-      layout: DashboardLayout, 
-      requiresAuth: true,
-      role: 'admin'
-    },
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
   },
   {
-    path: "/gestion-servicios",
+    path: "/services",
     name: "ServiceManagement",
     component: ServiceManagementView,
-    meta: { 
-      layout: DashboardLayout, 
-      requiresAuth: true,
-      role: 'admin'
-    },
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
   },
   {
-    path: "/gestion-membresias",
-    name: "MembershipVue",
+    path: "/memberships",
+    name: "Memberships",
     component: MembershipsView,
-    meta: { 
-      layout: DashboardLayout, 
-      requiresAuth: true,
-      role: 'admin'
-    },
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
   },
   {
-    path: "/control-vigencia",
-    name: "ValidityControlVue",
+    path: "/membership-expiration",
+    name: "ValidityControl",
     component: ValidityControlView,
-    meta: { 
-      layout: DashboardLayout, 
-      requiresAuth: true,
-      role: 'admin'
-    },
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
   },
   {
-    path: "/valoracion-servicios",
-    name: "ServiceRatingVue",
+    path: "/service-evaluation",
+    name: "ServiceRating",
     component: ServiceRatingView,
-    meta: { 
-      layout: DashboardLayout, 
-      requiresAuth: true,
-      role: 'admin'
-    },
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/additional-services-payment",
+    name: "AdditionalServicesPayment",
+    component: AdditionalServicesPaymentView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/material-loans",
+    name: "MaterialLoans",
+    component: MaterialLoansView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/consumables-control",
+    name: "ConsumablesControl",
+    component: ConsumablesControlView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/appointments",
+    name: "Appointments",
+    component: AppointmentsView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/client-training",
+    name: "ClientTraining",
+    component: ClientTrainingView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/support-resolution",
+    name: "SupportResolution",
+    component: SupportResolutionView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/users-management",
+    name: "UsersManagement",
+    component: UsersManagementView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
+  },
+  {
+    path: "/branches",
+    name: "Branches",
+    component: BranchesView,
+    meta: { layout: DashboardLayout, requiresAuth: true, role: 'admin' },
   },
 ];
 
@@ -284,7 +322,7 @@ router.beforeEach((to, from, next) => {
   if (to.name === "Login" || to.name === "Register") {
     if (isAuthenticated()) {
       console.log("Usuario autenticado intentando acceder a login/register, verificando roles");
-      
+
       // Si no tiene roles, hacer logout automático
       if (userRoles.length === 0) {
         console.log("Usuario autenticado sin roles, haciendo logout automático");
@@ -293,7 +331,7 @@ router.beforeEach((to, from, next) => {
         next(); // Permitir acceso a login/register
         return;
       }
-      
+
       // Redirigir según roles
       if (hasRole('admin')) {
         console.log("Redirigiendo a Dashboard (admin)");
@@ -324,7 +362,7 @@ router.beforeEach((to, from, next) => {
       next({ name: "Login", query: { redirect: to.fullPath } });
       return;
     }
-    
+
     // Si la ruta requiere un rol específico
     if (to.meta.role) {
       const requiredRole = to.meta.role as string;
@@ -358,7 +396,7 @@ router.beforeEach((to, from, next) => {
       next(); // Si no tiene roles, permitir acceso a Home
       return;
     }
-    
+
     console.log("Redirigiendo según rol");
     if (hasRole('admin')) {
       console.log("Redirigiendo a Dashboard (admin)");
