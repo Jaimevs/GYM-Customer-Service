@@ -151,7 +151,7 @@ const handleSubmit = async () => {
 const handleGoogleLogin = () => {
   console.log('Iniciando login con Google');
   // Usa la URL correcta para redirigir a la autenticación de Google
-  window.location.href = `${API_URL}/auth/google`;
+  window.location.href = `${API_URL}/api/auth/google`;
 };
 
 onMounted(() => {
