@@ -38,26 +38,25 @@
   }
 
   /* --- Contenido Principal --- */
-  .dashboard-main {
-    flex: 1;
-    padding: $espaciado-grande;
-    margin-top: 64px; // Margen superior para el navbar
-    margin-left: 280px; // Margen inicial para el sidebar expandido (250px + 30px de espacio extra)
-    transition: margin-left 0.3s ease;
-    overflow-y: auto;
-    z-index: 1; // Asegura que el contenido principal esté detrás del navbar y sidebar
+   .dashboard-main {
+  flex: 1;
+  padding: $espaciado-grande;
+  margin-top: 64px; // Margen superior para el navbar
+  transition: margin-left 0.3s ease;
+  overflow-y: auto;
+  z-index: 1; // Asegura que el contenido principal esté detrás del navbar y sidebar
 
-    &.sidebar-collapsed {
-      margin-left: 100px; // Margen reducido cuando el sidebar está contraído (70px + 30px de espacio extra)
-    }
+  &.sidebar-collapsed {
+    margin-left: 70px; // Ancho reducido cuando el sidebar está contraído
+  }
 
-    &.sidebar-expanded {
-      margin-left: 280px; // Margen normal cuando el sidebar está expandido (250px + 30px de espacio extra)
-    }
+  &.sidebar-expanded {
+    margin-left: 320px; // Ancho normal cuando el sidebar está expandido
+  }
 
-    /* Ajuste para cuando el sidebar está completamente oculto */
-    &.sidebar-hidden {
-      margin-left: 0; // Ocupa todo el ancho si el sidebar está oculto
-    }
+  /* Ajuste para cuando el sidebar está completamente oculto */
+  &.sidebar-hidden {
+    margin-left: 0; // Ocupa todo el ancho si el sidebar está oculto
+  }
   }
 }
