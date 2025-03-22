@@ -2,10 +2,19 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // Importar vistas
 import HomeView from "../views/public/HomeView.vue";
+// import PublicLayout from "../views/layouts/PublicLayout.vue";
+import GymsView from "../views/public/GymsView.vue";
+import MemberShipsView from "../views/public/MemberShipsView.vue";
+import FacilitiesView from "../views/public/FacilitiesView.vue";
+import AboutGymBullsView from "../views/public/AboutGymBullsView.vue";
+import ContactUsView from "../views/public/ContactUsView.vue";
+import FaqView from "../views/public/FaqView.vue";
+
+
 import LoginView from "../views/auth/LoginView.vue";
 import RegisterView from "../views/auth/RegisterView.vue";
 import ProfileView from "../views/dashboard/ProfileView.vue";
-import SettingsView from "../views/dashboard/SettingsView.vue";
+// import SettingsView from "../views/user/SettingsView.vue";
 import ErrorPage from "../views/public/ErrorView.vue";
 import FeedbackView from "../views/dashboard/FeedbackView.vue";
 import TrainersView from "../views/dashboard/TrainersView.vue";
@@ -25,13 +34,25 @@ import SupportResolutionView from "../views/dashboard/SupportResolutionView.vue"
 import UsersManagementView from "../views/dashboard/UsersManagementView.vue";
 import BranchesView from "../views/dashboard/BranchesView.vue";
 
-import UsersView from "../views/user/UsersView.vue"; // Para usuario normal
+//Vistas Usuario
+import UsersView from "../views/user/UsersView.vue";
+import ClassesView from "../views/user/ClassesView.vue";
+import MembershipView from "../views/user/MembershipView.vue";
+import MessagesView from "../views/user/MessagesView.vue";
+import ProgressView from "../views/user/ProgressView.vue";
+import SettingsView from "../views/user/SettingsView.vue";
+import StatisticsView from "../views/user/StatisticsView.vue";
+import TrainingPlansView from "../views/user/TrainingPlansView.vue";
+
+
+//Vista para el entrenador
 import CoachView from "../views/coach/CoachView.vue"; // Para entrenador
 
 // Importar layouts
 import AuthLayout from "../layouts/AuthLayout.vue";
 import PublicLayout from "../layouts/PublicLayout.vue";
 import DashboardLayout from "../layouts/DashboardLayout.vue";
+import UserLayout from "../layouts/UserLayout.vue";
 
 // Función para verificar autenticación
 const isAuthenticated = () => {
@@ -63,10 +84,46 @@ const hasRole = (role: string): boolean => {
 // Rutas públicas
 const publicRoutes = [
   {
-    path: "/",
-    name: "Home",
+    path: '/',
+    name: 'Home',
     component: HomeView,
-    meta: { layout: PublicLayout },
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
+  },
+  {
+    path: '/gimnasios',
+    name: 'Gyms',
+    component: GymsView,
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
+  },
+  {
+    path: '/planes',
+    name: 'MemberShips',
+    component: MemberShipsView,
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
+  },
+  {
+    path: '/instalaciones',
+    name: 'Facilities',
+    component: FacilitiesView,
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
+  },
+  {
+    path: '/conoce-gym-bulls',
+    name: 'AboutGymBulls',
+    component: AboutGymBullsView,
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
+  },
+  {
+    path: '/contactanos',
+    name: 'ContactUs',
+    component: ContactUsView,
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
+  },
+  {
+    path: '/preguntas-frecuentes',
+    name: 'FAQ',
+    component: FaqView,
+    meta: { layout: PublicLayout }, // Usa el PublicLayout
   },
 ];
 
@@ -173,7 +230,78 @@ const userRoutes = [
     component: UsersView,
     meta: {
       requiresAuth: true,
-      role: 'usuario'
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/progreso",
+    name: "ProgressView",
+    component: ProgressView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/clases",
+    name: "ClassesView",
+    component: ClassesView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/planes-entrenamiento",
+    name: "TrainingPlansView",
+    component: TrainingPlansView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/estadisticas",
+    name: "StatisticsView",
+    component: StatisticsView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/membresia",
+    name: "MembershipView",
+    component: MembershipView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/mensajes",
+    name: "MessagesView",
+    component: MessagesView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
+    },
+  },
+  {
+    path: "/ajustes",
+    name: "SettingsView",
+    component: SettingsView,
+    meta: {
+      requiresAuth: true,
+      role: "usuario",
+      layout: UserLayout,
     },
   },
 ];
