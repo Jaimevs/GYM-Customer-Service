@@ -1,37 +1,51 @@
-/* --- DashboardLayout.vue --- */
 <template>
   <div class="dashboard-layout">
     <!-- Navbar -->
-    <NavbarDashboard @toggle-sidebar="toggleSidebar" @toggle-expand="toggleSidebarExpand" />
+    <NavbarGeneral @toggle-sidebar="toggleSidebar" @toggle-expand="toggleSidebarExpand" />
 
     <div class="dashboard-container">
       <!-- Sidebar -->
-      <SidebarDashboard :model-value="isSidebarVisible" :expanded="isSidebarExpanded"
-        @update:model-value="updateSidebarVisibility" />
+      <SidebarGeneral :model-value="isSidebarVisible" :expanded="isSidebarExpanded"
+        @update:model-value="updateSidebarVisibility" :menuItems="getMenuItemsByRole" />
 
       <!-- Contenido principal -->
       <main class="dashboard-main" :class="{
         'sidebar-collapsed': !isSidebarExpanded,
         'sidebar-expanded': isSidebarExpanded && isSidebarVisible,
-        'sidebar-hidden': !isSidebarVisible
+        'sidebar-hidden': !isSidebarVisible,
       }">
         <slot></slot>
       </main>
-
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { ref } from "vue";
-import SidebarDashboard from "@/components/dashboard/SidebarDashboard.vue";
-import NavbarDashboard from "@/components/dashboard/NavbarDashboard.vue";
+<script setup lang="ts">
+import { ref, computed } from "vue";
+import { useAuthStore } from "@/stores/authStore"; // Importar el store de Pinia
+import SidebarGeneral from "@/components/common/SidebarGeneral.vue";
+import NavbarGeneral from "@/components/common/NavbarGeneral.vue";
+import { adminMenuItems, userMenuItems, coachMenuItems } from "@/data/menuItems";
 
 // Estado para la visibilidad del sidebar
 const isSidebarVisible = ref(true);
 
 // Estado para el modo expandido/contraído del sidebar
 const isSidebarExpanded = ref(true);
+
+// Obtener el store de autenticación de Pinia
+const authStore = useAuthStore();
+
+// Obtener el rol del usuario desde el store de Pinia
+const userRole = computed(() => authStore.role);
+
+// Determinar la lista de menú según el rol
+const getMenuItemsByRole = computed(() => {
+  if (userRole.value === "admin") return adminMenuItems;
+  if (userRole.value === "usuario") return userMenuItems;
+  if (userRole.value === "entrenador") return coachMenuItems;
+  return [];
+});
 
 // Función para alternar la visibilidad del sidebar
 const toggleSidebar = () => {
