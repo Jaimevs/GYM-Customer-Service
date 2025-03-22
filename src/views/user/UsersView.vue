@@ -1,275 +1,316 @@
 <template>
-  <NavbarDashboard />
-  <div class="coach-dashboard">
-    <h1>Dashboard de Usuario</h1>
-    <p>Bienvenido al panel de Usuario.</p>
-    
-    <!-- Datos personales del usuario -->
-    <div class="personal-data">
-      <h2>Tus Datos Personales</h2>
-      
-      <div v-if="loading" class="loading">
-        Cargando datos personales...
-      </div>
-      
-      <div v-else-if="error" class="error-message">
-        <p>{{ error }}</p>
-        <button v-if="!personData" class="btn primary mt-2" @click="useDemoData">
-          Usar datos de demostración
-        </button>
-      </div>
-      
-      <table v-if="personData" class="person-table">
-        <tbody>
-          <tr>
-            <th>Nombre:</th>
-            <td>{{ personData.Nombre || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <th>Primer Apellido:</th>
-            <td>{{ personData.Primer_Apellido || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <th>Segundo Apellido:</th>
-            <td>{{ personData.Segundo_Apellido || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <th>Título de Cortesía:</th>
-            <td>{{ personData.Titulo_Cortesia || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <th>Fecha de Nacimiento:</th>
-            <td>{{ formatDate(personData.Fecha_Nacimiento) }}</td>
-          </tr>
-          <tr>
-            <th>Género:</th>
-            <td>{{ personData.Genero || 'No disponible' }}</td>
-          </tr>
-          <tr>
-            <th>Tipo de Sangre:</th>
-            <td>{{ personData.Tipo_Sangre || 'No disponible' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    
-    <!-- Contenido específico para usuarios -->
-    <div class="coach-content">
-      <div class="stats-card">
-        <h3>Tus Sesiones</h3>
-        <p class="stat">3 programadas</p>
-      </div>
-      
-      <div class="stats-card">
-        <h3>Días Activos</h3>
-        <p class="stat">15 este mes</p>
-      </div>
-      
-      <div class="stats-card">
-        <h3>Progreso</h3>
-        <p class="stat">75% completado</p>
-      </div>
-    </div>
-    
-    <div class="action-buttons">
-      <button class="btn primary">Ver Horarios</button>
-      <button class="btn secondary">Mi Entrenamiento</button>
-    </div>
-  </div>
+  <v-container class="dashboard-content">
+    <!-- Sección de Bienvenida -->
+    <v-row>
+      <v-col cols="12" md="8">
+        <v-card>
+          <v-card-title>¡Bienvenido de nuevo, Alex!</v-card-title>
+          <v-card-subtitle>Aquí tienes un resumen de tu progreso hoy</v-card-subtitle>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" md="4">
+                <div class="progress-item">
+                  <span class="text-sm font-medium">Objetivo Semanal</span>
+                  <v-progress-linear :value="60" height="8" color="primary"></v-progress-linear>
+                  <span class="text-xs text-muted">3/5 entrenamientos completados</span>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="progress-item">
+                  <span class="text-sm font-medium">Visitas Mensuales</span>
+                  <v-progress-linear :value="75" height="8" color="primary"></v-progress-linear>
+                  <span class="text-xs text-muted">12/16 visitas</span>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="progress-item">
+                  <span class="text-sm font-medium">Objetivo de Peso</span>
+                  <v-progress-linear :value="40" height="8" color="primary"></v-progress-linear>
+                  <span class="text-xs text-muted">4/10 kg perdidos</span>
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn outlined color="primary">Ver Progreso Detallado</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-card>
+          <v-card-title>Estado de Membresía</v-card-title>
+          <v-card-text>
+            <div class="membership-info">
+              <div class="info-item">
+                <span class="text-sm font-medium">Plan:</span>
+                <v-chip color="primary" small>Premium</v-chip>
+              </div>
+              <div class="info-item">
+                <span class="text-sm font-medium">Estado:</span>
+                <span class="text-sm text-success">Activo</span>
+              </div>
+              <div class="info-item">
+                <span class="text-sm font-medium">Renovación:</span>
+                <span class="text-sm">15 de junio de 2025</span>
+              </div>
+              <v-divider class="my-3"></v-divider>
+              <div class="info-item">
+                <span class="text-sm font-medium">Próximo Pago:</span>
+                <span class="text-sm">$49.99</span>
+              </div>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" block>Gestionar Membresía</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Clases Próximas -->
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Clases Próximas</v-card-title>
+          <v-card-subtitle>Clases que has reservado para los próximos 7 días</v-card-subtitle>
+          <v-card-text>
+            <v-list>
+              <v-list-item v-for="(classItem, index) in upcomingClasses" :key="index">
+                <v-list-item-icon>
+                  <v-icon color="primary">mdi-calendar</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>{{ classItem.name }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ classItem.time }}</v-list-item-subtitle>
+                </v-list-item-content>
+                <v-chip outlined>Confirmado</v-chip>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn outlined color="primary">Ver Todas las Clases</v-btn>
+            <v-btn color="primary">Reservar una Clase</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Seguimiento de Progreso -->
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-tabs v-model="activeTab">
+            <v-tab value="weight">Peso</v-tab>
+            <v-tab value="measurements">Medidas</v-tab>
+            <v-tab value="activity">Actividad</v-tab>
+          </v-tabs>
+          <v-card-text>
+            <v-tabs-items v-model="activeTab">
+              <v-tab-item value="weight">
+                <div class="chart-placeholder">
+                  <p>Gráfica de peso aquí</p>
+                </div>
+                <v-row class="mt-4">
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Inicio</p>
+                        <p class="text-lg font-medium">85 kg</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Actual</p>
+                        <p class="text-lg font-medium">81 kg</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Objetivo</p>
+                        <p class="text-lg font-medium">75 kg</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Perdido</p>
+                        <p class="text-lg font-medium">4 kg</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-tab-item>
+              <v-tab-item value="measurements">
+                <div class="chart-placeholder">
+                  <p>Gráfica de medidas aquí</p>
+                </div>
+                <v-row class="mt-4">
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Pecho</p>
+                        <p class="text-lg font-medium">102 cm</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Cintura</p>
+                        <p class="text-lg font-medium">88 cm</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Cadera</p>
+                        <p class="text-lg font-medium">98 cm</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Bíceps</p>
+                        <p class="text-lg font-medium">36 cm</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-tab-item>
+              <v-tab-item value="activity">
+                <div class="chart-placeholder">
+                  <p>Gráfica de actividad aquí</p>
+                </div>
+                <v-row class="mt-4">
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Esta Semana</p>
+                        <p class="text-lg font-medium">3 visitas</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Este Mes</p>
+                        <p class="text-lg font-medium">12 visitas</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Duración Promedio</p>
+                        <p class="text-lg font-medium">65 min</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                  <v-col cols="6" md="3">
+                    <v-card outlined>
+                      <v-card-text>
+                        <p class="text-sm text-muted">Racha</p>
+                        <p class="text-lg font-medium">5 días</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-col>
+                </v-row>
+              </v-tab-item>
+            </v-tabs-items>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn outlined color="primary">Actualizar Progreso</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Planes de Entrenamiento -->
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>Plan de Entrenamiento Actual</v-card-title>
+          <v-card-subtitle>Tu rutina de ejercicios personalizada</v-card-subtitle>
+          <v-card-text>
+            <v-list>
+              <v-list-item v-for="(plan, index) in trainingPlans" :key="index">
+                <v-list-item-icon>
+                  <v-icon color="primary">mdi-dumbbell</v-icon>
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title>{{ plan.name }}</v-list-item-title>
+                  <v-list-item-subtitle>{{ plan.schedule }}</v-list-item-subtitle>
+                </v-list-item-content>
+                <v-btn outlined color="primary">Ver</v-btn>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn outlined color="primary">Solicitar Cambios</v-btn>
+            <v-btn color="primary">Agendar con Entrenador</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import NavbarDashboard from '../../components/dashboard/NavbarDashboard.vue';
-import axios from 'axios';
-import AuthService from '../../services/AuthService';
+<script setup>
+import { ref } from 'vue';
 
-// Variables reactivas
-const personData = ref(null);
-const loading = ref(true);
-const error = ref('');
+// Clases próximas
+const upcomingClasses = ref([
+  { name: 'Entrenamiento HIIT', time: 'Hoy, 6:00 PM - 7:00 PM' },
+  { name: 'Clase de Yoga', time: 'Mañana, 8:00 AM - 9:00 AM' },
+  { name: 'Spinning', time: 'Viernes, 5:30 PM - 6:30 PM' },
+]);
 
-// URL de la API
-const API_URL = import.meta.env.VITE_API_URL || 'https://gymtoday12.com';
+// Planes de entrenamiento
+const trainingPlans = ref([
+  { name: 'Fuerza Superior', schedule: 'Lunes y Jueves' },
+  { name: 'Enfoque en Piernas', schedule: 'Martes y Viernes' },
+  { name: 'Cardio y Core', schedule: 'Miércoles y Sábado' },
+]);
 
-// Formatear fecha
-const formatDate = (dateString) => {
-  if (!dateString) return 'No disponible';
-  
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  } catch (error) {
-    return 'Fecha inválida';
-  }
-};
-
-// Usar datos de demostración
-const useDemoData = () => {
-  // Obtener información del usuario del localStorage
-  const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-  
-  personData.value = {
-    ID: 1,
-    Usuario_ID: userInfo.id || 4,
-    Nombre: userInfo.username?.split(' ')[0] || "Usuario",
-    Primer_Apellido: userInfo.username?.split(' ')[1] || "De Prueba",
-    Segundo_Apellido: "",
-    Titulo_Cortesia: "Sr.",
-    Fecha_Nacimiento: "1990-01-01T00:00:00.000Z",
-    Genero: "Masculino",
-    Tipo_Sangre: "O+",
-    Estatus: true
-  };
-  
-  error.value = "Mostrando datos de demostración mientras se conecta con el servidor.";
-};
-
-// Obtener datos de la persona
-// En tu UsersView.vue, modifica la función fetchPersonData
-const fetchPersonData = async () => {
-  loading.value = true;
-  error.value = '';
-  
-  try {
-    // Obtener token
-    const token = localStorage.getItem('token');
-    if (!token) {
-      throw new Error('No hay sesión activa');
-    }
-    
-    // IMPORTANTE: Asegurarse de usar el formato correcto
-    const headers = {
-      'Authorization': `Bearer ${token}`
-    };
-    
-    console.log("Token usado:", token);
-    console.log("Headers enviados:", headers);
-    
-    // Intentar con la ruta sin prefijo porque así está montado en app.py
-    try {
-      const response = await axios.get('https://gymtoday12.com/my-person/', { headers });
-      personData.value = response.data;
-      return;
-    } catch (err) {
-      console.log("Error con la primera URL:", err.response?.status);
-      // Continuar con datos de prueba
-    }
-    
-    // Si llegamos aquí, usar datos de prueba
-    useDemoData();
-  } catch (err) {
-    console.error('Error:', err);
-    error.value = 'Error al cargar datos. Usando datos de demostración.';
-    useDemoData();
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Llamar a la función cuando el componente se monte
-onMounted(() => {
-  fetchPersonData();
-});
+// Seguimiento de progreso
+const activeTab = ref('weight');
 </script>
 
 <style scoped>
-.coach-dashboard {
-  padding: 20px;
-}
-
-.personal-data {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.person-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-}
-
-.person-table th, .person-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.person-table th {
-  width: 30%;
-  font-weight: 600;
-  color: #495057;
-}
-
-.loading, .error-message {
-  padding: 20px;
-  text-align: center;
-  border-radius: 6px;
-  margin: 15px 0;
-}
-
-.error-message {
-  background-color: #ffe9e9;
-  color: #d32f2f;
-}
-
-.loading {
-  background-color: #f8f9fa;
-  color: #6c757d;
-}
-
-.coach-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin: 20px 0;
-}
-
-.stats-card {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.stat {
-  font-size: 24px;
-  font-weight: bold;
-  color: #4a6cf7;
-}
-
-.action-buttons {
+.progress-item {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.btn {
-  padding: 10px 20px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
+.membership-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.primary {
-  background-color: #4a6cf7;
-  color: white;
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.secondary {
-  background-color: #e9ecef;
-  color: #212529;
-}
-
-.mt-2 {
-  margin-top: 10px;
+.chart-placeholder {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #e0e0e0;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  color: #9e9e9e;
+  font-size: 14px;
 }
 </style>

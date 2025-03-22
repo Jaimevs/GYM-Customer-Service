@@ -1,4 +1,4 @@
-/* --- NavbarDashboard.vue --- */
+/* --- NavbarUser.vue --- */
 <template>
   <v-app-bar color="transparent" elevation="0" class="navbar-dashboard">
     <!-- Botón de Hamburguesa -->
@@ -13,8 +13,7 @@
 
     <!-- Barra de Búsqueda -->
     <v-text-field v-model="searchQuery" placeholder="Buscar..." prepend-inner-icon="mdi-magnify" variant="outlined"
-      density="compact" hide-details single-line class="search-bar">
-    </v-text-field>
+      density="compact" hide-details single-line class="search-bar"></v-text-field>
 
     <!-- Espaciador -->
     <v-spacer></v-spacer>

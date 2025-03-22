@@ -1,0 +1,185 @@
+/* --- _navbar-user.scss --- */
+
+.navbar-dashboard {
+  background-color: #000 !important; /* Fondo negro */
+  padding: 0 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  display: flex;
+  align-items: center;
+  height: 64px;
+
+  /* --- Botón de Menú --- */
+  .menu-btn {
+    margin-left: 8px;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .icon-menu {
+    color: white !important; /* Forzamos el color blanco */
+    font-size: 28px;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #fbbf24; /* Amarillo dorado al pasar el ratón */
+    }
+  }
+
+  /* --- Logo --- */
+  .logo-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-left: 24px;
+
+    .logo-image {
+      width: 120px;
+      height: auto;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  /* --- Barra de Búsqueda --- */
+  .search-bar {
+    margin-left: 24px;
+    max-width: 300px;
+    background-color: #1f2937; /* Fondo oscuro */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .v-field {
+      padding: 8px;
+      border-radius: 8px;
+
+      &:hover {
+        background-color: #374151; /* Gris medio */
+      }
+    }
+
+    .v-icon {
+      color: white !important; /* Forzamos el color blanco */
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: #fbbf24; /* Amarillo dorado al pasar el ratón */
+      }
+    }
+  }
+
+  /* --- Botón de Configuración --- */
+  .settings-btn {
+    margin-left: 24px;
+
+    .icon-settings {
+      color: white !important; /* Forzamos el color blanco */
+      font-size: 24px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: #ef4444; /* Rojo vibrante al pasar el ratón */
+      }
+    }
+  }
+
+  /* --- Botón de Notificaciones --- */
+  .notification-btn {
+    margin-left: 24px;
+    position: relative;
+
+    .icon-bell {
+      color: white !important; /* Forzamos el color blanco */
+      font-size: 24px;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: #ef4444; /* Rojo vibrante al pasar el ratón */
+      }
+    }
+
+    .v-badge__badge {
+      top: -6px;
+      right: -6px;
+      font-size: 10px;
+      padding: 4px;
+      border-radius: 50%;
+      background-color: #ef4444; /* Rojo vibrante */
+      color: white; /* Texto blanco */
+    }
+  }
+
+  /* --- Lista de Notificaciones --- */
+  .notification-list {
+    background-color: #1f2937; /* Fondo oscuro */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+
+    .v-list-item {
+      padding: 8px 16px;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #374151; /* Gris medio */
+      }
+    }
+
+    .v-list-item-title {
+      font-family: "Inter", sans-serif;
+      font-size: 0.9rem;
+      color: #f3f4f6; /* Texto claro */
+    }
+  }
+
+  /* --- Avatar de Usuario --- */
+  .user-avatar {
+    margin-left: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    .avatar-image {
+      width: 100%; /* Asegura que la imagen ocupe todo el contenedor */
+      height: 100%; /* Asegura que la imagen ocupe todo el contenedor */
+      object-fit: cover; /* Ajusta la imagen manteniendo su proporción */
+      border: 2px solid #fbbf24; /* Borde amarillo dorado */
+      border-radius: 50%; /* Forma circular */
+    }
+  }
+
+  /* --- Menú de Usuario --- */
+  .user-menu {
+    background-color: #1f2937; /* Fondo oscuro */
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+
+    .v-list-item {
+      padding: 8px 16px;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #374151; /* Gris medio */
+      }
+    }
+
+    .v-list-item-title {
+      font-family: "Inter", sans-serif;
+      font-size: 0.9rem;
+      color: #f3f4f6; /* Texto claro */
+    }
+
+    .v-divider {
+      margin: 8px 0;
+    }
+  }
+}
