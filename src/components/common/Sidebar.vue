@@ -28,7 +28,7 @@
       </v-list>
 
       <!-- Preguntas Frecuentes -->
-      <v-list-item @click="navigateTo('/faq')" class="faq-item">
+      <v-list-item @click="navigateTo('/preguntas-frecuentes')" class="faq-item">
         <template #prepend>
           <Icon icon="solar:chat-round-dots-outline" class="menu-icon" />
         </template>
@@ -60,24 +60,28 @@ watch(
   }
 );
 
+// Menú de items con rutas corregidas
 const menuItems = ref([
   { title: "¡Inscríbete ya!", link: "/inscripcion", icon: "solar:users-group-rounded-outline" },
   { title: "Inicio", link: "/", icon: "solar:home-outline" },
   { title: "Gimnasios", link: "/gimnasios", icon: "solar:dumbbell-outline" },
   { title: "Planes", link: "/planes", icon: "solar:money-bag-outline" },
   { title: "Instalaciones", link: "/instalaciones", icon: "solar:dumbbell-outline" },
-  { title: "Conoce GYM BULLS", link: "/nosotros", icon: "solar:info-circle-outline" },
-  { title: "Contáctanos", link: "/contacto", icon: "solar:letter-outline" }
+  { title: "Conoce GYM BULLS", link: "/conoce-gym-bulls", icon: "solar:info-circle-outline" },
+  { title: "Contáctanos", link: "/contactanos", icon: "solar:letter-outline" }
 ]);
 
+// Función para cerrar el menú
 const closeMenu = () => {
   menuVisible.value = false;
   emit("update:modelValue", false);
 };
 
+// Función para navegar a una ruta específica
 const navigateTo = (link: string) => {
   console.log("Navegar a:", link);
-  closeMenu();
+  router.push(link); // Redirige al usuario a la ruta seleccionada
+  closeMenu(); // Cierra el menú después de navegar
 };
 
 // Función para navegar al inicio
