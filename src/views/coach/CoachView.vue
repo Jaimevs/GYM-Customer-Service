@@ -1,84 +1,120 @@
 <template>
-    <NavbarDashboard />
-    <div class="coach-dashboard">
-      <h1>Dashboard de Entrenador</h1>
-      <p>Bienvenido al panel de entrenador.</p>
-      
-      <!-- Contenido específico para entrenadores -->
-      <div class="coach-content">
-        <div class="stats-card">
-          <h3>Tus Estudiantes</h3>
-          <p class="stat">12 activos</p>
-        </div>
-        
-        <div class="stats-card">
-          <h3>Sesiones Programadas</h3>
-          <p class="stat">5 para hoy</p>
-        </div>
-        
-        <div class="stats-card">
-          <h3>Rendimiento</h3>
-          <p class="stat">98% satisfacción</p>
-        </div>
-      </div>
-      
-      <div class="action-buttons">
-        <button class="btn primary">Programar Sesión</button>
-        <button class="btn secondary">Ver Estudiantes</button>
-      </div>
-    </div>
-  </template>
-  
-  <script setup lang="ts">
-  import NavbarDashboard from '../../components/dashboard/NavbarDashboard.vue';
-  </script>
-  
-  <style scoped>
-  .coach-dashboard {
-    padding: 20px;
-  }
-  
-  .coach-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-    margin: 20px 0;
-  }
-  
-  .stats-card {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  .stat {
-    font-size: 24px;
-    font-weight: bold;
-    color: #4a6cf7;
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .btn {
-    padding: 10px 20px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-  }
-  
-  .primary {
-    background-color: #4a6cf7;
-    color: white;
-  }
-  
-  .secondary {
-    background-color: #e9ecef;
-    color: #212529;
-  }
-  </style>
+  <v-container class="coach-dashboard">
+    <!-- Título -->
+    <h1 class="text-h4 font-weight-bold mb-4">Dashboard de Entrenador</h1>
+    <p class="text-body-1 mb-6">Bienvenido al panel de entrenador.</p>
+
+    <!-- Estadísticas -->
+    <v-row class="mb-6">
+      <v-col cols="12" sm="4">
+        <v-card class="stats-card pa-4" elevation="2">
+          <v-icon size="40" color="primary" class="mb-3">mdi-account-group</v-icon>
+          <h3 class="text-h6 font-weight-medium">Tus Estudiantes</h3>
+          <p class="stat text-h5 primary--text">12 activos</p>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-card class="stats-card pa-4" elevation="2">
+          <v-icon size="40" color="success" class="mb-3">mdi-calendar-clock</v-icon>
+          <h3 class="text-h6 font-weight-medium">Sesiones Programadas</h3>
+          <p class="stat text-h5 success--text">5 para hoy</p>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-card class="stats-card pa-4" elevation="2">
+          <v-icon size="40" color="info" class="mb-3">mdi-star-outline</v-icon>
+          <h3 class="text-h6 font-weight-medium">Rendimiento</h3>
+          <p class="stat text-h5 info--text">98% satisfacción</p>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Gráfica de Rendimiento -->
+    <v-card class="mb-6" elevation="2">
+      <v-card-title class="text-h6 font-weight-bold">Rendimiento de Estudiantes</v-card-title>
+      <v-card-text>
+        <apexchart type="bar" height="350" :options="chartOptions" :series="chartSeries"></apexchart>
+      </v-card-text>
+    </v-card>
+
+    <!-- Botones de Acción -->
+    <v-row>
+      <v-col cols="12" sm="6">
+        <v-btn block color="primary" large @click="scheduleSession">Programar Sesión</v-btn>
+      </v-col>
+      <v-col cols="12" sm="6">
+        <v-btn block color="secondary" large @click="viewStudents">Ver Estudiantes</v-btn>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import VueApexCharts from "vue3-apexcharts";
+
+// Datos de la gráfica
+const chartSeries = ref([
+  {
+    name: "Progreso",
+    data: [75, 80, 85, 90, 95, 100],
+  },
+]);
+
+const chartOptions = ref({
+  chart: {
+    toolbar: {
+      show: false,
+    },
+  },
+  xaxis: {
+    categories: ["Estudiante 1", "Estudiante 2", "Estudiante 3", "Estudiante 4", "Estudiante 5", "Estudiante 6"],
+  },
+  plotOptions: {
+    bar: {
+      horizontal: false,
+      columnWidth: "50%",
+    },
+  },
+  colors: ["#4a6cf7"],
+  dataLabels: {
+    enabled: false,
+  },
+  stroke: {
+    show: true,
+    width: 2,
+    colors: ["transparent"],
+  },
+  fill: {
+    opacity: 1,
+  },
+});
+
+// Funciones para los botones
+const scheduleSession = () => {
+  alert("Programar sesión clicado");
+};
+
+const viewStudents = () => {
+  alert("Ver estudiantes clicado");
+};
+</script>
+
+<style scoped>
+.coach-dashboard {
+  padding: 20px;
+}
+
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.stat {
+  font-size: 24px;
+  font-weight: bold;
+}
+</style>

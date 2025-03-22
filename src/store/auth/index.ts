@@ -1,14 +1,15 @@
-import mutations from './mutations'
-import getters from './getters'
+  import mutations from './mutations'
+  import getters from './getters'
 
-export default {
-  namespaced: true,
-  state() {
-    return {
-      authenticated: false,
-      username: ''
-    }
-  },
-  mutations,
-  getters
-}
+  export default {
+    namespaced: true,
+    state() {
+      return {
+        authenticated: false,
+        username: '',
+        role: 'admin'
+      }
+    },
+    mutations,
+    getters
+  }
