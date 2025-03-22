@@ -52,6 +52,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import gsap from 'gsap';
 import axios from 'axios';
+import { useAuthStore } from '@/stores/authStore'; // Importar el store de Pinia
 
 // Configura la URL de tu API
 const API_URL = 'https://gymtoday12.com';
@@ -74,16 +75,16 @@ const googleButton = ref(null);
 onBeforeMount(() => {
   console.log('Verificando parámetros de URL');
   const token = route.query.token as string;
-  
+
   if (token) {
     console.log('Token encontrado en URL');
     try {
       // Decodificar el token y guardarlo en localStorage
       localStorage.setItem('token', token);
-      
+
       // Configurar axios para usar el token
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       // Redireccionar al dashboard (en un sistema real, verificarías los roles)
       router.push('/dashboard');
     } catch (error) {
@@ -94,7 +95,7 @@ onBeforeMount(() => {
       };
     }
   }
-  
+
   // Verificar si hay un error
   const error = route.query.error as string;
   if (error) {
@@ -105,42 +106,54 @@ onBeforeMount(() => {
   }
 });
 
-// Manejar el envío del formulario
+// En tu método de login (LoginView.vue)
 const handleSubmit = async () => {
   loading.value = true;
   message.value = null;
-  
+
   try {
     const response = await axios.post(`${API_URL}/api/login/`, {
       Correo_Electronico: email.value,
-      Contrasena: password.value
+      Contrasena: password.value,
     });
-    
+
     if (response.data && response.data.access_token) {
-      // Guardar token
-      localStorage.setItem('token', response.data.access_token);
-      
-      // Configurar axios para futuras peticiones
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access_token}`;
-      
-      // Guardar información de usuario
-      localStorage.setItem('user', JSON.stringify({
+      // Guardar token y datos de usuario
+      localStorage.setItem("token", response.data.access_token);
+      localStorage.setItem("user", JSON.stringify({
         id: response.data.user_id,
         username: response.data.username,
         email: response.data.email,
-        roles: response.data.roles || []
+        roles: response.data.roles || [],
       }));
-      
-      // Redireccionar según rol (simplificado para este ejemplo)
-      router.push('/dashboard');
+      localStorage.setItem("userRole", response.data.roles[0]); // Guardar el rol
+
+      // Actualizar el store de Pinia
+      const authStore = useAuthStore();
+      authStore.setRole(response.data.roles[0]); // Actualizar el rol
+      authStore.setUsername(response.data.username);
+      authStore.setAuthentication(true);
+
+      console.log("Usuario autenticado:", response.data); // Depuración
+
+      // Redireccionar según el rol
+      if (response.data.roles.includes("admin")) {
+        router.push("/dashboard");
+      } else if (response.data.roles.includes("usuario")) {
+        router.push("/user-dashboard");
+      } else if (response.data.roles.includes("entrenador")) {
+        router.push("/coach-dashboard");
+      } else {
+        router.push("/dashboard"); // Redirección por defecto
+      }
     } else {
-      throw new Error('Respuesta inválida del servidor');
+      throw new Error("Respuesta inválida del servidor");
     }
   } catch (error: any) {
-    console.error('Error de login:', error);
+    console.error("Error de login:", error);
     message.value = {
-      text: error.response?.data?.mensaje || 'Error al iniciar sesión',
-      type: 'error'
+      text: error.response?.data?.mensaje || "Error al iniciar sesión",
+      type: "error",
     };
   } finally {
     loading.value = false;
@@ -208,13 +221,13 @@ onMounted(() => {
   border-radius: 8px;
   margin-bottom: 20px;
   text-align: center;
-  
+
   &.success {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
   }
-  
+
   &.error {
     background-color: #f8d7da;
     color: #721c24;

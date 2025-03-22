@@ -1,4 +1,3 @@
-/* --- NavbarDashboard.vue --- */
 <template>
   <v-app-bar color="transparent" elevation="0" class="navbar-dashboard">
     <!-- Botón de Hamburguesa -->
@@ -11,10 +10,10 @@
       <img src="@/assets/img/gymbulls.png" alt="GYM BULLS Logo" class="logo-image" />
     </div>
 
-    <!-- Barra de Búsqueda -->
-    <v-text-field v-model="searchQuery" placeholder="Buscar..." prepend-inner-icon="mdi-magnify" variant="outlined"
-      density="compact" hide-details single-line class="search-bar">
-    </v-text-field>
+    <!-- Barra de Búsqueda (solo para admin) -->
+    <v-text-field v-if="userRole === 'admin'" v-model="searchQuery" placeholder="Buscar..."
+      prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details single-line
+      class="search-bar"></v-text-field>
 
     <!-- Espaciador -->
     <v-spacer></v-spacer>
@@ -67,8 +66,10 @@
 import { Icon } from "@iconify/vue";
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore"; // Importar el store de autenticación
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 // Estado de las notificaciones
 const notificationsCount = ref(3); // Ejemplo: 3 notificaciones
@@ -83,6 +84,9 @@ const userInitials = computed(() => {
   if (!username.value) return 'U';
   return username.value.charAt(0).toUpperCase();
 });
+
+// Obtener el rol del usuario desde el store
+const userRole = computed(() => authStore.getRole);
 
 // Cargar datos del usuario al montar el componente
 onMounted(() => {
