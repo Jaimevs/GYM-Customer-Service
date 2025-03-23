@@ -2,7 +2,7 @@
   <div class="verification-container">
     <h2 class="verification-title">Verificación de Correo</h2>
     <p class="verification-message">
-      Te hemos enviado un código de 6 dígitos a tu correo electrónico. Por favor, ingrésalo a continuación.
+      Te hemos enviado un código de 6 dígitos a tu correo electrónico. Por favor, ingrésalo a continuación para activar tu cuenta.
     </p>
 
     <!-- Campos de entrada para cada dígito del código de verificación -->
@@ -27,10 +27,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { Icon } from "@iconify/vue";
-import AuthService from "@/services/AuthService"; // Importar el servicio de autenticación
-import gsap from "gsap"; // Importar GSAP
+import { useRouter } from "vue-router";
+import gsap from "gsap";
+import axios from "axios";
 
+const router = useRouter();
+const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday12.com";
 const digits = ref(Array(6).fill("")); // Array para almacenar cada dígito
 const loading = ref(false); // Estado de carga
 const message = ref<{ text: string; type: "success" | "error" } | null>(null); // Mensaje de respuesta
@@ -51,6 +53,11 @@ const handleDigitInput = (index: number, event: Event) => {
 
   // Actualizar el dígito en el array
   digits.value[index] = value;
+  
+  // Si se completaron todos los dígitos y estamos en el último, verificar automáticamente
+  if (index === 5 && !digits.value.some(d => d === "")) {
+    handleVerification();
+  }
 };
 
 // Función para manejar la tecla de borrado (delete/backspace)
@@ -104,31 +111,120 @@ const handleVerification = async () => {
   message.value = null;
 
   try {
+    // Validar que se hayan ingresado todos los dígitos
+    const emptyDigits = digits.value.some(digit => digit === "");
+    if (emptyDigits) {
+      message.value = {
+        text: 'Por favor, ingresa todos los dígitos del código',
+        type: 'error',
+      };
+      animateMessage();
+      loading.value = false;
+      return;
+    }
+
     // Unir los dígitos para formar el código de verificación
     const code = digits.value.join('');
 
-    // Llamar al servicio para verificar el código
-    const response = await AuthService.verifyCode(code);
+    console.log('Enviando verificación con código:', code);
 
-    // Mostrar mensaje de éxito
-    message.value = {
-      text: response.message || '¡Código verificado correctamente!',
-      type: 'success',
-    };
-
-    // Redirigir al usuario después de la verificación
-    setTimeout(() => {
-      router.push({ path: '/login' }); // Redirigir al login usando el enrutador de Vue
-    }, 3000);
-  } catch (error: any) {
-    console.error('Error de verificación:', error);
-    message.value = {
-      text: error.response?.data?.detail || 'Error al verificar el código',
-      type: 'error',
-    };
+    try {
+      // Intenta con la verificación simplificada (solo el código)
+      const response = await axios.post(`${API_URL}/api/api/verify-code/`, {
+        code: code
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Respuesta de verificación:', response);
+      handleSuccessVerification();
+    } catch (error) {
+      // Si falla, intenta con el endpoint que requiere email
+      try {
+        // Recupera el email del localStorage si existe
+        const storedEmail = localStorage.getItem('pendingVerificationEmail');
+        
+        if (storedEmail) {
+          console.log('Intentando con email almacenado:', storedEmail);
+          
+          const response = await axios.post(`${API_URL}/api/api/users/verify/`, {
+            email: storedEmail,
+            code: code
+          }, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          console.log('Respuesta de verificación con email:', response);
+          handleSuccessVerification();
+        } else {
+          throw new Error('No se encontró el correo electrónico para la verificación');
+        }
+      } catch (secondError) {
+        handleVerificationError(secondError);
+      }
+    }
+  } catch (error) {
+    handleVerificationError(error);
   } finally {
     loading.value = false;
   }
+};
+
+// Manejar verificación exitosa
+const handleSuccessVerification = () => {
+  message.value = {
+    text: '¡Tu cuenta ha sido creada exitosamente!',
+    type: 'success',
+  };
+  animateMessage();
+
+  // Limpiar el email almacenado
+  localStorage.removeItem('pendingVerificationEmail');
+
+  // Redirigir al usuario después de la verificación
+  setTimeout(() => {
+    router.push({ path: '/login' });
+  }, 3000);
+};
+
+// Manejar errores de verificación
+const handleVerificationError = (error: any) => {
+  console.error('Error de verificación:', error);
+  
+  // Preparar mensaje de error
+  let errorMsg = 'Error al verificar el código';
+  
+  if (axios.isAxiosError(error) && error.response) {
+    // Error de respuesta del servidor
+    if (error.response.data?.detail) {
+      errorMsg = error.response.data.detail;
+    } else if (error.response.status === 400) {
+      errorMsg = 'Código inválido o expirado';
+    } else {
+      errorMsg = `Error ${error.response.status}: ${error.response.statusText}`;
+    }
+    
+    console.error('Detalles del error:', {
+      status: error.response.status,
+      statusText: error.response.statusText,
+      data: error.response.data
+    });
+  } else if (axios.isAxiosError(error) && error.request) {
+    // Error de conexión
+    errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+  } else if (error instanceof Error) {
+    errorMsg = error.message;
+  }
+  
+  message.value = {
+    text: errorMsg,
+    type: 'error',
+  };
+  animateMessage();
 };
 
 // Animación inicial del contenedor al montar el componente
@@ -139,128 +235,141 @@ onMounted(() => {
     duration: 1,
     ease: "power2.out",
   });
+
+  // Enfocar el primer campo de dígito automáticamente
+  const firstInput = document.querySelector('.digit-input:first-child') as HTMLInputElement;
+  if (firstInput) {
+    setTimeout(() => {
+      firstInput.focus();
+    }, 500);
+  }
 });
 </script>
 
-<style scoped lang="scss">
-@use "sass:color"; // Importar el módulo de color de Sass
-@use "@/styles/_variables.scss" as *;
-
+<style scoped>
 .verification-container {
-  max-width: 400px;
+  max-width: 90%; /* Ajusta el ancho máximo para que no sobresalga */
   margin: 0 auto;
-  padding: $espaciado-grande;
-  text-align: center;
-  background-color: $color-fondo-sidebar;
-  border-radius: $radio-borde * 2;
-  box-shadow: $sombra-suave;
+  padding: 1rem; /* Reduce el padding para pantallas pequeñas */
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .verification-title {
-  font-size: 26px;
-  margin-bottom: $espaciado-base;
-  color: $color-gris-oscuro;
-  font-family: $fuente-titulo;
-  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #333;
+  font-size: 1.5rem; /* Ajusta el tamaño de la fuente */
 }
 
 .verification-message {
-  font-size: 14px;
-  color: $color-negro;
-  margin-bottom: $espaciado-grande;
-  line-height: 1.6;
-  font-family: $fuente-principal;
+  text-align: center;
+  margin-bottom: 1.5rem; /* Reduce el margen inferior */
+  color: #666;
+  font-size: 0.9rem; /* Ajusta el tamaño de la fuente */
 }
 
 .digits-container {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: $espaciado-grande;
+  justify-content: center;
+  gap: 8px; /* Reduce el espacio entre los campos */
+  margin-bottom: 1.5rem; /* Reduce el margen inferior */
+}
 
-  .digit-input {
-    width: 40px;
-    height: 50px;
-    text-align: center;
-    font-size: 24px;
-    border: $ancho-borde solid $color-gris-medio;
-    border-radius: $radio-borde;
-    background-color: $color-blanco;
-    outline: none;
-    transition: border-color 0.3s ease, transform 0.3s ease;
+.digit-input {
+  width: 40px; /* Reduce el ancho de los campos */
+  height: 45px; /* Reduce la altura de los campos */
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 20px; /* Reduce el tamaño de la fuente */
+  text-align: center;
+  transition: border 0.3s, transform 0.3s;
+}
 
-    &:focus {
-      border-color: $color-rojo-botones;
-      transform: scale(1.1);
-    }
-  }
+.digit-input:focus {
+  outline: none;
+  border-color: #5995fd;
+  box-shadow: 0 0 8px rgba(89, 149, 253, 0.3);
 }
 
 .btn {
   width: 100%;
-  padding: $espaciado-base;
+  padding: 10px; /* Reduce el padding */
   border: none;
-  border-radius: $radio-borde;
-  background: linear-gradient(135deg, $color-rojo-botones, $color-rojo-calido);
-  color: $color-texto-botones;
-  font-size: 16px;
+  border-radius: 50px;
+  background-color: #5995fd;
+  color: white;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-  font-family: $fuente-principal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s;
+}
 
-  &:hover:not(:disabled) {
-    background: linear-gradient(135deg, $color-rojo-calido, $color-rojo-botones);
-    transform: translateY(-2px);
-  }
+.btn:hover:not(:disabled) {
+  background-color: #4d84e2;
+}
 
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  .loader {
-    border: 3px solid $color-gris-claro;
-    border-top: 3px solid $color-rojo-botones;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
-  }
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .message {
-  padding: $espaciado-base;
-  border-radius: $radio-borde;
-  margin-bottom: $espaciado-grande;
+  margin-top: 1rem; /* Reduce el margen superior */
+  padding: 8px; /* Reduce el padding */
+  border-radius: 5px;
   text-align: center;
-  font-size: 14px;
-  box-shadow: $sombra-suave;
-  font-family: $fuente-principal;
-  transition: all 0.3s ease;
+  font-size: 0.9rem; /* Ajusta el tamaño de la fuente */
+}
 
-  &.success {
-    background-color: rgba($color-verde-lima, 0.1);
-    color: color.adjust($color-verde-lima, $lightness: -10%); // Usar color.adjust
-    border: 1px solid rgba($color-verde-lima, 0.2);
-  }
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
 
-  &.error {
-    background-color: rgba($color-rojo-vibrante, 0.1);
-    color: $color-rojo-vibrante;
-    border: 1px solid rgba($color-rojo-vibrante, 0.2);
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba($color-rojo-vibrante, 0.2);
-  }
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.loader {
+  width: 18px; /* Reduce el tamaño del loader */
+  height: 18px; /* Reduce el tamaño del loader */
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Media queries para ajustes adicionales en pantallas pequeñas */
+@media (max-width: 480px) {
+  .verification-container {
+    padding: 0.5rem;
   }
 
-  100% {
-    transform: rotate(360deg);
+  .digit-input {
+    width: 35px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .btn {
+    padding: 8px;
+  }
+
+  .message {
+    font-size: 0.8rem;
   }
 }
 </style>
