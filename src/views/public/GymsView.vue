@@ -17,14 +17,15 @@
           <v-card-subtitle class="gym-location">{{ gym.location }}</v-card-subtitle>
           <v-card-text class="gym-description">{{ gym.description }}</v-card-text>
           <v-card-actions>
-            <v-btn>Regístrate ya</v-btn>
+            <router-link to="/compra-membresia">
+              <v-btn>Regístrate ya</v-btn>
+            </router-link>
           </v-card-actions>
         </v-card>
       </div>
     </div>
   </v-container>
 </template>
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import gsap from 'gsap';

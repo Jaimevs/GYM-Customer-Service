@@ -6,6 +6,7 @@ import FacilitiesView from "@/views/public/FacilitiesView.vue";
 import AboutGymBullsView from "@/views/public/AboutGymBullsView.vue";
 import ContactUsView from "@/views/public/ContactUsView.vue";
 import FaqView from "@/views/public/FaqView.vue";
+import MembershipPaymentView from "@/views/public/MembershipPayment.vue"; // Importa la nueva vista
 import PublicLayout from "@/layouts/PublicLayout.vue";
 
 const publicRoutes: RouteRecordRaw[] = [
@@ -50,6 +51,12 @@ const publicRoutes: RouteRecordRaw[] = [
     name: "FAQ",
     component: FaqView,
     meta: { layout: PublicLayout },
+  },
+  {
+    path: "/compra-membresia", // Nueva ruta
+    name: "MembershipPayment",
+    component: MembershipPaymentView, // Usa la vista MembershipPayment
+    meta: { layout: PublicLayout }, // Usa el layout público
   },
 ];
 
