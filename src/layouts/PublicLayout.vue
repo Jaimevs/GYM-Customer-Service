@@ -1,3 +1,4 @@
+<!-- PublicLayout.vue-->
 <template>
   <div class="public-layout">
     <!-- Navbar Público -->
@@ -46,7 +47,7 @@ const toggleSidebar = () => {
   flex: 1;
   /* Ocupa el espacio restante */
   padding: 0;
-  /* Elimina el padding para que el HeroSection ocupe toda la pantalla */
+  /* Elimina cualquier padding que pueda interferir */
   background-color: transparent;
 }
 </style>
