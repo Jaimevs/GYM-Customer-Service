@@ -42,35 +42,39 @@
 
         <!-- Botón de Registro -->
         <button type="submit" class="btn solid" ref="submitButton" :disabled="loading">
-          {{ loading ? 'Cargando...' : 'Registrarse' }}
+          <span v-if="loading" class="loader"></span>
+          <span v-else>{{ loading ? 'Cargando...' : 'Registrarse' }}</span>
         </button>
       </form>
     </template>
 
     <!-- Mostrar el componente de verificación después del registro exitoso -->
-    <VerificationCode v-if="showVerification" />
+    <VerificationCode v-if="showVerification" :email="email" />
 
-    <!-- Divider Wrapper -->
-    <div class="divider-wrapper" ref="dividerWrapper">
-      <span>O regístrate con</span>
-    </div>
+    <!-- Solo mostrar estas opciones cuando no se está en la pantalla de verificación -->
+    <template v-if="!showVerification">
+      <!-- Divider Wrapper -->
+      <div class="divider-wrapper" ref="dividerWrapper">
+        <span>O regístrate con</span>
+      </div>
 
-    <!-- Opción de continuar con Google -->
-    <button @click="handleGoogleRegister" class="btn google" ref="googleButton" :disabled="loading">
-      <Icon icon="flat-color-icons:google" width="20" height="20" />
-      Continuar con Google
-    </button>
+      <!-- Opción de continuar con Google -->
+      <button @click="handleGoogleRegister" class="btn google" ref="googleButton" :disabled="loading">
+        <Icon icon="flat-color-icons:google" width="20" height="20" />
+        Continuar con Google
+      </button>
 
-    <!-- Separator para Términos de Uso y Política de Privacidad -->
-    <div class="separator">
-      <a href="#">Términos de uso</a> | <a href="#">Política de privacidad</a>
-    </div>
+      <!-- Separator para Términos de Uso y Política de Privacidad -->
+      <div class="separator">
+        <a href="#">Términos de uso</a> | <a href="#">Política de privacidad</a>
+      </div>
 
-    <!-- Texto de Login -->
-    <p class="register-text" ref="loginText">
-      ¿Ya tienes una cuenta?
-      <router-link to="/login" class="register-link">Inicia Sesión</router-link>
-    </p>
+      <!-- Texto de Login -->
+      <p class="register-text" ref="loginText">
+        ¿Ya tienes una cuenta?
+        <router-link to="/login" class="register-link">Inicia Sesión</router-link>
+      </p>
+    </template>
   </div>
 </template>
 
@@ -80,7 +84,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import gsap from 'gsap';
 import AuthService from '@/services/AuthService';
-import VerificationCode from '@/components/VerificationCode.vue'; // Importar el componente de verificación
+import VerificationCode from '@/components/VerificationCode.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -115,6 +119,18 @@ const toggleConfirmPasswordVisibility = () => {
   showConfirmPassword.value = !showConfirmPassword.value;
 };
 
+// Validar entrada de email
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Validar contraseña
+const validatePassword = (password: string): boolean => {
+  // La contraseña debe tener al menos 8 caracteres, una letra y un número
+  return password.length >= 8 && /[A-Za-z]/.test(password) && /[0-9]/.test(password);
+};
+
 // Manejar el envío del formulario
 const handleSubmit = async () => {
   // Validar que las contraseñas coincidan
@@ -130,26 +146,32 @@ const handleSubmit = async () => {
   message.value = null;
 
   try {
+    // Guardar el email para recuperarlo durante la verificación
+    localStorage.setItem('pendingVerificationEmail', email.value);
+    
     const response = await AuthService.register({
       username: username.value,
       email: email.value,
       password: password.value,
     });
 
+    // Mostrar mensaje de éxito
+    message.value = {
+      text: response.message || 'Se ha enviado un código de verificación a tu correo electrónico.',
+      type: 'success',
+    };
+
     // Mostrar el componente de verificación después del registro exitoso
     showVerification.value = true;
-
-    // Limpiar formulario
-    username.value = '';
-    email.value = '';
-    password.value = '';
-    confirmPassword.value = '';
   } catch (error: any) {
     console.error('Error de registro:', error);
     message.value = {
       text: error.response?.data?.detail || 'Error al registrarse',
       type: 'error',
     };
+    // Limpiar contraseñas en caso de error
+    password.value = '';
+    confirmPassword.value = '';
   } finally {
     loading.value = false;
   }
@@ -157,20 +179,44 @@ const handleSubmit = async () => {
 
 // Manejar registro con Google
 const handleGoogleRegister = () => {
+  loading.value = true;
   AuthService.loginWithGoogle();
 };
 
 onMounted(() => {
+  // Verificar si hay un registro pendiente de verificación
+  const pendingEmail = localStorage.getItem('pendingVerificationEmail');
+  if (pendingEmail) {
+    email.value = pendingEmail;
+    
+    // Si venimos desde una recarga y teníamos un registro pendiente
+    // podríamos decidir mostrar directamente la pantalla de verificación
+    // pero por ahora lo dejamos así para mantener compatibilidad
+  }
+
   // Animaciones GSAP
-  gsap.to(title.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 });
-  gsap.to(usernameField.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 });
-  gsap.to(emailField.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.6 });
-  gsap.to(passwordField.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.8 });
-  gsap.to(confirmPasswordField.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 1.0 });
-  gsap.to(submitButton.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 1.2 });
-  gsap.to(dividerWrapper.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 1.4 });
-  gsap.to(googleButton.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 1.6 });
-  gsap.to(loginText.value, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 1.8 });
+  const staggerDelay = 0.2;
+  const elements = [
+    { ref: title.value, delay: staggerDelay * 1 },
+    { ref: usernameField.value, delay: staggerDelay * 2 },
+    { ref: emailField.value, delay: staggerDelay * 3 },
+    { ref: passwordField.value, delay: staggerDelay * 4 },
+    { ref: confirmPasswordField.value, delay: staggerDelay * 5 },
+    { ref: submitButton.value, delay: staggerDelay * 6 },
+    { ref: dividerWrapper.value, delay: staggerDelay * 7 },
+    { ref: googleButton.value, delay: staggerDelay * 8 },
+    { ref: loginText.value, delay: staggerDelay * 9 }
+  ];
+
+  elements.forEach(elem => {
+    if (elem.ref) {
+      gsap.fromTo(
+        elem.ref, 
+        { opacity: 0, y: 20 }, 
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: elem.delay }
+      );
+    }
+  });
 });
 </script>
 

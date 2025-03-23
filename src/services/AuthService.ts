@@ -54,17 +54,33 @@ class AuthService {
 
       throw new Error("Respuesta inválida del servidor");
     } catch (error) {
+      console.error("Error en el login:", error);
       throw error;
     }
   }
 
   // Registro normal
   async register(credentials: RegisterCredentials): Promise<any> {
-    return axios.post(`${API_URL}/api/users/register/`, {
-      Nombre_Usuario: credentials.username,
-      Correo_Electronico: credentials.email,
-      Contrasena: credentials.password,
-    });
+    try {
+      console.log("Enviando registro con datos:", {
+        Nombre_Usuario: credentials.username,
+        Correo_Electronico: credentials.email,
+        Contrasena: credentials.password,
+      });
+
+      const response = await axios.post(`${API_URL}/api/users/register/`, {
+        Nombre_Usuario: credentials.username,
+        Correo_Electronico: credentials.email,
+        Contrasena: credentials.password,
+      });
+
+      console.log("Respuesta del registro:", response);
+      return response;
+    } catch (error) {
+      console.error("Error en el registro:", error);
+      this.logAxiosError(error);
+      throw error;
+    }
   }
 
   // Iniciar flujo de autenticación con Google
@@ -152,23 +168,96 @@ class AuthService {
   /**
    * Verifica un código de 6 dígitos enviado por el usuario.
    * @param code El código de 6 dígitos a verificar.
+   * @param email El correo electrónico del usuario.
    * @returns Una promesa con la respuesta del servidor.
    */
-  async verifyCode(code: string): Promise<any> {
+  async verifyCode(code: string, email: string): Promise<any> {
     try {
+      console.log(`Verificando código con email: ${email}, código: ${code}`);
+
+      // Probar con la ruta que usamos originalmente en el servicio
       const response = await axios.post(`${API_URL}/api/verify-code/`, {
         code: code,
+        email: email
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
 
-      // Si la verificación es exitosa, puedes manejar la respuesta aquí
-      if (response.data && response.data.success) {
-        console.log("Código verificado correctamente:", response.data);
-      }
-
-      return response.data; // Devuelve la respuesta del servidor
+      console.log("Respuesta de verificación:", response);
+      return response.data;
     } catch (error) {
       console.error("Error al verificar el código:", error);
-      throw error; // Lanza el error para que pueda ser manejado en la vista
+      this.logAxiosError(error);
+      throw error;
+    }
+  }
+
+  // Método para probar múltiples endpoints para verificación de código
+  async verifyCodeMultipleEndpoints(code: string, email: string): Promise<any> {
+    const possibleEndpoints = [
+      '/api/verify-code/', // Endpoint original
+      '/api/users/verify/', // Ruta con barra final
+      '/api/users/verify', // Ruta sin barra final
+      '/verify-code/',
+      '/users/verify/'
+    ];
+    
+    let lastError = null;
+    
+    for (const endpoint of possibleEndpoints) {
+      try {
+        console.log(`Intentando con endpoint: ${endpoint}`);
+        
+        const response = await axios.post(`${API_URL}${endpoint}`, {
+          code: code,
+          email: email
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log(`Verificación exitosa con endpoint: ${endpoint}`);
+        return response.data;
+      } catch (error) {
+        console.error(`Error con endpoint ${endpoint}:`, error);
+        lastError = error;
+        
+        // Si no es 404 o 405, puede ser un error de validación real
+        if (axios.isAxiosError(error) && 
+            error.response && 
+            ![404, 405].includes(error.response.status)) {
+          throw error;
+        }
+        
+        // Si es 404 o 405, intentamos con el siguiente endpoint
+      }
+    }
+    
+    // Si llegamos aquí, ningún endpoint funcionó
+    console.error("Todos los intentos de verificación fallaron");
+    throw lastError;
+  }
+
+  // Utilidad para registrar errores de Axios con más detalle
+  logAxiosError(error: any): void {
+    if (axios.isAxiosError(error)) {
+      console.error('Detalles del error Axios:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+        requestData: error.config?.data
+      });
+    } else {
+      console.error('Error no relacionado con Axios:', error);
     }
   }
 }
