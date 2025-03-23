@@ -3,9 +3,13 @@
 /* --- Colores --- */
 $color-negro: #000000; /* Negro sólido para el fondo */
 $color-gris-claro-brillante: #E0E0E0; /* Gris claro brillante para títulos */
-$color-gris-medio: #8D8D8D; /* Gris medio oscuro para texto */
-$color-rojo-botones: #E75556; /* Rojo vibrante para botones */
-$color-texto-botones: #E0E0E0; /* Texto blanco/gris claro para botones */
+$color-gris-medio: #c3bdbd; /* Gris medio oscuro para texto */
+$color-rojo-botones: #ff2a00; /* Rojo vibrante para botones */
+$color-texto-botones: #f5eeee; /* Texto blanco/gris claro para botones */
+
+/* _variables.scss */
+$color-titulos: #E0E0E0; /* Gris claro brillante para títulos */
+$color-texto: #e2d8d8; /* Gris medio oscuro para texto */
 
 $color-rojo-vibrante: #FF2B00; /* Rojo vibrante */
 $color-gris-oscuro: #333333;
