@@ -6,34 +6,30 @@
 
     <!-- Estadísticas -->
     <v-row class="mb-6">
-      <v-col cols="12" sm="4">
+      <v-col v-for="(stat, index) in stats" :key="index" cols="12" sm="4">
         <v-card class="stats-card pa-4" elevation="2">
-          <v-icon size="40" color="primary" class="mb-3">mdi-account-group</v-icon>
-          <h3 class="text-h6 font-weight-medium">Tus Estudiantes</h3>
-          <p class="stat text-h5 primary--text">12 activos</p>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-card class="stats-card pa-4" elevation="2">
-          <v-icon size="40" color="success" class="mb-3">mdi-calendar-clock</v-icon>
-          <h3 class="text-h6 font-weight-medium">Sesiones Programadas</h3>
-          <p class="stat text-h5 success--text">5 para hoy</p>
-        </v-card>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-card class="stats-card pa-4" elevation="2">
-          <v-icon size="40" color="info" class="mb-3">mdi-star-outline</v-icon>
-          <h3 class="text-h6 font-weight-medium">Rendimiento</h3>
-          <p class="stat text-h5 info--text">98% satisfacción</p>
+          <v-icon size="40" :color="stat.color" class="mb-3">{{ stat.icon }}</v-icon>
+          <h3 class="text-h6 font-weight-medium">{{ stat.title }}</h3>
+          <p class="stat text-h5" :class="`${stat.color}--text`">{{ stat.value }}</p>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Gráfica de Rendimiento -->
+    <!-- Lista de Próximas Sesiones -->
     <v-card class="mb-6" elevation="2">
-      <v-card-title class="text-h6 font-weight-bold">Rendimiento de Estudiantes</v-card-title>
+      <v-card-title class="text-h6 font-weight-bold">Próximas Sesiones</v-card-title>
       <v-card-text>
-        <apexchart type="bar" height="350" :options="chartOptions" :series="chartSeries"></apexchart>
+        <v-list dense>
+          <v-list-item v-for="(session, index) in upcomingSessions" :key="index">
+            <v-list-item-icon>
+              <v-icon color="primary">mdi-clock-time-eight-outline</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title>{{ session.student }}</v-list-item-title>
+              <v-list-item-subtitle>{{ session.time }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
       </v-card-text>
     </v-card>
 
@@ -51,52 +47,49 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import VueApexCharts from "vue3-apexcharts";
+import { useRouter } from "vue-router";
 
-// Datos de la gráfica
-const chartSeries = ref([
+const router = useRouter();
+
+// Datos de las estadísticas
+const stats = ref([
   {
-    name: "Progreso",
-    data: [75, 80, 85, 90, 95, 100],
+    icon: "mdi-account-group",
+    title: "Tus Estudiantes",
+    value: "12 activos",
+    color: "primary",
+  },
+  {
+    icon: "mdi-calendar-clock",
+    title: "Sesiones Programadas",
+    value: "5 para hoy",
+    color: "success",
+  },
+  {
+    icon: "mdi-star-outline",
+    title: "Rendimiento",
+    value: "98% satisfacción",
+    color: "info",
   },
 ]);
 
-const chartOptions = ref({
-  chart: {
-    toolbar: {
-      show: false,
-    },
-  },
-  xaxis: {
-    categories: ["Estudiante 1", "Estudiante 2", "Estudiante 3", "Estudiante 4", "Estudiante 5", "Estudiante 6"],
-  },
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      columnWidth: "50%",
-    },
-  },
-  colors: ["#4a6cf7"],
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ["transparent"],
-  },
-  fill: {
-    opacity: 1,
-  },
-});
+// Datos de próximas sesiones
+const upcomingSessions = ref([
+  { student: "Estudiante 1", time: "10:00 AM" },
+  { student: "Estudiante 2", time: "11:30 AM" },
+  { student: "Estudiante 3", time: "2:00 PM" },
+]);
 
-// Funciones para los botones
+// Redirigir a /clases-coach
 const scheduleSession = () => {
-  alert("Programar sesión clicado");
+  console.log("Redirigiendo a /clases-coach");
+  router.push("/clases-coach");
 };
 
+// Redirigir a /clientes
 const viewStudents = () => {
-  alert("Ver estudiantes clicado");
+  console.log("Redirigiendo a /clientes");
+  router.push("/clientes");
 };
 </script>
 
@@ -111,6 +104,8 @@ const viewStudents = () => {
   align-items: center;
   justify-content: center;
   text-align: center;
+  height: 100%;
+  /* Asegura que todas las tarjetas tengan la misma altura */
 }
 
 .stat {

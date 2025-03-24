@@ -3,7 +3,8 @@
 
 /* --- Navbar General --- */
 .navbar-dashboard {
-  background-color: $color-negro !important; // Fondo negro
+// background: linear-gradient(135deg, #2b2b2b, #c92020, #2b2b2b);
+background-color: black !important;
   padding: 0 $espaciado-base;
   box-shadow: $sombra-suave; // Sombra suave
   display: flex;
@@ -44,48 +45,6 @@
 
       &:hover {
         transform: scale(1.05);
-      }
-    }
-  }
-
-  /* --- Barra de Búsqueda --- */
-  .search-bar {
-    margin-left: $espaciado-grande;
-    max-width: 300px;
-    background-color: $color-fondo-sidebar;
-    border-radius: $radio-borde;
-    box-shadow: $sombra-suave;
-
-    .v-field {
-      padding: $espaciado-pequeño;
-      border-radius: $radio-borde;
-
-      &:hover {
-        background-color: $color-gris-medio;
-      }
-    }
-
-    .v-icon {
-      color: white !important; // Forzamos el color blanco
-      transition: color 0.3s ease;
-
-      &:hover {
-        color: $color-primario; // Amarillo dorado al pasar el ratón
-      }
-    }
-  }
-
-  /* --- Botón de Configuración --- */
-  .settings-btn {
-    margin-left: $espaciado-grande;
-
-    .icon-settings {
-      color: white !important; // Forzamos el color blanco
-      font-size: 24px;
-      transition: color 0.3s ease;
-
-      &:hover {
-        color: $color-secundario; // Rojo vibrante al pasar el ratón
       }
     }
   }

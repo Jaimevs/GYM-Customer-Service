@@ -1,41 +1,48 @@
 <template>
-  <v-container>
+  <v-container class="evaluations-dashboard">
+    <!-- Título -->
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4 mb-4">Evaluations</h1>
+        <h1 class="text-h4 font-weight-bold mb-4">Evaluaciones</h1>
       </v-col>
     </v-row>
 
-    <!-- Gráfico de barras con ApexCharts -->
+    <!-- Resumen de satisfacción -->
     <v-row>
       <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Evaluation Results</v-card-title>
-          <v-card-text>
-            <apexchart type="bar" :options="barChartOptions" :series="barChartSeries"></apexchart>
+        <v-card elevation="2" rounded="lg" class="satisfaction-card">
+          <v-card-title class="text-h6 font-weight-bold d-flex justify-center">
+            Satisfacción Promedio
+          </v-card-title>
+          <v-card-text class="text-center">
+            <div class="satisfaction-summary">
+              <v-icon size="80" color="success" class="mb-4">mdi-star</v-icon>
+              <h2 class="text-h2 font-weight-bold">{{ averageRating }}%</h2>
+              <p class="text-body-1 grey--text text--darken-1">Promedio de Satisfacción</p>
+            </div>
           </v-card-text>
         </v-card>
       </v-col>
 
-      <!-- Gráfico de radar con ApexCharts -->
+      <!-- Comentarios recientes -->
       <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Skill Assessment</v-card-title>
+        <v-card elevation="2" rounded="lg" class="comments-card">
+          <v-card-title class="text-h6 font-weight-bold d-flex justify-center">
+            Comentarios Recientes
+          </v-card-title>
           <v-card-text>
-            <apexchart type="radar" :options="radarChartOptions" :series="radarChartSeries"></apexchart>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Tabla de evaluaciones con Vuetify -->
-    <v-row>
-      <v-col cols="12">
-        <v-card>
-          <v-card-title>Evaluation Details</v-card-title>
-          <v-card-text>
-            <v-data-table :headers="headers" :items="evaluations" :items-per-page="5"
-              class="elevation-1"></v-data-table>
+            <v-timeline dense align-top>
+              <v-timeline-item v-for="(comment, index) in comments" :key="index" small>
+                <v-card elevation="2" rounded="lg" class="timeline-card">
+                  <v-card-title class="text-subtitle-1 font-weight-bold">
+                    {{ comment.client }}
+                  </v-card-title>
+                  <v-card-text class="text-body-2 grey--text text--darken-1">
+                    "{{ comment.text }}"
+                  </v-card-text>
+                </v-card>
+              </v-timeline-item>
+            </v-timeline>
           </v-card-text>
         </v-card>
       </v-col>
@@ -44,74 +51,77 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import VueApexCharts from 'vue3-apexcharts';
+import { defineComponent, ref, onMounted } from "vue";
+import gsap from "gsap";
 
 export default defineComponent({
-  name: 'EvaluationsView',
-  components: {
-    apexchart: VueApexCharts,
-  },
+  name: "EvaluationsView",
   setup() {
-    // Datos para el gráfico de barras
-    const barChartOptions = ref({
-      chart: {
-        type: 'bar',
-      },
-      xaxis: {
-        categories: ['Client 1', 'Client 2', 'Client 3', 'Client 4', 'Client 5'],
-      },
+    // Datos ficticios para el promedio de satisfacción
+    const averageRating = ref(87); // Porcentaje de satisfacción
+
+    // Comentarios ficticios
+    const comments = ref([
+      { client: "Juan Pérez", text: "Excelente entrenador, muy motivador." },
+      { client: "María López", text: "Muy buen seguimiento, me siento más fuerte." },
+      { client: "Carlos Ramírez", text: "Podría mejorar la comunicación." },
+    ]);
+
+    // Animación inicial
+    onMounted(() => {
+      gsap.from(".satisfaction-summary", {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.6,
+        ease: "back.out(1.7)",
+      });
+      gsap.from(".timeline-card", {
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
     });
-
-    const barChartSeries = ref([
-      {
-        name: 'Progress',
-        data: [30, 40, 35, 50, 49],
-      },
-    ]);
-
-    // Datos para el gráfico de radar
-    const radarChartOptions = ref({
-      chart: {
-        type: 'radar',
-      },
-      labels: ['Strength', 'Endurance', 'Flexibility', 'Speed', 'Coordination'],
-    });
-
-    const radarChartSeries = ref([
-      {
-        name: 'Client 1',
-        data: [80, 50, 30, 40, 60],
-      },
-    ]);
-
-    // Datos para la tabla
-    const headers = ref([
-      { text: 'Client', value: 'client' },
-      { text: 'Date', value: 'date' },
-      { text: 'Type', value: 'type' },
-      { text: 'Score', value: 'score' },
-      { text: 'Comments', value: 'comments' },
-    ]);
-
-    const evaluations = ref([
-      { client: 'John Doe', date: '2023-10-01', type: 'Initial', score: 85, comments: 'Good progress' },
-      { client: 'Jane Smith', date: '2023-10-05', type: 'Follow-up', score: 90, comments: 'Excellent performance' },
-      { client: 'Mike Johnson', date: '2023-10-10', type: 'Initial', score: 70, comments: 'Needs improvement' },
-    ]);
 
     return {
-      barChartOptions,
-      barChartSeries,
-      radarChartOptions,
-      radarChartSeries,
-      headers,
-      evaluations,
+      averageRating,
+      comments,
     };
   },
 });
 </script>
 
 <style scoped>
-/* Estilos personalizados si los necesitas */
+.evaluations-dashboard {
+  padding: 32px;
+}
+
+.satisfaction-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f9f9f9;
+}
+
+.comments-card {
+  height: 100%;
+  background-color: #f9f9f9;
+}
+
+.timeline-card {
+  background-color: white;
+  border-left: 4px solid #4a6cf7;
+  padding: 16px;
+}
+
+.satisfaction-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
 </style>

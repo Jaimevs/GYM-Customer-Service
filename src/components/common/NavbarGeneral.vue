@@ -10,18 +10,8 @@
       <img src="@/assets/img/gymbulls.png" alt="GYM BULLS Logo" class="logo-image" />
     </div>
 
-    <!-- Barra de Búsqueda (solo para admin) -->
-    <v-text-field v-if="userRole === 'admin'" v-model="searchQuery" placeholder="Buscar..."
-      prepend-inner-icon="mdi-magnify" variant="outlined" density="compact" hide-details single-line
-      class="search-bar"></v-text-field>
-
     <!-- Espaciador -->
     <v-spacer></v-spacer>
-
-    <!-- Botón de Configuración -->
-    <v-btn icon variant="text" class="settings-btn" @click="openSettings">
-      <Icon icon="solar:settings-outline" class="icon-settings" />
-    </v-btn>
 
     <!-- Botón de Notificaciones -->
     <v-menu offset-y>
@@ -48,13 +38,16 @@
       </template>
       <v-list class="user-menu">
         <v-list-item @click="navigateToProfile">
+          <Icon icon="solar:user-circle-linear" class="menu-icon" />
           <v-list-item-title>Perfil</v-list-item-title>
         </v-list-item>
         <v-list-item @click="navigateToSettings">
+          <Icon icon="solar:settings-linear" class="menu-icon" />
           <v-list-item-title>Configuración</v-list-item-title>
         </v-list-item>
         <v-divider></v-divider>
         <v-list-item @click="logout">
+          <Icon icon="solar:logout-2-linear" class="menu-icon" />
           <v-list-item-title>Cerrar Sesión</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -62,89 +55,80 @@
   </v-app-bar>
 </template>
 
-<script setup lang="ts">
-import { Icon } from "@iconify/vue";
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/authStore"; // Importar el store de autenticación
+  <script setup lang="ts">
+  import { Icon } from "@iconify/vue";
+  import { ref, computed, onMounted } from "vue";
+  import { useRouter } from "vue-router";
+  import { useAuthStore } from "@/stores/authStore"; // Importar el store de autenticación
 
-const router = useRouter();
-const authStore = useAuthStore();
+  const router = useRouter();
+  const authStore = useAuthStore();
 
-// Estado de las notificaciones
-const notificationsCount = ref(3); // Ejemplo: 3 notificaciones
-const notifications = ref(["Notificación 1", "Notificación 2", "Notificación 3"]);
+  // Estado de las notificaciones
+  const notificationsCount = ref(3); // Ejemplo: 3 notificaciones
+  const notifications = ref(["Notificación 1", "Notificación 2", "Notificación 3"]);
 
-// Estado de la barra de búsqueda
-const searchQuery = ref("");
+  // Información del usuario
+  const username = ref('');
+  const userInitials = computed(() => {
+    if (!username.value) return 'U';
+    return username.value.charAt(0).toUpperCase();
+  });
 
-// Información del usuario
-const username = ref('');
-const userInitials = computed(() => {
-  if (!username.value) return 'U';
-  return username.value.charAt(0).toUpperCase();
-});
+  // Obtener el rol del usuario desde el store
+  const userRole = computed(() => authStore.getRole);
 
-// Obtener el rol del usuario desde el store
-const userRole = computed(() => authStore.getRole);
-
-// Cargar datos del usuario al montar el componente
-onMounted(() => {
-  try {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const userData = JSON.parse(userStr);
-      username.value = userData.username || '';
+  // Cargar datos del usuario al montar el componente
+  onMounted(() => {
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        const userData = JSON.parse(userStr);
+        username.value = userData.username || '';
+      }
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
     }
-  } catch (error) {
-    console.error('Error al cargar datos del usuario:', error);
-  }
-});
+  });
 
-// Funciones de navegación
-const navigateTo = (link: string) => {
-  router.push(link);
-};
+  // Funciones de navegación
+  const navigateTo = (link: string) => {
+    router.push(link);
+  };
 
-const navigateToProfile = () => {
-  console.log("Navegando al perfil...");
-  router.push("/profile");
-};
+  const navigateToProfile = () => {
+    console.log("Navegando al perfil...");
+    router.push("/profile");
+  };
 
-const navigateToSettings = () => {
-  console.log("Navegando a la configuración...");
-  router.push("/settings");
-};
+  const navigateToSettings = () => {
+    console.log("Navegando a la configuración...");
+    router.push("/settings");
+  };
 
-const openSettings = () => {
-  console.log("Abriendo configuración global...");
-  router.push("/global-settings");
-};
+  const logout = () => {
+    console.log("Cerrando sesión...");
 
-// Función para cerrar sesión
-const logout = () => {
-  console.log("Cerrando sesión...");
+    // Eliminar token y datos de usuario
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
 
-  // Eliminar token y datos de usuario
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+    // Limpiar headers de autorización si estás usando axios
+    if (window.axios) {
+      delete window.axios.defaults.headers.common['Authorization'];
+    }
 
-  // Limpiar headers de autorización si estás usando axios
-  if (window.axios) {
-    delete window.axios.defaults.headers.common['Authorization'];
-  }
+    // Redirigir al login
+    router.push("/login");
+  };
 
-  // Redirigir al login
-  router.push("/login");
-};
+  // Emite un evento para alternar el sidebar
+  const emit = defineEmits(["toggle-sidebar"]);
+  const toggleSidebar = () => {
+    emit("toggle-sidebar");
+  };
+  </script>
 
-// Emite un evento para alternar el sidebar
-const emit = defineEmits(["toggle-sidebar"]);
-const toggleSidebar = () => {
-  emit("toggle-sidebar");
-};
-</script>
-
-<style scoped lang="scss">
-@use "@/styles/common/_navbar-dashboard.scss";
-</style>
+  <style scoped lang="scss">
+  @use "@/styles/common/_navbar-dashboard.scss";
+  </style>

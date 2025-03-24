@@ -1,24 +1,26 @@
 <template>
-  <v-container>
+  <v-container class="classes-dashboard">
+    <!-- Título -->
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4 mb-4">Classes</h1>
+        <h1 class="text-h4 font-weight-bold mb-4">Clases</h1>
       </v-col>
     </v-row>
 
     <!-- Lista de clases -->
     <v-row>
       <v-col cols="12" md="8">
-        <v-card>
-          <v-card-title>Upcoming Classes</v-card-title>
+        <v-card elevation="2" rounded="lg">
+          <v-card-title class="text-h6 font-weight-bold">Próximas Clases</v-card-title>
           <v-card-text>
             <v-data-table :headers="headers" :items="classes" :items-per-page="5" class="elevation-1">
+              <!-- Columna de acciones -->
               <template v-slot:item.actions="{ item }">
-                <v-btn icon @click="editClass(item)">
-                  <v-icon>mdi-pencil</v-icon>
+                <v-btn icon small @click="editClass(item)">
+                  <Icon icon="solar:pen-bold" class="action-icon" />
                 </v-btn>
-                <v-btn icon @click="deleteClass(item)">
-                  <v-icon>mdi-delete</v-icon>
+                <v-btn icon small @click="deleteClass(item)">
+                  <Icon icon="solar:trash-bin-trash-bold" class="action-icon" />
                 </v-btn>
               </template>
             </v-data-table>
@@ -28,21 +30,21 @@
 
       <!-- Calendario de clases -->
       <v-col cols="12" md="4">
-        <v-card>
-          <v-card-title>Class Calendar</v-card-title>
+        <v-card elevation="2" rounded="lg">
+          <v-card-title class="text-h6 font-weight-bold">Calendario de Clases</v-card-title>
           <v-card-text>
-            <v-calendar v-model="calendarDate" :events="calendarEvents" event-color="primary"></v-calendar>
+            <v-calendar v-model="calendarDate" :events="calendarEvents" event-color="primary"
+              class="rounded-lg"></v-calendar>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <!-- Botón para agregar una nueva clase -->
-    <v-row>
+    <v-row class="mt-4">
       <v-col cols="12">
-        <v-btn color="primary" @click="openAddClassDialog">
-          <v-icon left>mdi-plus</v-icon>
-          Add Class
+        <v-btn color="primary" large block @click="openAddClassDialog">
+          <Icon icon="solar:plus-circle-outline" class="mr-2" /> Agregar Clase
         </v-btn>
       </v-col>
     </v-row>
@@ -50,23 +52,31 @@
     <!-- Diálogo para agregar/editar una clase -->
     <v-dialog v-model="classDialog" max-width="500">
       <v-card>
-        <v-card-title>
-          {{ isEditing ? 'Edit Class' : 'Add Class' }}
+        <v-card-title class="text-h6 font-weight-bold">
+          {{ isEditing ? "Editar Clase" : "Agregar Clase" }}
         </v-card-title>
         <v-card-text>
-          <v-form @submit.prevent="saveClass">
-            <v-text-field v-model="classForm.name" label="Class Name" outlined dense required></v-text-field>
+          <v-form @submit.prevent="saveClass" ref="form">
+            <v-text-field v-model="classForm.name" label="Nombre de la Clase" outlined dense required
+              class="mb-3"></v-text-field>
 
-            <v-text-field v-model="classForm.instructor" label="Instructor" outlined dense required></v-text-field>
+            <v-autocomplete v-model="classForm.client" :items="clients" item-text="name" item-value="id"
+              label="Buscar Cliente" outlined dense required class="mb-3">
+              <template v-slot:prepend-inner>
+                <Icon icon="solar:user-search-outline" class="mr-2" />
+              </template>
+            </v-autocomplete>
 
-            <v-text-field v-model="classForm.date" label="Date" type="date" outlined dense required></v-text-field>
+            <v-text-field v-model="classForm.date" label="Fecha" type="date" outlined dense required
+              class="mb-3"></v-text-field>
 
-            <v-text-field v-model="classForm.time" label="Time" type="time" outlined dense required></v-text-field>
+            <v-text-field v-model="classForm.time" label="Hora" type="time" outlined dense required
+              class="mb-3"></v-text-field>
 
-            <v-btn type="submit" color="primary">
-              {{ isEditing ? 'Save Changes' : 'Add Class' }}
+            <v-btn type="submit" color="primary" block large>
+              {{ isEditing ? "Guardar Cambios" : "Agregar Clase" }}
             </v-btn>
-            <v-btn text @click="classDialog = false">Cancel</v-btn>
+            <v-btn text block large @click="classDialog = false">Cancelar</v-btn>
           </v-form>
         </v-card-text>
       </v-card>
@@ -75,24 +85,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from "vue";
+import { Icon } from "@iconify/vue";
+import gsap from "gsap";
 
 export default defineComponent({
-  name: 'CoachClassesView',
+  name: "CoachClassesView",
+  components: { Icon },
   setup() {
+    // Lista de clientes (simulada)
+    const clients = ref([
+      { id: 1, name: "Juan Pérez", email: "juan.perez@example.com" },
+      { id: 2, name: "María López", email: "maria.lopez@example.com" },
+      { id: 3, name: "Carlos Ramírez", email: "carlos.ramirez@example.com" },
+    ]);
+
     // Lista de clases
     const classes = ref([
-      { id: 1, name: 'Yoga Class', instructor: 'John Doe', date: '2023-10-15', time: '10:00' },
-      { id: 2, name: 'HIIT Workout', instructor: 'Jane Smith', date: '2023-10-16', time: '18:00' },
+      {
+        id: 1,
+        name: "Clase de Yoga",
+        date: "2023-10-15",
+        time: "10:00",
+        client: 1, // ID del cliente asignado
+      },
+      {
+        id: 2,
+        name: "Entrenamiento HIIT",
+        date: "2023-10-16",
+        time: "18:00",
+        client: 2, // ID del cliente asignado
+      },
     ]);
 
     // Encabezados de la tabla
     const headers = ref([
-      { text: 'Class Name', value: 'name' },
-      { text: 'Instructor', value: 'instructor' },
-      { text: 'Date', value: 'date' },
-      { text: 'Time', value: 'time' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: "Nombre de la Clase", value: "name" },
+      { text: "Fecha", value: "date" },
+      { text: "Hora", value: "time" },
+      { text: "Cliente", value: "clientName", sortable: false },
+      { text: "Acciones", value: "actions", sortable: false },
     ]);
 
     // Calendario
@@ -101,7 +133,7 @@ export default defineComponent({
       classes.value.map((cls) => ({
         name: cls.name,
         start: `${cls.date}T${cls.time}:00`,
-        end: `${cls.date}T${parseInt(cls.time) + 1}:00:00`,
+        end: `${cls.date}T${parseInt(cls.time.split(":")[0]) + 1}:00:00`,
       }))
     );
 
@@ -110,17 +142,30 @@ export default defineComponent({
     const isEditing = ref(false);
     const classForm = ref({
       id: null,
-      name: '',
-      instructor: '',
-      date: '',
-      time: '',
+      name: "",
+      client: null,
+      date: "",
+      time: "",
     });
 
     // Abrir diálogo para agregar una nueva clase
     const openAddClassDialog = () => {
-      classForm.value = { id: null, name: '', instructor: '', date: '', time: '' };
+      classForm.value = {
+        id: null,
+        name: "",
+        client: null,
+        date: "",
+        time: "",
+      };
       isEditing.value = false;
       classDialog.value = true;
+
+      // Animación GSAP para abrir el diálogo
+      gsap.fromTo(
+        ".details-list",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+      );
     };
 
     // Editar una clase existente
@@ -154,9 +199,26 @@ export default defineComponent({
       calendarEvents.value = classes.value.map((cls) => ({
         name: cls.name,
         start: `${cls.date}T${cls.time}:00`,
-        end: `${cls.date}T${parseInt(cls.time) + 1}:00:00`,
+        end: `${cls.date}T${parseInt(cls.time.split(":")[0]) + 1}:00:00`,
       }));
     };
+
+    // Obtener el nombre del cliente asignado a una clase
+    const getClientName = (clientId) => {
+      const client = clients.value.find((c) => c.id === clientId);
+      return client ? client.name : "Sin cliente";
+    };
+
+    // Animación inicial de la tabla
+    onMounted(() => {
+      gsap.from(".classes-dashboard .v-data-table tbody tr", {
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    });
 
     return {
       classes,
@@ -166,15 +228,33 @@ export default defineComponent({
       classDialog,
       isEditing,
       classForm,
+      clients,
       openAddClassDialog,
       editClass,
       deleteClass,
       saveClass,
+      getClientName,
     };
   },
 });
 </script>
 
 <style scoped>
-/* Estilos personalizados si los necesitas */
+.classes-dashboard {
+  padding: 20px;
+}
+
+.action-icon {
+  font-size: 20px;
+  color: #666;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #1976d2;
+  }
+}
+
+.details-list {
+  margin-top: 16px;
+}
 </style>

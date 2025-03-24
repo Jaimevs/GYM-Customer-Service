@@ -1,27 +1,23 @@
 <template>
-  <v-container>
+  <v-container class="clients-dashboard">
+    <!-- Título -->
     <v-row>
       <v-col cols="12">
-        <h1 class="text-h4 mb-4">Clients</h1>
+        <h1 class="text-h4 font-weight-bold mb-4">Clientes</h1>
       </v-col>
     </v-row>
 
     <!-- Lista de clientes -->
     <v-row>
       <v-col cols="12">
-        <v-card>
-          <v-card-title>Client List</v-card-title>
+        <v-card elevation="2" rounded="lg">
+          <v-card-title class="text-h6 font-weight-bold">Lista de Clientes</v-card-title>
           <v-card-text>
             <v-data-table :headers="headers" :items="clients" :items-per-page="5" class="elevation-1">
+              <!-- Columna de acciones -->
               <template v-slot:item.actions="{ item }">
-                <v-btn icon @click="viewClientDetails(item)">
-                  <v-icon>mdi-eye</v-icon>
-                </v-btn>
-                <v-btn icon @click="editClient(item)">
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
-                <v-btn icon @click="deleteClient(item)">
-                  <v-icon>mdi-delete</v-icon>
+                <v-btn icon small @click="viewClientDetails(item)">
+                  <Icon icon="solar:eye-bold" class="action-icon" />
                 </v-btn>
               </template>
             </v-data-table>
@@ -33,128 +29,136 @@
     <!-- Diálogo para ver detalles del cliente -->
     <v-dialog v-model="clientDetailsDialog" max-width="500">
       <v-card>
-        <v-card-title>Client Details</v-card-title>
+        <v-card-title class="text-h6 font-weight-bold">Detalles del Cliente</v-card-title>
         <v-card-text>
-          <v-list v-if="selectedClient">
+          <v-list v-if="selectedClient" class="details-list">
             <v-list-item>
               <v-list-item-content>
-                <v-list-item-title>{{ selectedClient.name }}</v-list-item-title>
+                <v-list-item-title class="font-weight-bold">{{ selectedClient.name }}</v-list-item-title>
                 <v-list-item-subtitle>Email: {{ selectedClient.email }}</v-list-item-subtitle>
-                <v-list-item-subtitle>Phone: {{ selectedClient.phone }}</v-list-item-subtitle>
-                <v-list-item-subtitle>Membership: {{ selectedClient.membership }}</v-list-item-subtitle>
+                <v-list-item-subtitle>Teléfono: {{ selectedClient.phone }}</v-list-item-subtitle>
+                <v-list-item-subtitle>Membresía: {{ selectedClient.membership }}</v-list-item-subtitle>
+                <v-list-item-subtitle>Sexo: {{ selectedClient.gender }}</v-list-item-subtitle>
+                <v-list-item-subtitle>Edad: {{ selectedClient.age }} años</v-list-item-subtitle>
+                <v-list-item-subtitle>Estatura: {{ selectedClient.height }} cm</v-list-item-subtitle>
+                <v-list-item-subtitle>Peso: {{ selectedClient.weight }} kg</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="clientDetailsDialog = false">Close</v-btn>
+          <v-btn color="primary" block @click="closeDetailsDialog">Cerrar</v-btn>
         </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Diálogo para editar un cliente -->
-    <v-dialog v-model="editClientDialog" max-width="500">
-      <v-card>
-        <v-card-title>Edit Client</v-card-title>
-        <v-card-text>
-          <v-form @submit.prevent="saveClient">
-            <v-text-field v-model="clientForm.name" label="Name" outlined dense required></v-text-field>
-
-            <v-text-field v-model="clientForm.email" label="Email" outlined dense required></v-text-field>
-
-            <v-text-field v-model="clientForm.phone" label="Phone" outlined dense required></v-text-field>
-
-            <v-select v-model="clientForm.membership" :items="membershipOptions" label="Membership" outlined dense
-              required></v-select>
-
-            <v-btn type="submit" color="primary">Save Changes</v-btn>
-            <v-btn text @click="editClientDialog = false">Cancel</v-btn>
-          </v-form>
-        </v-card-text>
       </v-card>
     </v-dialog>
   </v-container>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from "vue";
+import { Icon } from "@iconify/vue";
+import gsap from "gsap";
 
 export default defineComponent({
-  name: 'ClientsCoachView',
+  name: "ClientsCoachView",
+  components: { Icon },
   setup() {
-    // Lista de clientes
+    // Lista de clientes con datos adicionales
     const clients = ref([
-      { id: 1, name: 'John Doe', email: 'john.doe@example.com', phone: '+1234567890', membership: 'Premium' },
-      { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', phone: '+0987654321', membership: 'Basic' },
+      {
+        id: 1,
+        name: "Juan Pérez",
+        email: "juan.perez@example.com",
+        phone: "+1234567890",
+        membership: "Premium",
+        gender: "Masculino",
+        age: 30,
+        height: 180,
+        weight: 75,
+      },
+      {
+        id: 2,
+        name: "María López",
+        email: "maria.lopez@example.com",
+        phone: "+0987654321",
+        membership: "Básica",
+        gender: "Femenino",
+        age: 25,
+        height: 165,
+        weight: 60,
+      },
     ]);
 
     // Encabezados de la tabla
     const headers = ref([
-      { text: 'Name', value: 'name' },
-      { text: 'Email', value: 'email' },
-      { text: 'Phone', value: 'phone' },
-      { text: 'Membership', value: 'membership' },
-      { text: 'Actions', value: 'actions', sortable: false },
+      { text: "Nombre", value: "name" },
+      { text: "Email", value: "email" },
+      { text: "Teléfono", value: "phone" },
+      { text: "Membresía", value: "membership" },
+      { text: "Acciones", value: "actions", sortable: false },
     ]);
 
     // Diálogo para ver detalles del cliente
     const clientDetailsDialog = ref(false);
     const selectedClient = ref(null);
 
-    // Diálogo para editar un cliente
-    const editClientDialog = ref(false);
-    const clientForm = ref({
-      id: null,
-      name: '',
-      email: '',
-      phone: '',
-      membership: '',
-    });
-
-    // Opciones de membresía
-    const membershipOptions = ref(['Basic', 'Premium', 'VIP']);
-
     // Ver detalles del cliente
     const viewClientDetails = (item) => {
       selectedClient.value = item;
       clientDetailsDialog.value = true;
+
+      // Animación GSAP para abrir el diálogo
+      gsap.fromTo(
+        ".details-list",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+      );
     };
 
-    // Editar un cliente
-    const editClient = (item) => {
-      clientForm.value = { ...item };
-      editClientDialog.value = true;
+    // Cerrar diálogo de detalles
+    const closeDetailsDialog = () => {
+      clientDetailsDialog.value = false;
     };
 
-    // Eliminar un cliente
-    const deleteClient = (item) => {
-      clients.value = clients.value.filter((client) => client.id !== item.id);
-    };
-
-    // Guardar cambios del cliente
-    const saveClient = () => {
-      const index = clients.value.findIndex((client) => client.id === clientForm.value.id);
-      clients.value[index] = { ...clientForm.value };
-      editClientDialog.value = false;
-    };
+    // Animación inicial de la tabla
+    onMounted(() => {
+      gsap.from(".clients-dashboard .v-data-table tbody tr", {
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    });
 
     return {
       clients,
       headers,
       clientDetailsDialog,
       selectedClient,
-      editClientDialog,
-      clientForm,
-      membershipOptions,
       viewClientDetails,
-      editClient,
-      deleteClient,
-      saveClient,
+      closeDetailsDialog,
     };
   },
 });
 </script>
 
 <style scoped>
-/* Estilos personalizados si los necesitas */
+.clients-dashboard {
+  padding: 20px;
+}
+
+.action-icon {
+  font-size: 20px;
+  color: #666;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #1976d2;
+  }
+}
+
+.details-list {
+  margin-top: 16px;
+}
 </style>
