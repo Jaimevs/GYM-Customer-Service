@@ -141,19 +141,21 @@ onMounted(async () => {
     personalData.birthDate = userData.Fecha_Nacimiento ? new Date(userData.Fecha_Nacimiento).toISOString().split('T')[0] : '';
     personalData.gender = userData.Genero || '';
     personalData.bloodType = userData.Tipo_Sangre || '';
-    personalData.height = userData.Estatura;
+    personalData.height = userData.Estatura ? userData.Estatura * 100 : null; // Convertir metros a cm
     personalData.weight = userData.Peso;
     personalData.photoUrl = userData.Fotografia;
     
     console.log('Datos personales cargados:', personalData);
   } catch (error) {
     console.error('Error al cargar datos personales:', error);
-    showAlert('error', 'No se pudieron cargar tus datos personales. Intenta nuevamente.');
+    // No mostrar alerta si es la primera vez que el usuario accede
+    // showAlert('info', 'Completa tu información personal para continuar.');
   } finally {
     loading.value = false;
   }
 });
 
+// Función para guardar los datos personales
 // Función para guardar los datos personales
 const savePersonalData = async () => {
   try {
@@ -179,8 +181,8 @@ const savePersonalData = async () => {
       Peso: personalData.weight
     };
 
-    // Guardar datos completos usando el servicio
-    const result = await PersonalDataService.saveCompleteProfile(apiData, photo.value);
+    // Usar el nuevo método que decide si crear o actualizar
+    const result = await PersonalDataService.saveOrCreateProfile(apiData, photo.value);
     
     // Actualizar la URL de la foto en el estado local si se devolvió una
     if (result.Fotografia) {
