@@ -13,9 +13,12 @@
         <Icon icon="eva:email-outline" width="24" height="24" />
         <input type="email" v-model="email" placeholder="Correo electrónico" required />
       </div>
-      <div class="input-field" ref="passwordField">
+      <div class="input-field password-field" ref="passwordField">
         <Icon icon="solar:lock-password-linear" width="24" height="24" />
-        <input type="password" v-model="password" placeholder="Contraseña" required />
+        <input :type="showPassword ? 'text' : 'password'" v-model="password" placeholder="Contraseña" required />
+        <!-- Ícono para alternar la visibilidad de la contraseña -->
+        <Icon :icon="showPassword ? 'eva:eye-outline' : 'eva:eye-off-outline'" width="20" height="20"
+          class="toggle-password" @click="togglePasswordVisibility" />
       </div>
       <button type="submit" class="btn solid" ref="submitButton" :disabled="loading">
         {{ loading ? 'Cargando...' : 'Continuar' }}
@@ -64,12 +67,20 @@ const password = ref('');
 const loading = ref(false);
 const message = ref<{ text: string; type: 'success' | 'error' } | null>(null);
 
+// Variable para controlar la visibilidad de la contraseña
+const showPassword = ref(false);
+
 // Referencias para las animaciones
 const emailField = ref(null);
 const passwordField = ref(null);
 const submitButton = ref(null);
 const dividerWrapper = ref(null);
 const googleButton = ref(null);
+
+// Función para alternar la visibilidad de la contraseña
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
 
 // Verificar si hay token o mensaje de error en la URL
 onBeforeMount(() => {
@@ -239,5 +250,26 @@ onMounted(() => {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+// Estilos para el campo de contraseña
+.password-field {
+  position: relative;
+
+  .toggle-password-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+    /* Color gris claro */
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: #666;
+      /* Cambio de color al pasar el mouse */
+    }
+  }
 }
 </style>

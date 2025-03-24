@@ -13,49 +13,51 @@ $hover-color: rgba(0, 0, 0, 0.05); // Sutil efecto de hover
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 
   /* --- Header --- */
-  .header {
-    position: relative; // Añade posicionamiento relativo
+/* --- Header --- */
+.header {
+  position: relative; // Añade posicionamiento relativo
+  display: flex;
+  flex-direction: column; // Cambiamos a columna para centrar el logo
+  justify-content: center; // Centra verticalmente
+  align-items: center; // Centra horizontalmente
+  padding: 20px;
+  background: linear-gradient(135deg, #c92020, #000000);
+  border-radius: 0 16px 0 0;
+
+  .logo-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center; // Centra el logo horizontalmente
     align-items: center;
-    padding: 20px;
-    background: linear-gradient(135deg, #444, #222);
-    border-radius: 0 16px 0 0;
+    width: 100%; // Ocupa todo el ancho disponible
+    cursor: pointer;
 
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-
-      .logo-image {
-        width: 120px; // Ancho fijo del logo
-        height: auto; // Mantener proporciones
-        transition: transform 0.3s ease;
-
-        &:hover {
-          transform: scale(1.1); // Efecto hover suave para el logo
-        }
-      }
-    }
-
-    .close-btn {
-      position: absolute; // Posicionamiento absoluto
-      top: 16px; // Ajusta la posición vertical
-      right: 16px; // Ajusta la posición horizontal
-      color: white;
-      transition: all 0.3s ease;
+    .logo-image {
+      width: 120px; // Ancho fijo del logo
+      height: auto; // Mantener proporciones
+      transition: transform 0.3s ease;
 
       &:hover {
-        transform: rotate(90deg) scale(1.1);
-      }
-
-      .close-icon {
-        font-size: 28px;
+        transform: scale(1.1); // Efecto hover suave para el logo
       }
     }
   }
 
+  .close-btn {
+    position: absolute; // Posicionamiento absoluto
+    top: 16px; // Ajusta la posición vertical
+    right: 16px; // Ajusta la posición horizontal
+    color: white;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: rotate(90deg) scale(1.1);
+    }
+
+    .close-icon {
+      font-size: 28px;
+    }
+  }
+}
   /* --- Menú --- */
   .menu-list {
     padding: 10px 0;
