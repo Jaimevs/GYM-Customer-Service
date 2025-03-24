@@ -70,14 +70,32 @@ export const userMenuItems = [
   { title: "Estadísticas", link: "/estadisticas", icon: "solar:graph-linear" },
   { title: "Membresía", link: "/membresia", icon: "solar:card-linear" },
   { title: "Mensajes", link: "/mensajes", icon: "mage:message" },
+  {
+    title: "Quejas y Sugerencias",
+    link: "/queja-sugerencia",
+    icon: "codicon:feedback",
+  },
+  {
+    title: "Datos Personales",
+    link: "/datos-personales",
+    icon: "majesticons:user-line",
+  },
   { title: "Configuración", link: "/ajustes", icon: "solar:settings-linear" },
 ];
 
 export const coachMenuItems = [
   { title: "Dashboard", link: "/coach-dashboard", icon: "solar:home-2-linear" },
-  { title: "Clientes", link: "/clientes", icon: "solar:users-group-two-rounded-linear" },
+  {
+    title: "Clientes",
+    link: "/clientes",
+    icon: "solar:users-group-two-rounded-linear",
+  },
   { title: "Clases", link: "/clases-coach", icon: "solar:calendar-linear" },
-  {title: "Planes de Entrenamiento", link: "/planes-entrenamientos",icon: "solar:dumbbell-linear",},
+  {
+    title: "Planes de Entrenamiento",
+    link: "/planes-entrenamientos",
+    icon: "solar:dumbbell-linear",
+  },
   {
     title: "Evaluaciones",
     link: "/evaluaciones",
