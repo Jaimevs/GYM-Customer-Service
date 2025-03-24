@@ -143,6 +143,60 @@ class PersonalDataService {
       console.error('Error no relacionado con Axios:', error);
     }
   }
+
+  // Agregar este método a la clase PersonalDataService
+
+/**
+ * Crea un nuevo perfil para el usuario autenticado
+ * @param data Los datos personales a insertar
+ * @returns Una promesa con los datos personales creados
+ */
+async createPersonalData(data: PersonalData): Promise<PersonProfile> {
+  try {
+    const response = await axios.post(`${API_URL}/persons/create-profile/`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log("Perfil personal creado:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error al crear perfil personal:", error);
+    this.logAxiosError(error);
+    throw error;
+  }
+}
+
+/**
+ * Guarda o crea un perfil completo dependiendo si existe o no
+ * @param data Los datos personales
+ * @param photoFile El archivo de imagen (opcional)
+ * @returns Una promesa con los datos personales
+ */
+async saveOrCreateProfile(data: PersonalData, photoFile?: File | null): Promise<PersonProfile> {
+  try {
+    // Si hay una fotografía, convertirla a Base64
+    if (photoFile) {
+      const photoBase64 = await this.fileToBase64(photoFile);
+      data.Fotografia = photoBase64;
+    }
+
+    try {
+      // Intentamos obtener el perfil existente
+      await this.getPersonalData();
+      // Si existe, actualizamos
+      return await this.updatePersonalData(data);
+    } catch (error) {
+      // Si no existe, creamos uno nuevo
+      return await this.createPersonalData(data);
+    }
+  } catch (error) {
+    console.error("Error al guardar o crear perfil:", error);
+    throw error;
+  }
+}
 }
 
 export default new PersonalDataService();
