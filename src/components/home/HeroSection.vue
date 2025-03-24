@@ -17,9 +17,10 @@
 
         <!-- Botón Mejorado -->
         <div class="hero-button-wrapper">
-          <button class="cta-button" @click="scrollToPlans">
+          <!-- Usamos router-link para navegar a /compra-membresia -->
+          <router-link to="/compra-membresia" class="cta-button">
             ÚNETE HOY Y TRANSFORMA TU CUERPO
-          </button>
+          </router-link>
         </div>
 
         <!-- Redes Sociales -->
@@ -52,11 +53,6 @@
 import { onMounted } from 'vue';
 import { gsap } from 'gsap';
 import { Icon } from '@iconify/vue';
-
-// Función para desplazarse a la sección de planes
-const scrollToPlans = () => {
-  window.scrollTo({ top: document.getElementById('plans')?.offsetTop, behavior: 'smooth' });
-};
 
 // Array de imágenes para el carousel
 const carouselImages = [

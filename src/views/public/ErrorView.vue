@@ -1,348 +1,275 @@
 <template>
-    <div class="container">
-      <div class="forms-container">
-        <div class="error-display">
-          <div v-if="isOffline" class="error-content">
-            <h2 class="title">Sin conexión a internet</h2>
-            <p class="error-text">
-              Parece que no tienes conexión a internet. Por favor, verifica tu conexión e intenta nuevamente.
-            </p>
-            <button @click="checkConnection" class="btn">
-              Reintentar
-            </button>
-          </div>
-          <div v-else-if="errorCode === '404'" class="error-content">
-            <h2 class="title">404</h2>
-            <p class="error-text">Página no encontrada</p>
-            <router-link to="/" class="btn">Regresar al inicio</router-link>
-          </div>
-          <div v-else class="error-content">
-            <h2 class="title">{{ errorCode }}</h2>
-            <p class="error-text">{{ errorMessage || 'Ha ocurrido un error' }}</p>
-            <router-link to="/" class="btn">Regresar al inicio</router-link>
-          </div>
-        </div>
+  <div class="container">
+    <!-- Contenido principal -->
+    <div class="error-container">
+      <div class="error-circle">
+        <span class="error-code">{{ errorCode }}</span>
       </div>
-      <div class="panels-container">
-        <div class="panel left-panel">
-          <div class="content">
-            <h3>Algo salió mal</h3>
-            <p>
-              Lo sentimos por los inconvenientes. Estamos trabajando para resolver el problema.
-            </p>
-          </div>
-        </div>
+
+      <div class="error-content">
+        <h2 class="title">{{ isOffline ? "Sin conexión a internet" : "Algo salió mal" }}</h2>
+        <p class="error-text">
+          {{
+            isOffline
+              ? "Parece que no tienes conexión a internet. Por favor, verifica tu conexión e intenta nuevamente."
+              : errorMessage || "La página que buscas no está disponible."
+          }}
+        </p>
+
+        <button @click="checkConnection" v-if="isOffline" class="btn">Reintentar</button>
+        <router-link to="/" v-else class="btn">Regresar al inicio</router-link>
       </div>
     </div>
-  </template>
-  
-  <script lang="ts" setup>
-  import { ref, onMounted } from 'vue';
-  
-  const props = defineProps({
-    errorCode: {
-      type: String,
-      required: false,
-      default: '404'
-    },
-    errorMessage: {
-      type: String,
-      required: false,
-      default: ''
-    }
+
+    <!-- Efecto visual de fondo -->
+    <div class="background-effect"></div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+
+const props = defineProps({
+  errorCode: {
+    type: String,
+    required: false,
+    default: '404',
+  },
+  errorMessage: {
+    type: String,
+    required: false,
+    default: '',
+  },
+});
+
+const isOffline = ref(false);
+
+// Verificar la conexión a internet
+const checkConnection = () => {
+  isOffline.value = !navigator.onLine;
+  if (!isOffline.value) {
+    window.location.reload();
+  }
+};
+
+onMounted(() => {
+  isOffline.value = !navigator.onLine;
+  window.addEventListener('online', checkConnection);
+  window.addEventListener('offline', () => {
+    isOffline.value = true;
   });
-  
-  const isOffline = ref(false);
-  
-  const checkConnection = () => {
-    isOffline.value = !navigator.onLine;
-    if (!isOffline.value) {
-      window.location.reload();
-    }
-  };
-  
-  onMounted(() => {
-    isOffline.value = !navigator.onLine;
-    window.addEventListener('online', checkConnection);
-    window.addEventListener('offline', () => { isOffline.value = true; });
-  });
-  </script>
-  
-  <style scoped>
-  @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
-  
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+});
+</script>
+
+<style scoped lang="scss">
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+input {
+  font-family: "Poppins", sans-serif;
+}
+
+.container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #000;
+  /* Fondo negro */
+  color: #fff;
+  /* Texto blanco */
+  overflow: hidden;
+}
+
+.error-container {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  padding: 2rem;
+  z-index: 2;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.error-circle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 2rem;
+  background-color: #ff0000;
+  /* Círculo rojo */
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+  /* Sombra roja */
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.error-code {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  /* Texto blanco dentro del círculo */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  /* Sombra para el texto */
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #ff0000;
+  /* Título rojo */
+  animation: slideUp 1s ease-in-out;
+}
+
+.error-text {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: #ccc;
+  /* Texto gris claro */
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+.btn {
+  background-color: #ff0000;
+  /* Botón rojo */
+  color: #fff;
+  border: none;
+  outline: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.btn:hover {
+  background-color: #d10000;
+  /* Rojo más oscuro al pasar el mouse */
+  transform: scale(1.05);
+  /* Efecto de escala */
+  box-shadow: 0 4px 10px rgba(255, 0, 0, 0.5);
+  /* Sombra al hover */
+}
+
+/* Efecto visual de fondo */
+.background-effect {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 0, 0, 0.1), transparent 70%);
+  animation: rotateBackground 10s linear infinite;
+  z-index: 1;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  
-  body,
-  input {
-    font-family: "Poppins", sans-serif;
+
+  to {
+    opacity: 1;
   }
-  
-  .container {
-    position: relative;
-    width: 100%;
-    background-color: #fff;
-    min-height: 100vh;
-    overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
   }
-  
-  .forms-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
-  
-  .error-display {
-    position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    left: 75%;
-    width: 50%;
-    transition: 1s 0.7s ease-in-out;
-    display: grid;
-    grid-template-columns: 1fr;
-    z-index: 5;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
   }
-  
-  .error-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0rem 5rem;
-    transition: all 0.2s 0.7s;
-    overflow: hidden;
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    z-index: 2;
+
+  50% {
+    transform: scale(1.1);
   }
-  
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes rotateBackground {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .error-circle {
+    width: 120px;
+    height: 120px;
+  }
+
+  .error-code {
+    font-size: 2.5rem;
+  }
+
   .title {
-    font-size: 3.5rem; /* Título más grande */
-    color: #444;
-    margin-bottom: 20px; /* Mayor espacio abajo */
-    font-weight: 700; /* Más negrita */
+    font-size: 2rem;
   }
-  
+
   .error-text {
-    padding: 0.7rem 0;
-    font-size: 1.4rem; /* Texto más grande */
-    color: #333;
-    text-align: center;
-    max-width: 420px; /* Ancho máximo mayor */
-    margin-bottom: 30px; /* Mayor espacio antes del botón */
-    line-height: 1.6; /* Mejor espaciado entre líneas */
+    font-size: 1rem;
   }
-  
+
   .btn {
-    width: 200px; /* Botón más ancho */
-    background-color: #ff0000;
-    border: none;
-    outline: none;
-    height: 54px; /* Botón más alto */
-    border-radius: 54px;
-    color: #fff;
-    text-transform: uppercase;
-    font-weight: 600;
-    margin: 10px 0;
-    cursor: pointer;
-    transition: 0.5s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    font-size: 1.1rem; /* Texto del botón más grande */
-    letter-spacing: 1px; /* Espaciado entre letras */
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
   }
-  
-  .btn:hover {
-    background-color: #d10000;
-    transform: scale(1.05); /* Ligero efecto de escala al hover */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); /* Sombra al hover */
+}
+
+@media (max-width: 480px) {
+  .error-circle {
+    width: 100px;
+    height: 100px;
   }
-  
-  .panels-container {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    top: 0;
-    left: 0;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+
+  .error-code {
+    font-size: 2rem;
   }
-  
-  .container:before {
-    content: "";
-    position: absolute;
-    height: 2000px;
-    width: 2000px;
-    top: -10%;
-    right: 48%;
-    transform: translateY(-50%);
-    background-image: linear-gradient(135deg, #ffcc00, #ffa500);
-    transition: 1.8s ease-in-out;
-    border-radius: 50%;
-    z-index: 6;
+
+  .title {
+    font-size: 1.75rem;
   }
-  
-  .panel {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: space-around;
-    text-align: center;
-    z-index: 6;
+
+  .error-text {
+    font-size: 0.9rem;
   }
-  
-  .left-panel {
-    pointer-events: all;
-    padding: 3rem 17% 2rem 12%;
+
+  .btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.8rem;
   }
-  
-  .panel .content {
-    color: #fff;
-    transition: transform 0.9s ease-in-out;
-    transition-delay: 0.6s;
-  }
-  
-  .panel h3 {
-    font-weight: 700; /* Más negrita */
-    line-height: 1.2;
-    font-size: 2.2rem; /* Título más grande */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    margin-bottom: 15px; /* Más espacio abajo */
-  }
-  
-  .panel p {
-    font-size: 1.2rem; /* Texto más grande */
-    padding: 0.7rem 0;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    line-height: 1.6; /* Mejor espaciado entre líneas */
-  }
-  
-  @media (max-width: 870px) {
-    .container {
-      min-height: 800px;
-      height: 100vh;
-    }
-    
-    .error-display {
-      width: 100%;
-      top: 95px;
-      transform: translate(-50%, 0);
-      left: 50%;
-      transition: 1s 0.8s ease-in-out;
-    }
-  
-    .panels-container {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr 2fr 1fr;
-    }
-  
-    .panel {
-      flex-direction: row;
-      justify-content: space-around;
-      align-items: center;
-      padding: 2.5rem 8%;
-      grid-column: 1 / 2;
-    }
-  
-    .left-panel {
-      grid-row: 1 / 2;
-    }
-  
-    .panel .content {
-      padding-right: 15%;
-      transition: transform 0.9s ease-in-out;
-      transition-delay: 0.8s;
-    }
-  
-    .panel h3 {
-      font-size: 1.8rem; /* Título más grande en móvil */
-    }
-  
-    .panel p {
-      font-size: 1rem; /* Texto más grande en móvil */
-      padding: 0.5rem 0;
-    }
-  
-    .title {
-      font-size: 3rem; /* Título ajustado para móvil */
-    }
-  
-    .error-text {
-      font-size: 1.2rem; /* Texto ajustado para móvil */
-    }
-  
-    .container:before {
-      width: 1500px;
-      height: 1500px;
-      transform: translateX(-50%);
-      left: 30%;
-      bottom: 80%;
-      right: initial;
-      top: initial;
-      transition: 2s ease-in-out;
-      z-index: 0;
-    }
-  }
-  
-  @media (max-width: 570px) {
-    .error-content {
-      padding: 0 1.5rem;
-    }
-    
-    .panel .content {
-      padding: 0.5rem 1rem;
-    }
-    
-    .container {
-      padding: 1.5rem;
-    }
-  
-    .title {
-      font-size: 2.5rem; /* Título más pequeño en móviles */
-    }
-  
-    .btn {
-      width: 180px; /* Botón algo más pequeño en móviles */
-      height: 50px;
-      font-size: 1rem;
-    }
-  
-    .container:before {
-      bottom: 85%;
-      left: 50%;
-      opacity: 0.8;
-    }
-  
-    .error-display {
-      top: 150px;
-      padding-top: 20px;
-    }
-  }
-  
-  @media (max-width: 400px) {
-    .container:before {
-      bottom: 90%;
-    }
-    
-    .error-display {
-      top: 120px;
-    }
-  
-    .title {
-      font-size: 2.2rem;
-    }
-  
-    .error-text {
-      font-size: 1rem;
-    }
-  }
-  </style>
+}
+</style>
