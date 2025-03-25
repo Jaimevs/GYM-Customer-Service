@@ -7,7 +7,8 @@
     <v-alert v-if="successMessage" type="success" class="my-4">{{ successMessage }}</v-alert>
 
     <!-- Cargando -->
-    <v-progress-circular v-if="loading" indeterminate color="primary" class="my-5 mx-auto d-block"></v-progress-circular>
+    <v-progress-circular v-if="loading" indeterminate color="primary"
+      class="my-5 mx-auto d-block"></v-progress-circular>
 
     <div v-else>
       <!-- Clases vacías -->
@@ -18,37 +19,36 @@
       </v-card>
 
       <!-- Lista de clases -->
-      <v-simple-table v-else class="my-4">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Horario</th>
-            <th>Duración</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="cls in classes" :key="cls.ID">
-            <td>{{ cls.Nombre }}</td>
-            <td>{{ cls.Dia_Inicio }} a {{ cls.Dia_Fin }}, {{ formatTime(cls.Hora_Inicio) }} - {{ formatTime(cls.Hora_Fin) }}</td>
-            <td>{{ cls.Duracion_Minutos }} minutos</td>
-            <td>
-              <v-chip :color="cls.Estatus ? 'success' : 'error'" small>
-                {{ cls.Estatus ? 'Activa' : 'Inactiva' }}
-              </v-chip>
-            </td>
-            <td>
-              <v-btn icon small @click="editClass(cls)">
-                <v-icon>mdi-pencil</v-icon>
-              </v-btn>
-              <v-btn icon small @click="confirmDeleteClass(cls)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </td>
-          </tr>
-        </tbody>
-      </v-simple-table>
+      <v-data-table v-else :headers="tableHeaders" :items="classes" class="elevation-1 my-4" :items-per-page="5"
+        :footer-props="{ itemsPerPageOptions: [5, 10, 15] }">
+        <!-- Columna Horario -->
+        <template #item.Horario="{ item }">
+          {{ item.Dia_Inicio }} a {{ item.Dia_Fin }}, {{ formatTime(item.Hora_Inicio) }} - {{
+            formatTime(item.Hora_Fin) }}
+        </template>
+
+        <!-- Columna Duración -->
+        <template #item.Duracion_Minutos="{ item }">
+          {{ item.Duracion_Minutos }} minutos
+        </template>
+
+        <!-- Columna Estado -->
+        <template #item.Estatus="{ item }">
+          <v-chip :color="item.Estatus ? 'success' : 'error'" small>
+            {{ item.Estatus ? 'Activa' : 'Inactiva' }}
+          </v-chip>
+        </template>
+
+        <!-- Columna Acciones -->
+        <template #item.Acciones="{ item }">
+          <v-btn icon small @click="editClass(item)" class="mr-2">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <v-btn icon small @click="confirmDeleteClass(item)">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </template>
+      </v-data-table>
 
       <!-- Botón Agregar -->
       <v-btn color="primary" @click="openAddClassDialog" block>
@@ -65,62 +65,27 @@
           <v-textarea v-model="classForm.Descripcion" label="Descripción" rows="3"></v-textarea>
 
           <div class="d-flex mb-3">
-            <v-select
-              v-model="classForm.Dia_Inicio"
-              label="Día Inicio"
-              :items="diasSemana"
-              required
-              class="mr-2"
-            ></v-select>
-            <v-select
-              v-model="classForm.Dia_Fin"
-              label="Día Fin"
-              :items="diasSemana"
-              required
-              class="ml-2"
-            ></v-select>
+            <v-select v-model="classForm.Dia_Inicio" label="Día Inicio" :items="diasSemana" required
+              class="mr-2"></v-select>
+            <v-select v-model="classForm.Dia_Fin" label="Día Fin" :items="diasSemana" required class="ml-2"></v-select>
           </div>
 
           <div class="d-flex mb-3">
-            <v-text-field
-              v-model="classForm.Hora_Inicio"
-              label="Hora Inicio"
-              type="time"
-              required
-              class="mr-2"
-            ></v-text-field>
-            <v-text-field
-              v-model="classForm.Hora_Fin"
-              label="Hora Fin"
-              type="time"
-              required
-              class="ml-2"
-            ></v-text-field>
+            <v-text-field v-model="classForm.Hora_Inicio" label="Hora Inicio" type="time" required
+              class="mr-2"></v-text-field>
+            <v-text-field v-model="classForm.Hora_Fin" label="Hora Fin" type="time" required
+              class="ml-2"></v-text-field>
           </div>
 
-          <v-text-field
-            v-model.number="classForm.Duracion_Minutos"
-            label="Duración (minutos)"
-            type="number"
-            required
-            min="1"
-          ></v-text-field>
+          <v-text-field v-model.number="classForm.Duracion_Minutos" label="Duración (minutos)" type="number" required
+            min="1"></v-text-field>
 
-          <v-switch
-            v-model="classForm.Estatus"
-            label="Clase Activa"
-            color="success"
-          ></v-switch>
+          <v-switch v-model="classForm.Estatus" label="Clase Activa" color="success"></v-switch>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn text @click="classDialog = false">Cancelar</v-btn>
-          <v-btn
-            color="primary"
-            @click="saveClass"
-            :loading="saving"
-            :disabled="saving || !isFormValid"
-          >
+          <v-btn color="primary" @click="saveClass" :loading="saving" :disabled="saving || !isFormValid">
             {{ isEditing ? 'Guardar Cambios' : 'Agregar Clase' }}
           </v-btn>
         </v-card-actions>
@@ -132,18 +97,12 @@
       <v-card>
         <v-card-title>¿Eliminar clase?</v-card-title>
         <v-card-text>
-          ¿Estás seguro de que deseas eliminar la clase "{{ classToDelete?.Nombre }}"?
-          Esta acción no se puede deshacer.
+          ¿Estás seguro de que deseas eliminar la clase "{{ classToDelete?.Nombre }}"? Esta acción no se puede deshacer.
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn text @click="deleteDialog = false">Cancelar</v-btn>
-          <v-btn
-            color="error"
-            @click="deleteClass"
-            :loading="deleting"
-            :disabled="deleting"
-          >
+          <v-btn color="error" @click="deleteClass" :loading="deleting" :disabled="deleting">
             Eliminar
           </v-btn>
         </v-card-actions>
@@ -190,12 +149,20 @@ export default {
         Hora_Fin: '09:00',
         Duracion_Minutos: 60,
         Estatus: true,
-        Entrenador_ID: 0 // Se establecerá con el ID del usuario actual
-      }
+        Entrenador_ID: 0,
+      },
+
+      // Definición de columnas para la data table
+      tableHeaders: [
+        { text: 'Nombre', value: 'Nombre', sortable: true },
+        { text: 'Horario', value: 'Horario', sortable: false },
+        { text: 'Duración', value: 'Duracion_Minutos', sortable: true },
+        { text: 'Estado', value: 'Estatus', sortable: true },
+        { text: 'Acciones', value: 'Acciones', sortable: false },
+      ],
     };
   },
   computed: {
-    // Computed para verificar si el formulario es válido
     isFormValid() {
       return (
         this.classForm.Nombre.trim() !== '' &&
@@ -205,14 +172,17 @@ export default {
         this.classForm.Hora_Fin !== '' &&
         this.classForm.Duracion_Minutos > 0
       );
-    }
+    },
+  },
+  watch: {
+    'classForm.Hora_Inicio': 'calculateDuration',
+    'classForm.Hora_Fin': 'calculateDuration',
   },
   async mounted() {
     await this.loadMyClasses();
     await this.getCurrentUser();
   },
   methods: {
-    // Cargar información del usuario actual
     async getCurrentUser() {
       try {
         const userInfo = await CoachClassesService.getCurrentUser();
@@ -221,12 +191,9 @@ export default {
         console.error('Error al obtener información del usuario:', err);
       }
     },
-
-    // Cargar mis clases
     async loadMyClasses() {
       this.loading = true;
       this.error = null;
-
       try {
         this.classes = await CoachClassesService.getMyClasses();
       } catch (err) {
@@ -236,8 +203,6 @@ export default {
         this.loading = false;
       }
     },
-
-    // Abrir diálogo para agregar una nueva clase
     openAddClassDialog() {
       this.classForm = {
         Nombre: '',
@@ -248,13 +213,12 @@ export default {
         Hora_Fin: '09:00',
         Duracion_Minutos: 60,
         Estatus: true,
-        Entrenador_ID: this.classForm.Entrenador_ID // Mantener el ID del entrenador
+        Entrenador_ID: this.classForm.Entrenador_ID,
       };
       this.isEditing = false;
       this.classDialog = true;
+      this.$nextTick(() => this.calculateDuration());
     },
-
-    // Editar una clase existente
     editClass(cls) {
       this.classForm = {
         ID: cls.ID,
@@ -266,61 +230,44 @@ export default {
         Hora_Fin: this.formatTimeForInput(cls.Hora_Fin),
         Duracion_Minutos: cls.Duracion_Minutos,
         Estatus: cls.Estatus,
-        Entrenador_ID: cls.Entrenador_ID
+        Entrenador_ID: cls.Entrenador_ID,
       };
       this.isEditing = true;
       this.classDialog = true;
+      this.$nextTick(() => this.calculateDuration());
     },
-
-    // Confirmar eliminación de una clase
     confirmDeleteClass(cls) {
       this.classToDelete = cls;
       this.deleteDialog = true;
     },
-
-    // Eliminar una clase
-async deleteClass() {
-  if (!this.classToDelete) return;
-
-  this.deleting = true;
-  this.error = null;
-
-  try {
-    await CoachClassesService.deleteClass(this.classToDelete.ID);
-
-    this.successMessage = 'Clase eliminada con éxito';
-    this.deleteDialog = false;
-
-    // Recargar clases
-    await this.loadMyClasses();
-  } catch (err) {
-    console.error(`Error al eliminar clase ${this.classToDelete.ID}:`, err);
-
-    // Mensaje específico para error de integridad referencial
-    if (err instanceof Error && err.message.includes('quejas asociadas')) {
-      this.error = err.message;
-    } else {
-      this.error = 'No se pudo eliminar la clase. Por favor, intenta nuevamente más tarde.';
-    }
-
-    // Cerramos el diálogo de confirmación
-    this.deleteDialog = false;
-  } finally {
-    this.deleting = false;
-  }
-},
-
-    // Guardar una clase (agregar o editar)
+    async deleteClass() {
+      if (!this.classToDelete) return;
+      this.deleting = true;
+      this.error = null;
+      try {
+        await CoachClassesService.deleteClass(this.classToDelete.ID);
+        this.successMessage = 'Clase eliminada con éxito';
+        this.deleteDialog = false;
+        await this.loadMyClasses();
+      } catch (err) {
+        console.error(`Error al eliminar clase ${this.classToDelete.ID}:`, err);
+        if (err instanceof Error && err.message.includes('quejas asociadas')) {
+          this.error = err.message;
+        } else {
+          this.error = 'No se pudo eliminar la clase. Por favor, intenta nuevamente más tarde.';
+        }
+        this.deleteDialog = false;
+      } finally {
+        this.deleting = false;
+      }
+    },
     async saveClass() {
       if (!this.isFormValid) return;
-
       this.saving = true;
       this.error = null;
       this.successMessage = null;
-
       try {
         if (this.isEditing && this.classForm.ID) {
-          // Actualizar clase existente
           const updateData = {
             Nombre: this.classForm.Nombre,
             Descripcion: this.classForm.Descripcion,
@@ -329,13 +276,11 @@ async deleteClass() {
             Hora_Inicio: this.classForm.Hora_Inicio,
             Hora_Fin: this.classForm.Hora_Fin,
             Duracion_Minutos: this.classForm.Duracion_Minutos,
-            Estatus: this.classForm.Estatus
+            Estatus: this.classForm.Estatus,
           };
-
           await CoachClassesService.updateClass(this.classForm.ID, updateData);
           this.successMessage = 'Clase actualizada con éxito';
         } else {
-          // Crear nueva clase
           const createData = {
             Nombre: this.classForm.Nombre,
             Descripcion: this.classForm.Descripcion,
@@ -345,14 +290,11 @@ async deleteClass() {
             Hora_Fin: this.classForm.Hora_Fin,
             Duracion_Minutos: this.classForm.Duracion_Minutos,
             Estatus: this.classForm.Estatus,
-            Entrenador_ID: this.classForm.Entrenador_ID
+            Entrenador_ID: this.classForm.Entrenador_ID,
           };
-
           await CoachClassesService.createClass(createData);
           this.successMessage = 'Clase creada con éxito';
         }
-
-        // Cerrar el diálogo y recargar clases
         this.classDialog = false;
         await this.loadMyClasses();
       } catch (err) {
@@ -362,38 +304,45 @@ async deleteClass() {
         this.saving = false;
       }
     },
-
-    // Función para formatear la hora para mostrar
+    calculateDuration() {
+      if (!this.classForm.Hora_Inicio || !this.classForm.Hora_Fin) return;
+      try {
+        const startMins = this.timeToMinutes(this.classForm.Hora_Inicio);
+        const endMins = this.timeToMinutes(this.classForm.Hora_Fin);
+        let duration = endMins - startMins;
+        if (duration < 0) {
+          duration += 24 * 60;
+        }
+        this.classForm.Duracion_Minutos = duration;
+      } catch (e) {
+        console.error('Error al calcular duración:', e);
+      }
+    },
+    timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    },
     formatTime(timeString) {
       if (!timeString) return '';
-
       try {
-        // Si es un string de tiempo en formato ISO
         if (timeString.includes('T')) {
           const date = new Date(timeString);
           return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
-
-        // Si es solo la hora (HH:MM:SS)
         return timeString.substring(0, 5);
       } catch (e) {
         console.error('Error al formatear la hora:', e);
         return timeString;
       }
     },
-
-    // Función para formatear la hora para el input time
     formatTimeForInput(timeString) {
       if (!timeString) return '';
-
       try {
-        // Si es un string de tiempo en formato ISO
         if (timeString.includes('T')) {
           const date = new Date(timeString);
           return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
         }
-
-        // Si es solo la hora (HH:MM:SS)
         return timeString.substring(0, 5);
       } catch (e) {
         console.error('Error al formatear la hora para input:', e);
@@ -401,7 +350,7 @@ async deleteClass() {
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>
