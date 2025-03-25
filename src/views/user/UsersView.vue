@@ -4,7 +4,7 @@
     <v-row>
       <v-col cols="12" md="8">
         <v-card>
-          <v-card-title>¡Bienvenido de nuevo, Alex!</v-card-title>
+          <v-card-title>¡Bienvenido de nuevo!</v-card-title>
           <v-card-subtitle>Aquí tienes un resumen de tu progreso hoy</v-card-subtitle>
           <v-card-text>
             <v-row>
