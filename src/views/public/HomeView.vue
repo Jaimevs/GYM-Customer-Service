@@ -14,6 +14,11 @@
         <FeatureCard v-for="(feature, index) in features" :key="index" :icon="feature.icon" :title="feature.title"
           :description="feature.description" :data-index="index" class="feature-card" />
       </div>
+
+      <!-- Nueva Sección: Call to Action -->
+      <CallToActionSection title="¿Listo para comenzar?"
+        description="Únete a nosotros hoy y comienza tu camino hacia una vida más saludable."
+        buttonText="¡Regístrate ahora!" />
     </main>
   </div>
 </template>
@@ -24,6 +29,7 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import HeroSection from '@/components/home/HeroSection.vue';
 import FeatureCard from '@/components/home/FeatureCard.vue';
+import CallToActionSection from '@/components/home/CallToActionSection.vue';
 
 // Datos de las características
 const features = [

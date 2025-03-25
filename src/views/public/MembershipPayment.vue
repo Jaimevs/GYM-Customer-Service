@@ -18,6 +18,17 @@
       <div v-if="selectedMembership" class="payment-form">
         <h2 class="payment-title">Pagar ${{ selectedMembership.price }} MXN</h2>
 
+        <!-- Beneficios de la membresía seleccionada -->
+        <div class="membership-benefits">
+          <h3 class="benefits-title">Beneficios incluidos:</h3>
+          <ul class="benefits-list">
+            <li v-for="(benefit, idx) in selectedMembership.benefits" :key="idx">
+              <Icon icon="mdi:check-circle" class="check-icon" />
+              {{ benefit }}
+            </li>
+          </ul>
+        </div>
+
         <!-- Componente PaymentElement de Stripe -->
         <form @submit.prevent="handleSubmit">
           <div id="payment-element">
@@ -36,12 +47,43 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { loadStripe } from '@stripe/stripe-js';
+import { Icon } from '@iconify/vue';
 
 // Datos de las membresías
 const memberships = [
-  { name: 'Básica', price: 500, description: 'Acceso limitado a instalaciones.' },
-  { name: 'Premium', price: 1000, description: 'Acceso completo + clases grupales.' },
-  { name: 'VIP', price: 2000, description: 'Acceso ilimitado + entrenador personal.' },
+  {
+    name: 'Básica',
+    price: 500,
+    description: 'Acceso limitado a instalaciones.',
+    benefits: [
+      'Acceso a equipos básicos',
+      'Clases grupales básicas',
+      'Wi-Fi gratuito',
+    ],
+  },
+  {
+    name: 'Premium',
+    price: 1000,
+    description: 'Acceso completo + clases grupales.',
+    benefits: [
+      'Acceso ilimitado a todas las instalaciones',
+      'Clases grupales avanzadas',
+      'Entrenador personal incluido',
+      'Descuentos en suplementos',
+    ],
+  },
+  {
+    name: 'VIP',
+    price: 2000,
+    description: 'Acceso ilimitado + entrenador personal.',
+    benefits: [
+      'Acceso exclusivo a áreas VIP',
+      'Entrenador personal dedicado',
+      'Clases privadas',
+      'Acceso a eventos exclusivos',
+      'Locker personalizado',
+    ],
+  },
 ];
 
 // Estado del componente
@@ -95,13 +137,13 @@ const handleSubmit = async () => {
   text-align: center;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 4rem 2rem;
   background-color: #000;
   color: #fff;
   margin-top: 80px;
 
   @include mixins.media-query(small) {
-    padding: 1rem;
+    padding: 2rem 1rem;
     margin-top: 60px;
   }
 }
@@ -148,54 +190,52 @@ const handleSubmit = async () => {
   border-radius: 12px;
   padding: 2rem;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.3s ease;
   text-align: center;
 
-  @include mixins.media-query(small) {
-    padding: 1.5rem;
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 24px rgba(255, 255, 255, 0.2);
   }
-}
 
-.membership-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 12px 24px rgba(255, 255, 255, 0.1);
-}
+  &.selected {
+    border-color: #ff0000;
+    box-shadow: 0 12px 24px rgba(255, 0, 0, 0.4);
+    background-color: #333;
+    transform: scale(1.05);
+  }
 
-.membership-card.selected {
-  border-color: #ff0000;
-  box-shadow: 0 12px 24px rgba(255, 0, 0, 0.2);
-}
+  h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    color: #fff;
 
-.membership-card h3 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.75rem;
-  margin-bottom: 1rem;
-  color: #fff;
+    @include mixins.media-query(small) {
+      font-size: 1.5rem;
+    }
+  }
 
-  @include mixins.media-query(small) {
+  .price {
+    font-family: 'Poppins', sans-serif;
     font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff0000;
+    margin-bottom: 1rem;
+
+    @include mixins.media-query(small) {
+      font-size: 1.25rem;
+    }
   }
-}
 
-.membership-card .price {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #ff0000;
-  margin-bottom: 1rem;
+  .description {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    color: #ccc;
 
-  @include mixins.media-query(small) {
-    font-size: 1.25rem;
-  }
-}
-
-.membership-card .description {
-  font-family: 'Roboto', sans-serif;
-  font-size: 1rem;
-  color: #ccc;
-
-  @include mixins.media-query(small) {
-    font-size: 0.9rem;
+    @include mixins.media-query(small) {
+      font-size: 0.9rem;
+    }
   }
 }
 
@@ -205,6 +245,7 @@ const handleSubmit = async () => {
   padding: 2rem;
   border-radius: 12px;
   border: 1px solid #333;
+  text-align: center;
 
   @include mixins.media-query(small) {
     width: 100%;
@@ -221,6 +262,49 @@ const handleSubmit = async () => {
 
   @include mixins.media-query(small) {
     font-size: 1.75rem;
+  }
+}
+
+.membership-benefits {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+
+  .benefits-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #ff0000;
+    margin-bottom: 1rem;
+
+    @include mixins.media-query(small) {
+      font-size: 1.1rem;
+    }
+  }
+
+  .benefits-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-family: 'Roboto', sans-serif;
+      font-size: 1rem;
+      color: #ccc;
+
+      @include mixins.media-query(small) {
+        font-size: 0.9rem;
+      }
+    }
+
+    .check-icon {
+      color: #4caf50;
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+    }
   }
 }
 
@@ -247,22 +331,26 @@ const handleSubmit = async () => {
   font-weight: bold;
   border-radius: 50px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   width: 100%;
   margin-top: 1.5rem;
+
+  &:hover {
+    background-color: #d10000;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(255, 0, 0, 0.4);
+  }
+
+  &:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 
   @include mixins.media-query(small) {
     padding: 0.75rem 1.5rem;
     font-size: 0.9rem;
   }
-}
-
-.pay-button:hover {
-  background-color: #d10000;
-}
-
-.pay-button:disabled {
-  background-color: #555;
-  cursor: not-allowed;
 }
 </style>

@@ -62,7 +62,7 @@ watch(
 
 // Menú de items con rutas corregidas
 const menuItems = ref([
-  { title: "¡Inscríbete ya!", link: "/inscripcion", icon: "solar:users-group-rounded-outline" },
+  { title: "¡Inscríbete ya!", link: "/planes", icon: "solar:users-group-rounded-outline" },
   { title: "Inicio", link: "/", icon: "solar:home-outline" },
   { title: "Gimnasios", link: "/gimnasios", icon: "solar:dumbbell-outline" },
   { title: "Planes", link: "/planes", icon: "solar:money-bag-outline" },
