@@ -32,7 +32,7 @@ import gsap from "gsap";
 import axios from "axios";
 
 const router = useRouter();
-const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday12.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://18.130.133.242:8000";
 const digits = ref(Array(6).fill("")); // Array para almacenar cada dígito
 const loading = ref(false); // Estado de carga
 const message = ref<{ text: string; type: "success" | "error" } | null>(null); // Mensaje de respuesta
