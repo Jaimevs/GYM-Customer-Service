@@ -134,7 +134,8 @@ export default {
       gsap.from([title.value, subtitle.value], {
         y: 50,
         opacity: 0,
-        stagger: 0.2
+        stagger: 0.2,
+        immediateRender: false
       });
 
       if (isMobile.value) {
@@ -494,7 +495,7 @@ export default {
 
 @media (max-width: 600px) {
   .membership-container {
-    padding: 20px 10px;
+    padding: 5rem 0.625rem 1.25rem;
   }
 
   .gradient-title {
