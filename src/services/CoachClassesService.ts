@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Clase, ClaseCreate, ClaseUpdate } from "./ClassesService";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://gymtoday1243.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday1243.com";
 
 class CoachClassesService {
   // Constructor que verifica si hay token en localStorage
@@ -100,20 +100,20 @@ class CoachClassesService {
     } catch (error) {
       console.error(`Error al eliminar clase ${id}:`, error);
       this.logAxiosError(error);
-      
+
       // Verificar si es un error de integridad referencial
       if (axios.isAxiosError(error) && error.response?.status === 500) {
         const errorMessage = error.response?.data?.detail || '';
-        
-        if (errorMessage.includes('IntegrityError') || 
+
+        if (errorMessage.includes('IntegrityError') ||
             errorMessage.includes('foreign key constraint') ||
             errorMessage.includes('FOREIGN KEY')) {
-          
+
           throw new Error("Esta clase tiene quejas asociadas y no puede ser eliminada. " +
             "Por favor, contacta al administrador para eliminar primero las quejas relacionadas.");
         }
       }
-      
+
       throw error;
     }
   }
@@ -130,7 +130,7 @@ class CoachClassesService {
       if (!token) {
         throw new Error("No se encontró token de autenticación");
       }
-      
+
       // Decodificar el token para obtener la información del usuario
       // Esto es solo un ejemplo, la implementación real dependería de tu estructura de token
       const base64Url = token.split('.')[1];
