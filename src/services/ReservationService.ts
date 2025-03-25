@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://18.130.133.242:8000";
+const API_URL = import.meta.env.VITE_API_URL || "https://18.130.133.242:8000";
 
 // Interfaz para Reservaciones
 export interface Reservacion {
@@ -55,7 +55,7 @@ class ReservationService {
       if (!token) {
         throw new Error("No se encontró token de autenticación");
       }
-      
+
       // Decodificar el token para obtener la información del usuario
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -83,14 +83,14 @@ class ReservationService {
         if (userData.ID) return userData.ID;
         if (userData.id) return userData.id;
       }
-      
+
       // Intentar obtener de localStorage como respaldo
       const userStr = localStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
         if (user.ID) return user.ID;
       }
-      
+
       console.error("No se pudo identificar al usuario actual");
       return 0;
     } catch (e) {
@@ -104,18 +104,18 @@ class ReservationService {
    * @returns Una promesa con la lista de reservaciones
    */
   async getMyReservations(
-    fechaInicio?: string, 
-    fechaFin?: string, 
+    fechaInicio?: string,
+    fechaFin?: string,
     estatus?: string
   ): Promise<ReservacionWithDetails[]> {
     try {
       let url = `${API_URL}/mis-reservaciones/`;
       const params: any = {};
-      
+
       if (fechaInicio) params.fecha_inicio = fechaInicio;
       if (fechaFin) params.fecha_fin = fechaFin;
       if (estatus) params.estatus = estatus;
-      
+
       const response = await axios.get(url, {
         params,
         headers: {
@@ -168,32 +168,32 @@ class ReservationService {
       if (!token) {
         throw new Error("No hay token de autenticación disponible");
       }
-      
+
       console.log("Token actual:", token);
       console.log("Usuario decodificado:", this.getCurrentUser());
-      
+
       // Obtener el ID del usuario actual si no se proporcionó
       let userId = reservacion.Usuario_ID;
       if (!userId) {
         userId = this.getUserId();
-        
+
         if (!userId) {
           throw new Error("No se pudo obtener el ID del usuario. Por favor, inicie sesión nuevamente.");
         }
       }
-      
+
       // Formatear correctamente la fecha
       let fechaReservacion = reservacion.Fecha_Reservacion;
       if (fechaReservacion) {
         try {
           // Primero, intentar extraer solo la fecha y la hora
           let fechaYHora;
-          
+
           if (fechaReservacion.includes('T')) {
             // Si ya está en formato "YYYY-MM-DDTHH:MM:SS" o similares
             // Extraer la parte antes de la T y después de la T
             const [datePart, timePart] = fechaReservacion.split('T');
-            
+
             // Si la parte de fecha incluye espacios, es un formato incorrecto
             if (datePart.includes(' ')) {
               // Es algo como "Tue Mar 25 2025..."
@@ -217,7 +217,7 @@ class ReservationService {
             const horas = String(fecha.getHours()).padStart(2, '0');
             const minutos = String(fecha.getMinutes()).padStart(2, '0');
             const segundos = String(fecha.getSeconds()).padStart(2, '0');
-            
+
             fechaYHora = `${año}-${mes}-${dia}T${horas}:${minutos}:${segundos}`;
           } else {
             // Otro formato desconocido, intentar convertir con Date
@@ -229,15 +229,15 @@ class ReservationService {
             const horas = String(fecha.getHours()).padStart(2, '0');
             const minutos = String(fecha.getMinutes()).padStart(2, '0');
             const segundos = String(fecha.getSeconds()).padStart(2, '0');
-            
+
             fechaYHora = `${año}-${mes}-${dia}T${horas}:${minutos}:${segundos}`;
           }
-          
+
           // Asegurarnos de que no tiene Z al final (que indica UTC)
           if (fechaYHora.endsWith('Z')) {
             fechaYHora = fechaYHora.slice(0, -1);
           }
-          
+
           fechaReservacion = fechaYHora;
           console.log("Fecha formateada:", fechaReservacion);
         } catch (e) {
@@ -249,7 +249,7 @@ class ReservationService {
               if (fechaReservacion.includes('T')) {
                 // Ya tiene formato ISO pero podría tener problemas
                 const [fechaPart, horaPart] = fechaReservacion.split('T');
-                
+
                 // Si fechaPart tiene formato incorrecto
                 if (fechaPart.includes(' ')) {
                   // Es algo como "Tue Mar 25 2025..."
@@ -270,7 +270,7 @@ class ReservationService {
           }
         }
       }
-      
+
       // Crear el payload con todos los datos necesarios
       const payload = {
         Usuario_ID: userId,
@@ -279,20 +279,20 @@ class ReservationService {
         Comentario: reservacion.Comentario || null,
         Estatus: "Confirmada" // Añadir estatus para evitar problemas
       };
-  
+
       console.log("Enviando datos para crear reservación:", payload);
-      
+
       // Configurar el token en los headers para esta solicitud específica
       const headers = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Authorization': `Bearer ${token}`
       };
-      
+
       const response = await axios.post(`${API_URL}/reservaciones/`, payload, {
         headers: headers
       });
-  
+
       console.log("Reservación creada:", response.data);
       return response.data;
     } catch (error) {
@@ -322,14 +322,14 @@ class ReservationService {
           const horas = String(fecha.getHours()).padStart(2, '0');
           const minutos = String(fecha.getMinutes()).padStart(2, '0');
           const segundos = String(fecha.getSeconds()).padStart(2, '0');
-          
+
           payload.Fecha_Reservacion = `${año}-${mes}-${dia}T${horas}:${minutos}:${segundos}`;
         } catch (e) {
           console.error("Error al formatear fecha para actualización:", e);
           // Si hay error, mantenemos la fecha original
         }
       }
-      
+
       const response = await axios.put(`${API_URL}/reservaciones/${id}`, payload, {
         headers: {
           'Content-Type': 'application/json',
@@ -379,9 +379,9 @@ class ReservationService {
     try {
       let url = `${API_URL}/reservaciones/clase/${claseId}`;
       const params: any = {};
-      
+
       if (fecha) params.fecha = fecha;
-      
+
       const response = await axios.get(url, {
         params,
         headers: {

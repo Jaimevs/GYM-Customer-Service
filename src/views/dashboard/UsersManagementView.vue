@@ -202,7 +202,7 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
 // URL base de la API
-const apiBaseUrl = 'http://18.130.133.242:8000';
+const apiBaseUrl = 'https://gymtoday1243.com';
 
 // Estado para controlar la carga
 const cargando = ref(false);
