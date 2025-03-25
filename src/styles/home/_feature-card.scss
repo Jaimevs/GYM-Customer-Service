@@ -5,97 +5,96 @@
 
 /* Contenedor de las Feature Cards */
 .home-view .features {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; /* Columnas responsivas */
-  gap: $espaciado-grande !important; /* Espacio entre las tarjetas */
-  margin-top: $espaciado-extra-grande !important; /* Espaciado superior */
-  text-align: center !important; /* Alinea el texto al centro */
-  justify-content: center !important; /* Centra las tarjetas horizontalmente */
-  width: 100% !important; /* Ocupa todo el ancho disponible */
-  max-width: 1200px !important; /* Límite máximo de ancho */
-  margin: 0 auto !important; /* Centra el contenedor padre */
-  padding: 0 $espaciado-base !important; /* Añade un poco de padding horizontal */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Columnas responsivas */
+  gap: $espaciado-grande; /* Espacio entre las tarjetas */
+  margin-top: $espaciado-extra-grande; /* Espaciado superior */
+  text-align: center; /* Alinea el texto al centro */
+  justify-content: center; /* Centra las tarjetas horizontalmente */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  max-width: 1200px; /* Límite máximo de ancho */
+  margin: 0 auto; /* Centra el contenedor padre */
+  padding: 0 $espaciado-base; /* Añade un poco de padding horizontal */
 
   /* Mejora para dispositivos móviles */
   @include media-query(small) {
-    grid-template-columns: 1fr !important; /* Una sola columna en dispositivos pequeños */
-    padding: 0 $espaciado-pequeño !important; /* Reduce el padding en móviles */
+    grid-template-columns: 1fr; /* Una sola columna en dispositivos pequeños */
+    padding: 0 $espaciado-pequeño; /* Reduce el padding en móviles */
   }
 }
 
 /* Estilos de las Feature Cards */
 .feature-card {
-  width: 100% !important; /* Ocupa todo el ancho disponible */
-  max-width: none !important; /* Elimina el límite máximo de ancho */
-  min-height: 280px !important; /* Altura mínima */
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
-  border-radius: $radio-borde !important;
-  padding: $espaciado-base !important;
-  background-color: $color-blanco !important;
-  transition: transform 0.3s ease-in-out !important, box-shadow 0.3s ease-in-out !important;
-  box-shadow: $sombra-suave !important;
+  width: 100%;
+  max-width: none;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: $radio-borde;
+  padding: $espaciado-base;
+  background-color: $color-gris-claro; /* Fondo gris claro */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: $sombra-suave;
 
   /* Mejora para dispositivos móviles */
   @include media-query(small) {
-    padding: $espaciado-pequeño !important; /* Reduce el padding en móviles */
+    padding: $espaciado-pequeño;
   }
 
   &:hover {
-    transform: translateY(-8px) !important;
-    box-shadow: $sombra-fuerte !important;
+    transform: translateY(-8px);
+    box-shadow: $sombra-fuerte;
 
     .custom-title {
-      color: $color-rojo-vibrante !important; /* Cambia el color del título al pasar el mouse */
+      color: $color-rojo-vibrante; /* Cambia el color del título al pasar el mouse */
     }
 
     .custom-description {
-      color: $color-texto-principal !important; /* Cambia el color de la descripción al pasar el mouse */
+      color: $color-texto-principal; /* Cambia el color de la descripción al pasar el mouse */
+    }
+
+    .feature-icon {
+      transform: scale(1.2) translateY(-10px); /* Mueve el ícono hacia arriba */
+      color: $color-rojo-vibrante; /* Cambia el color del ícono */
     }
   }
 }
 
 .feature-icon-container {
-  margin-bottom: $espaciado-base !important;
+  margin-bottom: $espaciado-base;
 
   .feature-icon {
-    font-size: 60px !important;
-    color: $color-rojo-vibrante !important;
-    transition: transform 0.3s ease-in-out !important, color 0.3s ease-in-out !important;
-
-    /* Cambia el color del ícono al pasar el mouse */
-    .feature-card:hover & {
-      transform: scale(1.2) !important;
-      color: $color-negro !important; /* Cambia el color del ícono a negro */
-    }
+    font-size: 60px;
+    color: $color-rojo-vibrante;
+    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
   }
 }
 
 .custom-title {
-  font-family: $fuente-titulo !important;
-  font-size: 1.5rem !important;
-  font-weight: bold !important;
-  color: $color-negro !important;
-  margin-bottom: $espaciado-pequeño !important;
-  transition: color 0.3s ease-in-out !important;
+  font-family: $fuente-titulo;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: $color-negro;
+  margin-bottom: $espaciado-pequeño;
+  transition: color 0.3s ease-in-out;
 
   @include media-query(small) {
-    font-size: 1.2rem !important;
+    font-size: 1.2rem;
   }
 }
 
 .custom-description {
-  font-family: $fuente-principal !important;
-  font-size: 1rem !important;
-  font-weight: 500 !important;
-  color: $color-texto-secundario !important;
-  line-height: 1.6 !important;
-  text-align: center !important;
-  transition: color 0.3s ease-in-out !important;
+  font-family: $fuente-principal;
+  font-size: 1rem;
+  font-weight: 500;
+  color: $color-texto-secundario;
+  line-height: 1.6;
+  text-align: center;
+  transition: color 0.3s ease-in-out;
 
   @include media-query(small) {
-    font-size: 0.9rem !important;
+    font-size: 0.9rem;
   }
 }
