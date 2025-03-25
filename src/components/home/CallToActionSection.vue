@@ -36,6 +36,7 @@ const redirectToPlans = () => {
 </script>
 
 <style scoped lang="scss">
+@use 'sass:color';
 @use '@/styles/_variables.scss' as *;
 @use '@/styles/_mixins.scss' as *;
 
@@ -92,7 +93,8 @@ const redirectToPlans = () => {
       transition: background-color 0.3s ease, transform 0.3s ease;
 
       &:hover {
-        background-color: darken($color-amarillo-dorado, 10%); // Oscurecer el color al pasar el mouse
+        // Reemplazamos darken() con color.scale()
+        background-color: color.scale($color-amarillo-dorado, $lightness: -20%);
         transform: scale(1.05);
       }
 

@@ -18,7 +18,7 @@
         <!-- Botón Mejorado -->
         <div class="hero-button-wrapper">
           <!-- Usamos router-link para navegar a /compra-membresia -->
-          <router-link to="/compra-membresia" class="cta-button">
+          <router-link to="/planes" class="cta-button">
             ÚNETE HOY Y TRANSFORMA TU CUERPO
           </router-link>
         </div>

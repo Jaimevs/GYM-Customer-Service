@@ -35,7 +35,7 @@
       <!-- Botón de contacto -->
       <div class="footer-cta">
         <!-- Usamos router-link para navegar a /compra-membresia -->
-        <router-link to="/compra-membresia" class="cta-button">ÚNETE AHORA</router-link>
+        <router-link to="/planes" class="cta-button">ÚNETE AHORA</router-link>
       </div>
 
       <!-- Derechos reservados -->
