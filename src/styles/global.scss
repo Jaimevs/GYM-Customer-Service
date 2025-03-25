@@ -30,8 +30,7 @@ input {
   top: -10%;
   right: 48%;
   transform: translateY(-50%);
-  background-image: linear-gradient(135deg, $color-rojo-botones, $color-rojo-granate); /* Gradiente amarillo */
-  transition: 1.8s ease-in-out;
+  background-image: linear-gradient(135deg, $color-rojo-botones, $color-rojo-granate);
   border-radius: 50%;
   z-index: 1; /* Asegura que el círculo esté detrás de otros elementos */
 }
