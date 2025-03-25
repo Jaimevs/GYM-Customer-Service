@@ -58,7 +58,7 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore'; // Importar el store de Pinia
 
 // Configura la URL de tu API
-const API_URL = 'http://18.130.133.242:8000';
+const API_URL = 'https://gymtoday1243.com';
 
 const router = useRouter();
 const route = useRoute();
