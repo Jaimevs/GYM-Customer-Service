@@ -25,6 +25,7 @@
       <v-col cols="12">
         <v-tabs v-model="activeTab" color="primary" grow>
           <v-tab value="active">Reservaciones Activas</v-tab>
+          <v-tab value="history">Historial</v-tab>
           <v-tab value="new">Nueva Reservación</v-tab>
         </v-tabs>
       </v-col>
@@ -96,6 +97,126 @@
                     Cancelar
                   </v-btn>
                 </template>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+      </v-window-item>
+
+      <!-- Pestaña de historial de reservaciones -->
+      <v-window-item value="history">
+        <v-card class="mt-4">
+          <v-card-title class="d-flex justify-space-between align-center">
+            <span>Historial de Reservaciones</span>
+            
+            <v-btn color="primary" variant="text" :loading="refreshing" @click="loadHistoricalReservations">
+              <v-icon left>mdi-refresh</v-icon>
+              Actualizar
+            </v-btn>
+          </v-card-title>
+          
+          <v-card-text>
+            <!-- Filtros de búsqueda -->
+            <v-row class="mb-4">
+              <v-col cols="12" sm="4">
+                <v-menu
+                  v-model="startDateMenu"
+                  :close-on-content-click="false"
+                  location="bottom"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-text-field
+                      v-model="filters.startDate"
+                      label="Desde"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      v-bind="props"
+                      clearable
+                      @click:clear="filters.startDate = null"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="filters.startDate"
+                    @update:model-value="startDateMenu = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+              
+              <v-col cols="12" sm="4">
+                <v-menu
+                  v-model="endDateMenu"
+                  :close-on-content-click="false"
+                  location="bottom"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-text-field
+                      v-model="filters.endDate"
+                      label="Hasta"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      v-bind="props"
+                      clearable
+                      @click:clear="filters.endDate = null"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="filters.endDate"
+                    @update:model-value="endDateMenu = false"
+                  ></v-date-picker>
+                </v-menu>
+              </v-col>
+              
+              <v-col cols="12" sm="4">
+                <v-select
+                  v-model="filters.status"
+                  :items="statusOptions"
+                  label="Estatus"
+                  prepend-icon="mdi-filter-variant"
+                  clearable
+                ></v-select>
+              </v-col>
+              
+              <v-col cols="12" class="d-flex justify-end">
+                <v-btn color="secondary" class="mr-2" @click="resetFilters">Limpiar</v-btn>
+                <v-btn color="primary" @click="applyFilters">Filtrar</v-btn>
+              </v-col>
+            </v-row>
+            
+            <div v-if="historicalReservations.length === 0" class="text-center my-5">
+              <v-icon size="64" color="grey">mdi-calendar-clock</v-icon>
+              <p class="text-h6 mt-3">No hay historial disponible</p>
+              <p class="text-body-1">No se encontraron reservaciones con los filtros actuales.</p>
+            </div>
+            
+            <v-list v-else>
+              <v-list-item v-for="reservation in historicalReservations" :key="reservation.ID">
+                <template v-slot:prepend>
+                  <v-icon :color="getStatusIconColor(reservation.Estatus)" class="mr-3">
+                    {{ getStatusIcon(reservation.Estatus) }}
+                  </v-icon>
+                </template>
+                
+                <v-list-item-title class="font-weight-bold">
+                  {{ reservation.Nombre_Clase || `Clase #${reservation.Clase_ID}` }}
+                </v-list-item-title>
+                
+                <v-list-item-subtitle>
+                  <div>
+                    <strong>Fecha:</strong> {{ formatDate(reservation.Fecha_Reservacion) }}
+                  </div>
+                  <div>
+                    <strong>Horario:</strong> {{ reservation.Dia_Clase }}, 
+                    {{ formatTime(reservation.Hora_Inicio) }} - {{ formatTime(reservation.Hora_Fin) }}
+                  </div>
+                  <div>
+                    <strong>Entrenador:</strong> {{ reservation.Entrenador_Nombre || 'Sin asignar' }}
+                  </div>
+                  <div class="mt-1">
+                    <v-chip :color="getStatusColor(reservation.Estatus)" size="small">
+                      {{ reservation.Estatus }}
+                    </v-chip>
+                  </div>
+                </v-list-item-subtitle>
               </v-list-item>
             </v-list>
           </v-card-text>
@@ -217,6 +338,22 @@ const submitting = ref(false);
 
 // Estados para reservaciones
 const activeReservations = ref<ReservacionWithDetails[]>([]);
+const historicalReservations = ref<ReservacionWithDetails[]>([]);
+
+// Estados para filtros de historial
+const filters = ref({
+  startDate: null as string | null,
+  endDate: null as string | null,
+  status: null as string | null
+});
+const startDateMenu = ref(false);
+const endDateMenu = ref(false);
+const statusOptions = [
+  { title: 'Confirmada', value: 'Confirmada' },
+  { title: 'Cancelada', value: 'Cancelada' },
+  { title: 'Asistida', value: 'Asistida' },
+  { title: 'No Asistida', value: 'No Asistida' }
+];
 
 // Estados para nueva reservación
 const availableClasses = ref<ClaseWithEntrenador[]>([]);
@@ -238,6 +375,8 @@ onMounted(async () => {
 watch(activeTab, (newTab) => {
   if (newTab === 'active') {
     loadReservations('Confirmada');
+  } else if (newTab === 'history') {
+    loadHistoricalReservations();
   } else if (newTab === 'new') {
     loadAvailableClasses();
   }
@@ -249,24 +388,48 @@ const loadReservations = async (status: string) => {
   error.value = null;
   
   try {
-    const reservaciones = await ReservationService.getMyReservations(undefined, undefined, status);
-    
-    // Verificar que el usuario actual sea el dueño
-    const currentUserId = ReservationService.getUserId();
-    
-    // Filtrar para mostrar solo las reservaciones del usuario actual
-    activeReservations.value = reservaciones.filter(res => res.Usuario_ID === currentUserId);
-    
-    // Si hay discrepancias, mostrar advertencia
-    if (reservaciones.length !== activeReservations.value.length) {
-      console.warn(`Se filtraron ${reservaciones.length - activeReservations.value.length} reservaciones que no pertenecen al usuario actual`);
-    }
+    activeReservations.value = await ReservationService.getMyReservations(undefined, undefined, status);
   } catch (err) {
     console.error('Error al cargar reservaciones:', err);
     error.value = 'No se pudieron cargar tus reservaciones. Por favor, intenta nuevamente más tarde.';
   } finally {
     loading.value = false;
   }
+};
+
+// Cargar historial de reservaciones
+const loadHistoricalReservations = async () => {
+  loading.value = true;
+  error.value = null;
+  
+  try {
+    // Para el historial, traemos todas las reservaciones o aplicamos los filtros
+    historicalReservations.value = await ReservationService.getMyReservations(
+      filters.value.startDate || undefined,
+      filters.value.endDate || undefined,
+      filters.value.status || undefined
+    );
+  } catch (err) {
+    console.error('Error al cargar historial de reservaciones:', err);
+    error.value = 'No se pudo cargar tu historial de reservaciones. Por favor, intenta nuevamente más tarde.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Aplicar filtros al historial
+const applyFilters = () => {
+  loadHistoricalReservations();
+};
+
+// Resetear filtros
+const resetFilters = () => {
+  filters.value = {
+    startDate: null,
+    endDate: null,
+    status: null
+  };
+  loadHistoricalReservations();
 };
 
 // Cancelar una reservación
@@ -338,7 +501,7 @@ const isFormValid = computed(() => {
   return !!selectedClass.value && !!reservationDate.value;
 });
 
-// Función para crear nueva reservación
+// Función para crear nueva reservación (versión final)
 const createReservation = async () => {
   if (!isFormValid.value) return;
   

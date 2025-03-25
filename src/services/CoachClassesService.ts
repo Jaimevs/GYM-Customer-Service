@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Clase, ClaseCreate, ClaseUpdate } from "./ClassesService";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://18.130.133.242:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://gymtoday1243.com";
 
 class CoachClassesService {
   // Constructor que verifica si hay token en localStorage
