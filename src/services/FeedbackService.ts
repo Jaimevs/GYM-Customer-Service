@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://18.130.133.242:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://gymtoday1243.com";
 
 // Interfaz para Quejas
 export interface Queja {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://18.130.133.242:8000";
+const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday1243.com";
 
 interface LoginCredentials {
   email: string;
