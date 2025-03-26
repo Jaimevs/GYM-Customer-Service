@@ -7,11 +7,11 @@
     "node": "20.x"
   },
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",  
-  "preview": "vite preview",
-  "build:skip-typecheck": "vite build"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:skip-typecheck": "vite build"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@iconify/vue": "^4.3.0",
@@ -19,6 +19,7 @@
     "@stripe/stripe-js": "^6.1.0",
     "@tsparticles/vue3": "^3.0.1",
     "add": "^2.0.6",
+    "aos": "^2.3.4",
     "apexcharts": "^4.5.0",
     "axios": "^1.8.4",
     "gsap": "^3.12.7",
