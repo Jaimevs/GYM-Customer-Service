@@ -56,16 +56,16 @@ const userRoutes: RouteRecordRaw[] = [
       layout: GeneralLayout,
     },
   },
-  {
-    path: "/estadisticas",
-    name: "StatisticsView",
-    component: StatisticsView,
-    meta: {
-      requiresAuth: true,
-      role: "usuario",
-      layout: GeneralLayout,
-    },
-  },
+  // {
+  //   path: "/estadisticas",
+  //   name: "StatisticsView",
+  //   component: StatisticsView,
+  //   meta: {
+  //     requiresAuth: true,
+  //     role: "usuario",
+  //     layout: GeneralLayout,
+  //   },
+  // },
   {
     path: "/membresia",
     name: "MembershipView",

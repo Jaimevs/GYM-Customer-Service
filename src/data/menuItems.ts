@@ -67,7 +67,7 @@ export const userMenuItems = [
     link: "/planes-entrenamiento",
     icon: "solar:dumbbell-linear",
   },
-  { title: "Estadísticas", link: "/estadisticas", icon: "solar:graph-linear" },
+  // { title: "Estadísticas", link: "/estadisticas", icon: "solar:graph-linear" },
   { title: "Membresía", link: "/membresia", icon: "solar:card-linear" },
   { title: "Mensajes", link: "/mensajes", icon: "mage:message" },
   {

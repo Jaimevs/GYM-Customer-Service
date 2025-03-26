@@ -7,12 +7,10 @@ const vuetify = createVuetify({
   directives,
   icons: {
     defaultSet: "mdi",
-
-    sets: {
-    },
+    sets: {},
   },
   theme: {
-    defaultTheme: "light", // Especificar el tema por defecto
+    defaultTheme: "light",
     themes: {
       light: {
         colors: {
@@ -23,7 +21,12 @@ const vuetify = createVuetify({
           info: "#2196F3",
           success: "#4CAF50",
           warning: "#FB8C00",
-          background: "#FFFFFF", // Fondo blanco por defecto
+          background: "#FFFFFF",
+          // Añade los colores adicionales que necesitas
+          teal: "#009688",
+          orange: "#FF9800",
+          purple: "#9C27B0",
+          indigo: "#3F51B5",
         },
       },
       dark: {
@@ -35,7 +38,12 @@ const vuetify = createVuetify({
           info: "#2196F3",
           success: "#4CAF50",
           warning: "#FB8C00",
-          background: "#121212", // Fondo oscuro para el tema dark
+          background: "#121212",
+          // Añade los mismos colores adicionales para el tema oscuro
+          teal: "#009688",
+          orange: "#FF9800",
+          purple: "#9C27B0",
+          indigo: "#3F51B5",
         },
       },
     },
