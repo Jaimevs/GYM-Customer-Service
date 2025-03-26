@@ -7,10 +7,9 @@ $color-gris-medio: #c3bdbd; /* Gris medio oscuro para texto */
 $color-rojo-botones: #ff2a00; /* Rojo vibrante para botones */
 $color-texto-botones: #f5eeee; /* Texto blanco/gris claro para botones */
 
-/* _variables.scss */
+/* --- Colores adicionales --- */
 $color-titulos: #E0E0E0; /* Gris claro brillante para títulos */
 $color-texto: #e2d8d8; /* Gris medio oscuro para texto */
-
 $color-rojo-vibrante: #FF2B00; /* Rojo vibrante */
 $color-gris-oscuro: #333333;
 $color-amarillo-dorado: #FFD700; /* Amarillo dorado */
@@ -18,18 +17,18 @@ $color-blanco: #FFFFFF; /* Blanco puro */
 $color-verde-lima: #32CD32;
 $color-gris-claro: #F5F5F5; /* Gris claro para fondos */
 
-/* Nuevos colores añadidos */
+/* --- Nuevos colores añadidos --- */
 $color-rojo-granate: #8B0000; /* Rojo granate principal */
 $color-gris-medio: #666666; /* Gris medio para gradientes */
 $color-rojo-calido: #FF4500; /* Rojo cálido para detalles */
 
-/* Colores adicionales */
+/* --- Colores adicionales --- */
 $color-azul-gimnasio: #0074D9;
 $color-gris-fondo: #F5F5F5;
 $color-texto-secundario: #666666; /* Texto gris para elementos menos importantes */
 $color-texto-principal: #333333; /* Texto oscuro para mejor contraste */
 
-/* Nuevas variables */
+/* --- Variables principales --- */
 $color-primario: $color-amarillo-dorado; /* Usamos el amarillo dorado como color primario */
 $color-secundario: $color-rojo-vibrante; /* Usamos el rojo vibrante como color secundario */
 $color-fondo-sidebar: $color-gris-claro; /* Fondo claro para el sidebar */
@@ -50,14 +49,28 @@ $sombra-suave: 0 2px 4px rgba(0, 0, 0, 0.1);
 $sombra-fuerte: 0 4px 8px rgba(0, 0, 0, 0.2);
 
 /* --- Tipografía --- */
-$fuente-titulo: 'Poppins', sans-serif; // Más moderna para títulos
-$fuente-principal: 'Roboto', sans-serif; // Fuente principal para texto
-$fuente-secundaria: 'Open Sans', sans-serif; // Fuente secundaria para elementos menos importantes
+$fuente-titulo: 'Poppins', sans-serif; /* Más moderna para títulos */
+$fuente-principal: 'Roboto', sans-serif; /* Fuente principal para texto */
+$fuente-secundaria: 'Open Sans', sans-serif; /* Fuente secundaria para elementos menos importantes */
 $fuente-landing: 'Bebas Neue', sans-serif;
+
+/* --- Colores para gráficas (tonos cálidos) --- */
+$color-grafica-rojo-fuego: #FF4500; /* Rojo fuego vibrante */
+$color-grafica-rojo-granate: #8B0000; /* Rojo granate profundo */
+$color-grafica-amarillo-dorado: #FFD700; /* Amarillo dorado brillante */
+$color-grafica-ocre: #D2691E; /* Ocre terroso */
+$color-grafica-cafe-oscuro: #8B4513; /* Café oscuro intenso */
+$color-grafica-naranja-calido: #FFA500; /* Naranja cálido */
+$color-grafica-marron-suave: #A0522D; /* Marrón suave */
+$color-grafica-rosa-neon: #FF1493; /* Rosa neón para contraste */
+
+/* --- Colores neutros adicionales para gráficas --- */
+$color-grafica-gris-carbon: #262626; /* Gris carbón oscuro para datos secundarios */
+$color-grafica-gris-plata: #C0C0C0; /* Gris plata claro para líneas o bordes */
 
 /* Exportar variables SCSS como propiedades CSS */
 :root {
-  /* Colores */
+  /* Colores generales */
   --color-texto-principal: #{$color-texto-principal};
   --color-primario: #{$color-primario};
   --color-secundario: #{$color-secundario};
@@ -76,4 +89,18 @@ $fuente-landing: 'Bebas Neue', sans-serif;
   --fuente-principal: #{$fuente-principal};
   --fuente-secundaria: #{$fuente-secundaria};
   --fuente-landing: #{$fuente-landing};
+
+  /* Colores para gráficas (tonos cálidos) */
+  --color-grafica-rojo-fuego: #{$color-grafica-rojo-fuego};
+  --color-grafica-rojo-granate: #{$color-grafica-rojo-granate};
+  --color-grafica-amarillo-dorado: #{$color-grafica-amarillo-dorado};
+  --color-grafica-ocre: #{$color-grafica-ocre};
+  --color-grafica-cafe-oscuro: #{$color-grafica-cafe-oscuro};
+  --color-grafica-naranja-calido: #{$color-grafica-naranja-calido};
+  --color-grafica-marron-suave: #{$color-grafica-marron-suave};
+  --color-grafica-rosa-neon: #{$color-grafica-rosa-neon};
+
+  /* Colores neutros adicionales para gráficas */
+  --color-grafica-gris-carbon: #{$color-grafica-gris-carbon};
+  --color-grafica-gris-plata: #{$color-grafica-gris-plata};
 }
