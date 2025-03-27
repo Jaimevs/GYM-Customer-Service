@@ -1,30 +1,47 @@
 <template>
-  <v-container class="messages-container">
-    <v-row>
+  <div class="messages-content">
+    <!-- Título con animación -->
+    <v-row data-aos="fade-down" data-aos-duration="800">
       <v-col cols="12">
-        <h1 class="text-h4 mb-4">Mensajes</h1>
+        <h1 class="messages-title">
+          <span class="title-text">Mensajes</span>
+          <span class="title-highlight"></span>
+        </h1>
       </v-col>
     </v-row>
 
-    <!-- Lista de conversaciones -->
-    <v-row>
-      <v-col cols="12" md="4">
-        <v-card class="conversation-list" elevation="1">
-          <v-card-title class="conversation-title">Conversaciones</v-card-title>
-          <v-card-text>
-            <v-list class="conversation-items">
+    <!-- Contenido principal -->
+    <v-row class="mb-6">
+      <!-- Lista de conversaciones -->
+      <v-col cols="12" md="4" data-aos="fade-right">
+        <v-card class="conversation-card" elevation="4">
+          <div class="card-header">
+            <div class="chart-icon-bg">
+              <Icon icon="solar:chat-round-line-outline" width="24" />
+            </div>
+            <h3 class="text-h6">Conversaciones</h3>
+            <v-spacer></v-spacer>
+            <v-btn icon small>
+              <Icon icon="solar:user-plus-outline" />
+            </v-btn>
+          </div>
+          <v-card-text class="pa-0">
+            <v-list class="conversation-list">
               <v-list-item v-for="(conversation, index) in conversations" :key="index"
-                @click="selectConversation(index)" class="conversation-item"
-                :class="{ 'selected-conversation': selectedConversation === conversation }">
+                @click="selectConversation(index)" :class="`conversation-item-${index}`"
+                :style="{ 'border-left': selectedIndex === index ? '4px solid #FF7043' : 'none' }">
                 <v-list-item-avatar>
-                  <v-img :src="conversation.avatar"></v-img>
+                  <v-avatar :color="getAvatarColor(index)" size="40">
+                    <span class="white--text">{{ getInitials(conversation.name) }}</span>
+                  </v-avatar>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title>{{ conversation.name }}</v-list-item-title>
+                  <v-list-item-title class="font-weight-medium">{{ conversation.name }}</v-list-item-title>
                   <v-list-item-subtitle>{{ conversation.lastMessage }}</v-list-item-subtitle>
                 </v-list-item-content>
                 <v-list-item-action>
-                  <v-badge v-if="conversation.unread" color="primary" :content="conversation.unread"></v-badge>
+                  <v-badge v-if="conversation.unread" :color="getBadgeColor(index)" :content="conversation.unread">
+                  </v-badge>
                 </v-list-item-action>
               </v-list-item>
             </v-list>
@@ -33,46 +50,68 @@
       </v-col>
 
       <!-- Área de mensajes -->
-      <v-col cols="12" md="8">
-        <v-card class="message-area-card" elevation="1">
-          <v-card-title class="message-area-title">
-            {{ selectedConversation ? selectedConversation.name : 'Selecciona una conversación' }}
-          </v-card-title>
-          <v-card-text class="message-area">
-            <div v-if="selectedConversation" class="messages">
+      <v-col cols="12" md="8" data-aos="fade-left">
+        <v-card class="messages-card" elevation="4">
+          <div class="card-header">
+            <div class="chart-icon-bg">
+              <Icon icon="ep:chat-round" width="24" />
+            </div>
+            <h3 class="text-h6">{{ selectedConversation ? selectedConversation.name : 'Selecciona una conversación' }}
+            </h3>
+          </div>
+          <v-card-text class="messages-area">
+            <div v-if="selectedConversation" class="messages-container">
               <div v-for="(message, index) in selectedConversation.messages" :key="index"
-                :class="['message', message.sender === 'coach' ? 'sent' : 'received']" ref="messageRef">
+                :class="['message-bubble', message.sender === 'coach' ? 'sent' : 'received']">
                 <div class="message-content">{{ message.text }}</div>
                 <div class="message-time">{{ message.time }}</div>
               </div>
             </div>
-            <div v-else class="text-center no-conversation">
-              <p>Selecciona una conversación para ver los mensajes.</p>
+            <div v-else class="no-conversation">
+              <v-icon size="64" color="grey lighten-1">mdi-forum-outline</v-icon>
+              <p class="text-subtitle-1 grey--text">Selecciona una conversación para comenzar</p>
             </div>
           </v-card-text>
-          <v-card-actions v-if="selectedConversation" class="message-input-area">
-            <v-text-field v-model="newMessage" label="Escribe un mensaje" outlined dense @keyup.enter="sendMessage"
-              class="message-input"></v-text-field>
-            <v-btn color="primary" @click="sendMessage" class="send-button">Enviar</v-btn>
+          <v-card-actions v-if="selectedConversation" class="message-actions">
+            <v-text-field v-model="newMessage" label="Escribe un mensaje" outlined dense hide-details
+              @keyup.enter="sendMessage" class="message-input"></v-text-field>
+            <v-btn color="primary" @click="sendMessage" class="send-button" :disabled="!newMessage.trim()">
+              <Icon icon="solar:arrow-up-outline" width="20" />
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
-import gsap from "gsap";
+import { defineComponent, ref, onMounted } from 'vue';
+import { Icon } from '@iconify/vue';
+import gsap from 'gsap';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 export default defineComponent({
-  name: "CoachMessagesView",
+  name: 'MessagesView',
+  components: {
+    Icon
+  },
   setup() {
+    // Inicializar animaciones
+    onMounted(() => {
+      AOS.init({
+        duration: 800,
+        once: true,
+        easing: 'ease-in-out-quad'
+      });
+    });
+
     // Lista de conversaciones
     const conversations = ref([
       {
         name: "Juan Pérez",
-        avatar: "https://via.placeholder.com/150",
+        avatar: "",
         lastMessage: "Claro, ¡reprogramemos la sesión!",
         unread: 2,
         messages: [
@@ -82,7 +121,7 @@ export default defineComponent({
       },
       {
         name: "María López",
-        avatar: "https://via.placeholder.com/150",
+        avatar: "",
         lastMessage: "Gracias por los consejos.",
         unread: 0,
         messages: [
@@ -90,180 +129,277 @@ export default defineComponent({
           { text: "Gracias por los consejos.", sender: "client", time: "09:15 AM" },
         ],
       },
+      {
+        name: "Carlos Ramírez",
+        avatar: "",
+        lastMessage: "Entendido, nos vemos mañana",
+        unread: 1,
+        messages: [
+          { text: "Recuerda que mañana tenemos sesión a las 8am", sender: "coach", time: "08:30 AM" },
+          { text: "Entendido, nos vemos mañana", sender: "client", time: "08:35 AM" },
+        ],
+      },
     ]);
 
     // Conversación seleccionada
-    const selectedConversation = ref<typeof conversations.value[0] | null>(null);
-
-    // Nuevo mensaje
+    const selectedConversation = ref<any>(null);
+    const selectedIndex = ref<number | null>(null);
     const newMessage = ref("");
 
-    // Seleccionar una conversación
-    const selectConversation = (index: number) => {
-      selectedConversation.value = conversations.value[index];
-      conversations.value[index].unread = 0; // Marcar como leído
+    // Funciones de ayuda
+    const getInitials = (name: string) => {
+      return name.split(' ').map(n => n[0]).join('');
+    };
 
-      // Animación GSAP para resaltar la conversación seleccionada
-      gsap.to(".selected-conversation", {
-        backgroundColor: "#e9f7f2",
-        scale: 1.02,
+    const getAvatarColor = (index: number) => {
+      const colors = ['#FF7043', '#FFB74D', '#D84315', '#8D6E63', '#5D4037'];
+      return colors[index % colors.length];
+    };
+
+    const getBadgeColor = (index: number) => {
+      const colors = ['#FF7043', '#FFB74D', '#D84315', '#8D6E63', '#5D4037'];
+      return colors[index % colors.length];
+    };
+
+    // Seleccionar conversación
+    const selectConversation = (index: number) => {
+      selectedIndex.value = index;
+      selectedConversation.value = conversations.value[index];
+      conversations.value[index].unread = 0;
+
+      // Animación GSAP
+      gsap.from('.message-bubble', {
+        opacity: 0,
+        y: 20,
         duration: 0.3,
-        ease: "power2.out",
+        stagger: 0.1,
+        ease: "power2.out"
       });
     };
 
-    // Enviar un mensaje
+    // Enviar mensaje
     const sendMessage = () => {
       if (newMessage.value.trim() && selectedConversation.value) {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
         selectedConversation.value.messages.push({
           text: newMessage.value,
           sender: "coach",
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          time: timeString
         });
-        newMessage.value = ""; // Limpiar el campo de mensaje
 
-        // Animación GSAP para nuevos mensajes
-        gsap.fromTo(
-          ".message:last-child",
-          { opacity: 0, y: -20 },
-          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-        );
+        // Actualizar último mensaje
+        selectedConversation.value.lastMessage = newMessage.value.length > 30
+          ? newMessage.value.substring(0, 30) + '...'
+          : newMessage.value;
+
+        // Animación GSAP
+        gsap.from('.message-bubble:last-child', {
+          opacity: 0,
+          y: 20,
+          duration: 0.3,
+          ease: "power2.out"
+        });
+
+        newMessage.value = "";
       }
     };
-
-    // Animación inicial de las conversaciones
-    onMounted(() => {
-      gsap.from(".conversation-item", {
-        opacity: 0,
-        y: 20,
-        stagger: 0.1,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-    });
 
     return {
       conversations,
       selectedConversation,
+      selectedIndex,
       newMessage,
+      getInitials,
+      getAvatarColor,
+      getBadgeColor,
       selectConversation,
-      sendMessage,
+      sendMessage
     };
   },
 });
 </script>
 
-<style scoped>
-/* Estilo general */
-.messages-container {
-  background-color: #f0f2f5;
-  padding: 20px;
-  height: 100vh;
+<style scoped lang="scss">
+.messages-content {
+  padding: 24px;
+  background-color: #FFFFFF;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
-/* Card de conversaciones */
-.conversation-list {
-  background-color: white;
-  border-radius: 10px;
+.messages-title {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 8px;
+
+  .title-text {
+    position: relative;
+    z-index: 2;
+    font-size: 2.25rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--color-grafica-rojo-fuego), var(--color-grafica-amarillo-dorado));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-family: var(--fuente-titulo);
+  }
+
+  .title-highlight {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 69, 0, 0.2);
+    border-radius: 4px;
+    z-index: 1;
+    transform: rotate(-1deg);
+  }
 }
 
-.conversation-title {
-  background-color: #075e54;
-  color: white;
-  font-weight: bold;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+/* Tarjeta de conversaciones */
+.conversation-card {
+  border-radius: 16px;
+  overflow: hidden;
+  height: 80vh;
+
+  .conversation-list {
+    max-height: calc(80vh - 70px);
+    overflow-y: auto;
+  }
+
+  .v-list-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #FFF3E0;
+    }
+  }
 }
 
-.conversation-items {
-  padding: 0;
-}
-
-.conversation-item {
-  border-bottom: 1px solid #f0f2f5;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.conversation-item:hover {
-  background-color: #f5f5f5;
-}
-
-.selected-conversation {
-  background-color: #e9f7f2;
-  border-left: 3px solid #25d366;
-}
-
-/* Card de mensajes */
-.message-area-card {
-  background-color: white;
-  border-radius: 10px;
+/* Tarjeta de mensajes */
+.messages-card {
+  border-radius: 16px;
+  overflow: hidden;
   height: 80vh;
   display: flex;
   flex-direction: column;
+
+  .messages-area {
+    flex-grow: 1;
+    padding: 16px;
+    background-color: #F5E7DE;
+    overflow-y: auto;
+  }
+
+  .no-conversation {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .messages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .message-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    &.sent {
+      align-self: flex-end;
+      background-color: #FFE0B2;
+      border-bottom-right-radius: 4px;
+    }
+
+    &.received {
+      align-self: flex-start;
+      background-color: white;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-content {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: #5D4037;
+      text-align: right;
+    }
+  }
+
+  .message-actions {
+    padding: 16px;
+    background-color: white;
+    border-top: 1px solid #E0E0E0;
+
+    .message-input {
+      flex-grow: 1;
+    }
+
+    .send-button {
+      margin-left: 12px;
+      min-width: 48px;
+    }
+  }
 }
 
-.message-area-title {
-  background-color: #075e54;
-  color: white;
-  font-weight: bold;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.message-area {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 10px;
-  background-color: #e5ddd5;
-}
-
-.messages {
+/* Estilos para el card-header (compartido con ReportsView) */
+.card-header {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  padding: 16px;
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #e0e0e0;
+
+  h3 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+  }
+
+  .chart-icon-bg {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 112, 67, 0.1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    color: #FF7043;
+  }
 }
 
-.message {
-  max-width: 70%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  position: relative;
-}
+/* Responsive */
+@media (max-width: 960px) {
+  .messages-title {
+    .title-text {
+      font-size: 1.75rem;
+    }
 
-.message.sent {
-  align-self: flex-end;
-  background-color: #dcf8c6;
-}
+    .title-highlight {
+      height: 8px;
+      bottom: 3px;
+    }
+  }
 
-.message.received {
-  align-self: flex-start;
-  background-color: white;
-}
-
-.message-time {
-  font-size: 0.75rem;
-  color: #666;
-  margin-top: 4px;
-}
-
-/* Campo de texto para enviar mensajes */
-.message-input-area {
-  background-color: white;
-  padding: 10px;
-  border-top: 1px solid #f0f2f5;
-}
-
-.message-input {
-  flex-grow: 1;
-}
-
-.send-button {
-  margin-left: 10px;
-}
-
-.no-conversation {
-  color: #666;
-  font-style: italic;
+  .conversation-card,
+  .messages-card {
+    height: auto;
+    max-height: 50vh;
+  }
 }
 </style>
