@@ -62,7 +62,7 @@ const memberships = [
     ],
   },
   {
-    name: 'Premium',
+    name: 'Estándar',
     price: 1000,
     description: 'Acceso completo + clases grupales.',
     benefits: [
@@ -73,7 +73,7 @@ const memberships = [
     ],
   },
   {
-    name: 'VIP',
+    name: 'Premium',
     price: 2000,
     description: 'Acceso ilimitado + entrenador personal.',
     benefits: [
