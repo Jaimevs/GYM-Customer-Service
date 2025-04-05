@@ -21,7 +21,8 @@
           class="toggle-password" @click="togglePasswordVisibility" />
       </div>
       <button type="submit" class="btn solid" ref="submitButton" :disabled="loading">
-        {{ loading ? 'Cargando...' : 'Continuar' }}
+        <span v-if="loading" class="loader"></span>
+        <span v-else>Continuar</span>
       </button>
     </form>
 
@@ -50,15 +51,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeMount } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import gsap from 'gsap';
-import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore'; // Importar el store de Pinia
-
-// Configura la URL de tu API
-const API_URL = 'https://gymtoday1243.com';
+import AuthService from '@/services/AuthService';
+import GoogleAuthService from '@/services/GoogleAuthService';
 
 const router = useRouter();
 const route = useRoute();
@@ -82,88 +81,44 @@ const togglePasswordVisibility = () => {
   showPassword.value = !showPassword.value;
 };
 
-// Verificar si hay token o mensaje de error en la URL
-onBeforeMount(() => {
-  console.log('Verificando parámetros de URL');
-  const token = route.query.token as string;
-
-  if (token) {
-    console.log('Token encontrado en URL');
-    try {
-      // Decodificar el token y guardarlo en localStorage
-      localStorage.setItem('token', token);
-
-      // Configurar axios para usar el token
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-      // Redireccionar al dashboard (en un sistema real, verificarías los roles)
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error al procesar el token:', error);
-      message.value = {
-        text: 'Error al procesar la autenticación',
-        type: 'error'
-      };
-    }
-  }
-
-  // Verificar si hay un error
-  const error = route.query.error as string;
-  if (error) {
-    message.value = {
-      text: decodeURIComponent(error),
-      type: 'error'
-    };
-  }
-});
-
-// En tu método de login (LoginView.vue)
+// En tu método de login
 const handleSubmit = async () => {
   loading.value = true;
   message.value = null;
 
   try {
-    const response = await axios.post(`${API_URL}/api/login/`, {
-      Correo_Electronico: email.value,
-      Contrasena: password.value,
+    // Usar AuthService para iniciar sesión
+    const response = await AuthService.login({
+      email: email.value,
+      password: password.value
     });
 
-    if (response.data && response.data.access_token) {
-      // Guardar token y datos de usuario
-      localStorage.setItem("token", response.data.access_token);
-      localStorage.setItem("user", JSON.stringify({
-        id: response.data.user_id,
-        username: response.data.username,
-        email: response.data.email,
-        roles: response.data.roles || [],
-      }));
-      localStorage.setItem("userRole", response.data.roles[0]); // Guardar el rol
+    // Actualizar el store de Pinia
+    const authStore = useAuthStore();
+    authStore.setRole(response.roles[0] || 'usuario'); 
+    authStore.setUsername(response.Nombre_Usuario);
+    authStore.setAuthentication(true);
 
-      // Actualizar el store de Pinia
-      const authStore = useAuthStore();
-      authStore.setRole(response.data.roles[0]); // Actualizar el rol
-      authStore.setUsername(response.data.username);
-      authStore.setAuthentication(true);
-
-      console.log("Usuario autenticado:", response.data); // Depuración
-
-      // Redireccionar según el rol
-      if (response.data.roles.includes("admin")) {
-        router.push("/dashboard");
-      } else if (response.data.roles.includes("usuario")) {
-        router.push("/user-dashboard");
-      } else if (response.data.roles.includes("entrenador")) {
-        router.push("/coach-dashboard");
-      } else {
-        router.push("/dashboard"); // Redirección por defecto
-      }
+    // Redireccionar según el rol
+    if (response.roles.includes("admin")) {
+      router.push("/dashboard");
+    } else if (response.roles.includes("usuario")) {
+      router.push("/user-dashboard");
+    } else if (response.roles.includes("entrenador")) {
+      router.push("/coach-dashboard");
     } else {
-      throw new Error("Respuesta inválida del servidor");
+      router.push("/dashboard"); // Redirección por defecto
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error de login:", error);
+    
+    let errorMessage = "Error al iniciar sesión";
+    if (error.response) {
+      errorMessage = error.response.data?.mensaje || errorMessage;
+    }
+    
     message.value = {
-      text: error.response?.data?.mensaje || "Error al iniciar sesión",
+      text: errorMessage,
       type: "error",
     };
   } finally {
@@ -173,52 +128,57 @@ const handleSubmit = async () => {
 
 // Manejar login con Google
 const handleGoogleLogin = () => {
-  console.log('Iniciando login con Google');
-  // Usa la URL correcta para redirigir a la autenticación de Google
-  window.location.href = `${API_URL}/api/auth/google`;
+  loading.value = true;
+  message.value = null;
+  
+  try {
+    // Usar el servicio de autenticación de Google
+    GoogleAuthService.startGoogleAuth();
+  } catch (error) {
+    console.error('Error al iniciar autenticación con Google:', error);
+    message.value = {
+      text: 'Error al iniciar autenticación con Google',
+      type: 'error',
+    };
+    loading.value = false;
+  }
 };
 
 onMounted(() => {
+  // Verificar si hay errores en la URL
+  const errorParam = route.query.error as string;
+  if (errorParam) {
+    message.value = {
+      text: decodeURIComponent(errorParam),
+      type: 'error'
+    };
+  }
+
   // Animaciones GSAP
-  gsap.to(emailField.value, {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out',
-    delay: 0.2,
-  });
+  gsap.fromTo(emailField.value, 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 }
+  );
 
-  gsap.to(passwordField.value, {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out',
-    delay: 0.4,
-  });
+  gsap.fromTo(passwordField.value, 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 }
+  );
 
-  gsap.to(submitButton.value, {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out',
-    delay: 0.6,
-  });
+  gsap.fromTo(submitButton.value, 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.6 }
+  );
 
-  gsap.to(dividerWrapper.value, {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out',
-    delay: 0.8,
-  });
+  gsap.fromTo(dividerWrapper.value, 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.8 }
+  );
 
-  gsap.to(googleButton.value, {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out',
-    delay: 1.0,
-  });
+  gsap.fromTo(googleButton.value, 
+    { opacity: 0, y: 20 }, 
+    { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 1.0 }
+  );
 });
 </script>
 
@@ -255,21 +215,52 @@ onMounted(() => {
 // Estilos para el campo de contraseña
 .password-field {
   position: relative;
+}
 
-  .toggle-password-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #aaa;
-    /* Color gris claro */
-    transition: color 0.3s ease;
+// Estilos para el toggle de contraseña
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #aaa;
+  transition: color 0.3s ease;
 
-    &:hover {
-      color: #666;
-      /* Cambio de color al pasar el mouse */
-    }
+  &:hover {
+    color: #666;
   }
+}
+
+// Estilos para el botón de Google
+.btn.google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #ffffff;
+  color: #757575;
+  border: 1px solid #dddddd;
+  font-weight: 500;
+  margin-bottom: 15px;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+// Estilo para el loader
+.loader {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>

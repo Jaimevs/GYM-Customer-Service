@@ -1,6 +1,8 @@
 import { RouteRecordRaw } from "vue-router";
 import LoginView from "@/views/auth/LoginView.vue";
 import RegisterView from "@/views/auth/RegisterView.vue";
+import OAuthCallbackView from "@/views/auth/OAuthCallbackView.vue";
+import DebugToolView from "@/views/auth/DebugToolView.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 
 const authRoutes: RouteRecordRaw[] = [
@@ -14,6 +16,13 @@ const authRoutes: RouteRecordRaw[] = [
     path: "/register",
     name: "Register",
     component: RegisterView,
+    meta: { layout: AuthLayout },
+  },
+  {
+    // Ruta para el callback de Google OAuth
+    path: "/login/oauth",
+    name: "OAuthCallback",
+    component: OAuthCallbackView,
     meta: { layout: AuthLayout },
   },
   {
@@ -53,6 +62,15 @@ const authRoutes: RouteRecordRaw[] = [
         }
       }
       return { path: "/" };
+    },
+  },
+  {
+    path: "/auth/debug",
+    name: "DebugTool",
+    component: DebugToolView,
+    meta: { 
+      requiresAuth: true,
+      layout: AuthLayout 
     },
   },
 ];

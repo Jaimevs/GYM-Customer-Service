@@ -23,6 +23,12 @@
           <input type="email" v-model="email" placeholder="Correo electrónico" required />
         </div>
 
+        <!-- Teléfono (ahora requerido) -->
+        <div class="input-field" ref="phoneField">
+          <Icon icon="eva:phone-outline" width="20" height="20" />
+          <input type="tel" v-model="phone" placeholder="Número de teléfono" required />
+        </div>
+
         <!-- Contraseña -->
         <div class="input-field" ref="passwordField">
           <Icon icon="solar:lock-password-linear" width="20" height="20" />
@@ -83,8 +89,10 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { Icon } from '@iconify/vue';
 import gsap from 'gsap';
-import AuthService from '@/services/AuthService';
+import axios from 'axios';
 import VerificationCode from '@/components/VerificationCode.vue';
+import GoogleAuthService from '@/services/GoogleAuthService';
+import AuthService from '@/services/AuthService';
 
 const router = useRouter();
 const route = useRoute();
@@ -92,16 +100,21 @@ const username = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
+const phone = ref('');
 const loading = ref(false);
 const message = ref<{ text: string; type: 'success' | 'error' } | null>(null);
 const showVerification = ref(false); // Controlar la visibilidad del componente de verificación
 const showPassword = ref(false); // Mostrar/ocultar contraseña
 const showConfirmPassword = ref(false); // Mostrar/ocultar confirmación de contraseña
 
+// API URL 
+const API_URL = 'https://gymtoday12.com';
+
 // Referencias para las animaciones
 const title = ref(null);
 const usernameField = ref(null);
 const emailField = ref(null);
+const phoneField = ref(null);
 const passwordField = ref(null);
 const confirmPasswordField = ref(null);
 const submitButton = ref(null);
@@ -119,24 +132,60 @@ const toggleConfirmPasswordVisibility = () => {
   showConfirmPassword.value = !showConfirmPassword.value;
 };
 
-// Validar entrada de email
+// Validar entrada de email (solo formato básico)
 const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-// Validar contraseña
-const validatePassword = (password: string): boolean => {
-  // La contraseña debe tener al menos 8 caracteres, una letra y un número
-  return password.length >= 8 && /[A-Za-z]/.test(password) && /[0-9]/.test(password);
+// Validar formato de teléfono
+const validatePhone = (phone: string): boolean => {
+  // Verifica que el teléfono tenga al menos 10 dígitos
+  return /^\d{10,}$/.test(phone.replace(/\D/g, ''));
 };
 
 // Manejar el envío del formulario
 const handleSubmit = async () => {
+  // Validación básica de correo electrónico
+  if (!validateEmail(email.value)) {
+    message.value = {
+      text: 'Por favor, ingresa un correo electrónico válido',
+      type: 'error',
+    };
+    return;
+  }
+
+  // Validar que el teléfono no esté vacío
+  if (!phone.value) {
+    message.value = {
+      text: 'El número telefónico es obligatorio',
+      type: 'error',
+    };
+    return;
+  }
+
+  // Validar formato de teléfono
+  if (!validatePhone(phone.value)) {
+    message.value = {
+      text: 'Por favor, ingresa un número telefónico válido (al menos 10 dígitos)',
+      type: 'error',
+    };
+    return;
+  }
+
   // Validar que las contraseñas coincidan
   if (password.value !== confirmPassword.value) {
     message.value = {
       text: 'Las contraseñas no coinciden',
+      type: 'error',
+    };
+    return;
+  }
+
+  // Validar que la contraseña no esté vacía
+  if (!password.value) {
+    message.value = {
+      text: 'La contraseña no puede estar vacía',
       type: 'error',
     };
     return;
@@ -149,15 +198,17 @@ const handleSubmit = async () => {
     // Guardar el email para recuperarlo durante la verificación
     localStorage.setItem('pendingVerificationEmail', email.value);
     
-    const response = await AuthService.register({
+    // Usar el servicio de autenticación para registrar al usuario
+    await AuthService.register({
       username: username.value,
       email: email.value,
       password: password.value,
+      phone: phone.value
     });
 
     // Mostrar mensaje de éxito
     message.value = {
-      text: response.message || 'Se ha enviado un código de verificación a tu correo electrónico.',
+      text: 'Se ha enviado un código de verificación a tu correo electrónico.',
       type: 'success',
     };
 
@@ -165,10 +216,29 @@ const handleSubmit = async () => {
     showVerification.value = true;
   } catch (error: any) {
     console.error('Error de registro:', error);
+    
+    // Manejo de errores detallado
+    let errorMessage = 'Error al registrarse';
+    
+    if (error.response) {
+      // El servidor respondió con un código de estado diferente de 2xx
+      if (error.response.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.response.status === 400) {
+        errorMessage = 'El usuario o correo electrónico ya existe';
+      } else {
+        errorMessage = `Error ${error.response.status}: ${error.response.statusText}`;
+      }
+    } else if (error.request) {
+      // La solicitud se hizo pero no se recibió respuesta
+      errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+    }
+    
     message.value = {
-      text: error.response?.data?.detail || 'Error al registrarse',
+      text: errorMessage,
       type: 'error',
     };
+    
     // Limpiar contraseñas en caso de error
     password.value = '';
     confirmPassword.value = '';
@@ -180,7 +250,19 @@ const handleSubmit = async () => {
 // Manejar registro con Google
 const handleGoogleRegister = () => {
   loading.value = true;
-  AuthService.loginWithGoogle();
+  message.value = null;
+  
+  try {
+    // Usar el servicio de autenticación de Google
+    GoogleAuthService.startGoogleAuth();
+  } catch (error) {
+    console.error('Error al iniciar autenticación con Google:', error);
+    message.value = {
+      text: 'Error al iniciar autenticación con Google',
+      type: 'error',
+    };
+    loading.value = false;
+  }
 };
 
 onMounted(() => {
@@ -188,10 +270,6 @@ onMounted(() => {
   const pendingEmail = localStorage.getItem('pendingVerificationEmail');
   if (pendingEmail) {
     email.value = pendingEmail;
-    
-    // Si venimos desde una recarga y teníamos un registro pendiente
-    // podríamos decidir mostrar directamente la pantalla de verificación
-    // pero por ahora lo dejamos así para mantener compatibilidad
   }
 
   // Animaciones GSAP
@@ -200,12 +278,13 @@ onMounted(() => {
     { ref: title.value, delay: staggerDelay * 1 },
     { ref: usernameField.value, delay: staggerDelay * 2 },
     { ref: emailField.value, delay: staggerDelay * 3 },
-    { ref: passwordField.value, delay: staggerDelay * 4 },
-    { ref: confirmPasswordField.value, delay: staggerDelay * 5 },
-    { ref: submitButton.value, delay: staggerDelay * 6 },
-    { ref: dividerWrapper.value, delay: staggerDelay * 7 },
-    { ref: googleButton.value, delay: staggerDelay * 8 },
-    { ref: loginText.value, delay: staggerDelay * 9 }
+    { ref: phoneField.value, delay: staggerDelay * 4 },
+    { ref: passwordField.value, delay: staggerDelay * 5 },
+    { ref: confirmPasswordField.value, delay: staggerDelay * 6 },
+    { ref: submitButton.value, delay: staggerDelay * 7 },
+    { ref: dividerWrapper.value, delay: staggerDelay * 8 },
+    { ref: googleButton.value, delay: staggerDelay * 9 },
+    { ref: loginText.value, delay: staggerDelay * 10 }
   ];
 
   elements.forEach(elem => {
@@ -248,5 +327,31 @@ onMounted(() => {
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+// Estilos para el toggle de contraseña
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+// Estilos específicos para el botón de Google
+.btn.google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #ffffff;
+  color: #757575;
+  border: 1px solid #dddddd;
+  font-weight: 500;
+  margin-bottom: 15px;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
 }
 </style>
