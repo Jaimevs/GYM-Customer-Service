@@ -26,13 +26,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, defineProps } from "vue";
 import { useRouter } from "vue-router";
 import gsap from "gsap";
 import axios from "axios";
 
+// Props para recibir el email del componente padre
+const props = defineProps({
+  email: {
+    type: String,
+    required: true
+  }
+});
+
 const router = useRouter();
-const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday1243.com";
+const API_URL = 'https://gymtoday12.com';
 const digits = ref(Array(6).fill("")); // Array para almacenar cada dígito
 const loading = ref(false); // Estado de carga
 const message = ref<{ text: string; type: "success" | "error" } | null>(null); // Mensaje de respuesta
@@ -42,6 +50,13 @@ const messageElement = ref<HTMLElement | null>(null); // Referencia al mensaje
 const handleDigitInput = (index: number, event: Event) => {
   const target = event.target as HTMLInputElement;
   const value = target.value;
+
+  // Asegurarse de que solo se ingresen números
+  if (value && !/^\d+$/.test(value)) {
+    digits.value[index] = "";
+    target.value = "";
+    return;
+  }
 
   // Si se ingresa un valor, mover el foco al siguiente campo
   if (value && index < 5) {
@@ -71,12 +86,14 @@ const handleDelete = (index: number, event: KeyboardEvent) => {
 };
 
 // Animación del campo de entrada al enfocarse
-const animateInputField = () => {
-  gsap.fromTo(
-    ".digits-container",
-    { scale: 1 },
-    { scale: 1.05, duration: 0.3, ease: "power2.out" }
-  );
+const animateInputField = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  gsap.to(target, {
+    scale: 1.1,
+    duration: 0.2,
+    yoyo: true,
+    repeat: 1
+  });
 };
 
 // Animación mejorada del mensaje de éxito/error
@@ -127,104 +144,71 @@ const handleVerification = async () => {
     const code = digits.value.join('');
 
     console.log('Enviando verificación con código:', code);
+    console.log('Email para verificación:', props.email);
 
-    try {
-      // Intenta con la verificación simplificada (solo el código)
-      const response = await axios.post(`${API_URL}/api/api/verify-code/`, {
-        code: code
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Respuesta de verificación:', response);
-      handleSuccessVerification();
-    } catch (error) {
-      // Si falla, intenta con el endpoint que requiere email
-      try {
-        // Recupera el email del localStorage si existe
-        const storedEmail = localStorage.getItem('pendingVerificationEmail');
-        
-        if (storedEmail) {
-          console.log('Intentando con email almacenado:', storedEmail);
-          
-          const response = await axios.post(`${API_URL}/api/api/users/verify/`, {
-            email: storedEmail,
-            code: code
-          }, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          console.log('Respuesta de verificación con email:', response);
-          handleSuccessVerification();
-        } else {
-          throw new Error('No se encontró el correo electrónico para la verificación');
-        }
-      } catch (secondError) {
-        handleVerificationError(secondError);
+    // Realizar la solicitud usando la API correcta
+    const response = await axios.post(`${API_URL}/api/users/verify/`, {
+      email: props.email,
+      code: code
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
+    
+    console.log('Respuesta de verificación:', response.data);
+    
+    // Manejar respuesta exitosa
+    message.value = {
+      text: '¡Tu cuenta ha sido verificada exitosamente!',
+      type: 'success',
+    };
+    animateMessage();
+
+    // Limpiar el email almacenado
+    localStorage.removeItem('pendingVerificationEmail');
+
+    // Redirigir al usuario después de la verificación
+    setTimeout(() => {
+      router.push({ path: '/login' });
+    }, 2000);
+
+  } catch (error: any) {
+    console.error('Error de verificación:', error);
+    
+    // Preparar mensaje de error
+    let errorMsg = 'Error al verificar el código';
+    
+    if (axios.isAxiosError(error) && error.response) {
+      // Error de respuesta del servidor
+      if (error.response.data?.detail) {
+        errorMsg = error.response.data.detail;
+      } else if (error.response.status === 400) {
+        errorMsg = 'Código inválido o expirado';
+      } else {
+        errorMsg = `Error ${error.response.status}: ${error.response.statusText}`;
+      }
+      
+      console.error('Detalles del error:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      });
+    } else if (axios.isAxiosError(error) && error.request) {
+      // Error de conexión
+      errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+    } else if (error instanceof Error) {
+      errorMsg = error.message;
     }
-  } catch (error) {
-    handleVerificationError(error);
+    
+    message.value = {
+      text: errorMsg,
+      type: 'error',
+    };
+    animateMessage();
   } finally {
     loading.value = false;
   }
-};
-
-// Manejar verificación exitosa
-const handleSuccessVerification = () => {
-  message.value = {
-    text: '¡Tu cuenta ha sido creada exitosamente!',
-    type: 'success',
-  };
-  animateMessage();
-
-  // Limpiar el email almacenado
-  localStorage.removeItem('pendingVerificationEmail');
-
-  // Redirigir al usuario después de la verificación
-  setTimeout(() => {
-    router.push({ path: '/login' });
-  }, 3000);
-};
-
-// Manejar errores de verificación
-const handleVerificationError = (error: any) => {
-  console.error('Error de verificación:', error);
-  
-  // Preparar mensaje de error
-  let errorMsg = 'Error al verificar el código';
-  
-  if (axios.isAxiosError(error) && error.response) {
-    // Error de respuesta del servidor
-    if (error.response.data?.detail) {
-      errorMsg = error.response.data.detail;
-    } else if (error.response.status === 400) {
-      errorMsg = 'Código inválido o expirado';
-    } else {
-      errorMsg = `Error ${error.response.status}: ${error.response.statusText}`;
-    }
-    
-    console.error('Detalles del error:', {
-      status: error.response.status,
-      statusText: error.response.statusText,
-      data: error.response.data
-    });
-  } else if (axios.isAxiosError(error) && error.request) {
-    // Error de conexión
-    errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
-  } else if (error instanceof Error) {
-    errorMsg = error.message;
-  }
-  
-  message.value = {
-    text: errorMsg,
-    type: 'error',
-  };
-  animateMessage();
 };
 
 // Animación inicial del contenedor al montar el componente

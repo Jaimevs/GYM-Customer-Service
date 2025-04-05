@@ -1,359 +1,247 @@
 <template>
-    <div class="verification-container">
-      <h2 class="verification-title">Verificación de Correo</h2>
-      <p class="verification-message">
-        Te hemos enviado un código de 6 dígitos a tu correo electrónico. Por favor, ingrésalo a continuación para activar tu cuenta.
-      </p>
-  
-      <!-- Campos de entrada para cada dígito del código de verificación -->
-      <div class="digits-container">
-        <input v-for="(digit, index) in digits" :key="index" type="text" v-model="digits[index]" maxlength="1"
-          @input="handleDigitInput(index, $event)" @keydown.delete="handleDelete(index, $event)"
-          @focus="animateInputField" class="digit-input" />
-      </div>
-  
-      <!-- Botón para enviar el código -->
-      <button @click="handleVerification" class="btn solid" :disabled="loading">
-        <span v-if="loading" class="loader"></span>
-        <span v-else>{{ loading ? 'Verificando...' : 'Verificar' }}</span>
-      </button>
-  
-      <!-- Mensaje de error o éxito -->
-      <div v-if="message" :class="['message', message.type]" ref="messageElement">
-        {{ message.text }}
-      </div>
+  <div class="oauth-callback-container">
+    <div class="loader-container" v-if="loading">
+      <div class="loader"></div>
+      <p>Completando la autenticación...</p>
     </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref, onMounted, defineProps } from "vue";
-  import { useRouter } from "vue-router";
-  import gsap from "gsap";
-  import axios from "axios";
-  
-  // Props para recibir el email del componente padre
-  const props = defineProps({
-    email: {
-      type: String,
-      required: true
-    }
-  });
-  
-  const router = useRouter();
-  const API_URL = 'https://gymtoday12.com';
-  const digits = ref(Array(6).fill("")); // Array para almacenar cada dígito
-  const loading = ref(false); // Estado de carga
-  const message = ref<{ text: string; type: "success" | "error" } | null>(null); // Mensaje de respuesta
-  const messageElement = ref<HTMLElement | null>(null); // Referencia al mensaje
-  
-  // Función para manejar la entrada de dígitos
-  const handleDigitInput = (index: number, event: Event) => {
-    const target = event.target as HTMLInputElement;
-    const value = target.value;
-  
-    // Asegurarse de que solo se ingresen números
-    if (value && !/^\d+$/.test(value)) {
-      digits.value[index] = "";
-      target.value = "";
-      return;
-    }
-  
-    // Si se ingresa un valor, mover el foco al siguiente campo
-    if (value && index < 5) {
-      const nextInput = document.querySelector(
-        `.digit-input:nth-child(${index + 2})`
-      ) as HTMLInputElement;
-      if (nextInput) nextInput.focus();
-    }
-  
-    // Actualizar el dígito en el array
-    digits.value[index] = value;
     
-    // Si se completaron todos los dígitos y estamos en el último, verificar automáticamente
-    if (index === 5 && !digits.value.some(d => d === "")) {
-      handleVerification();
-    }
-  };
+    <div v-if="error" class="error-message">
+      <h3>Error de autenticación</h3>
+      <p>{{ errorMessage }}</p>
+      <router-link to="/login" class="btn">Volver al inicio de sesión</router-link>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+import axios from 'axios';
+
+const API_URL = "https://gymtoday12.com";
+
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+const loading = ref(true);
+const error = ref(false);
+const errorMessage = ref('');
+
+onMounted(() => {
+  console.log('OAuthCallbackView montado, procesando respuesta...');
   
-  // Función para manejar la tecla de borrado (delete/backspace)
-  const handleDelete = (index: number, event: KeyboardEvent) => {
-    if (event.key === "Backspace" && index > 0 && !digits.value[index]) {
-      const prevInput = document.querySelector(
-        `.digit-input:nth-child(${index})`
-      ) as HTMLInputElement;
-      if (prevInput) prevInput.focus();
-    }
-  };
+  // Obtener los parámetros de la URL
+  const queryParams = new URLSearchParams(window.location.search);
   
-  // Animación del campo de entrada al enfocarse
-  const animateInputField = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    gsap.to(target, {
-      scale: 1.1,
-      duration: 0.2,
-      yoyo: true,
-      repeat: 1
-    });
-  };
+  // Registrar todos los parámetros recibidos para depuración
+  const params = Object.fromEntries(queryParams.entries());
+  console.log('Parámetros recibidos:', params);
   
-  // Animación mejorada del mensaje de éxito/error
-  const animateMessage = () => {
-    if (messageElement.value) {
-      gsap.fromTo(
-        messageElement.value,
-        { opacity: 0, y: 20 }, // Inicia ligeramente abajo
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "power2.out",
-          onComplete: () => {
-            // Si es un error, agregamos un pequeño "shake" para llamar la atención
-            if (message.value?.type === "error") {
-              gsap.to(messageElement.value, {
-                x: [-5, 5, -5, 5, 0], // Efecto de "shake"
-                duration: 0.4,
-                ease: "power1.inOut",
-              });
-            }
-          },
+  // Verificar si hay un error
+  const errorParam = queryParams.get('error');
+  if (errorParam) {
+    error.value = true;
+    loading.value = false;
+    errorMessage.value = errorParam === 'authentication_failed' 
+      ? 'Error de autenticación con Google' 
+      : 'Error del servidor durante la autenticación';
+    console.error('Error detectado en la URL:', errorParam);
+    return;
+  }
+  
+  // Procesar el callback
+  processCallback(queryParams);
+});
+
+// Función para procesar el callback
+const processCallback = async (queryParams: URLSearchParams) => {
+  try {
+    // Verificar si recibimos datos completos
+    const encodedData = queryParams.get('data');
+    
+    if (encodedData) {
+      console.log('Datos codificados encontrados, decodificando...');
+      try {
+        // Decodificar y parsear los datos JSON
+        const userData = JSON.parse(decodeURIComponent(encodedData));
+        console.log('Datos decodificados:', userData);
+        
+        // CORRECCIÓN: Extraer y almacenar el token correctamente
+        if (userData.token && userData.token.access_token) {
+          // Guardar SOLO el string del token, no el objeto completo
+          const tokenString = userData.token.access_token;
+          console.log('Token extraído (access_token):', tokenString.substring(0, 30) + '...');
+          
+          // Guardar como string en localStorage
+          localStorage.setItem('token', tokenString);
+          
+          // Guardar información del usuario
+          const user = {
+            id: userData.ID,
+            username: userData.Nombre_Usuario,
+            email: userData.Correo_Electronico,
+            roles: userData.roles || []
+          };
+          
+          localStorage.setItem('user', JSON.stringify(user));
+          localStorage.setItem('userRole', user.roles[0] || 'usuario');
+          localStorage.setItem('googleAuth', 'true');
+          
+          console.log('Datos guardados correctamente en localStorage');
+          
+          // Actualizar el rol en el store
+          authStore.setRole(user.roles[0] || 'usuario');
+          
+          // Redirigir según el rol
+          setTimeout(() => {
+            redirectByRole(user.roles);
+          }, 800);
+          
+          return;
+        } else {
+          throw new Error('No se encontró access_token en los datos recibidos');
         }
-      );
-    }
-  };
-  
-  // Función para manejar la verificación del código
-  const handleVerification = async () => {
-    loading.value = true;
-    message.value = null;
-  
-    try {
-      // Validar que se hayan ingresado todos los dígitos
-      const emptyDigits = digits.value.some(digit => digit === "");
-      if (emptyDigits) {
-        message.value = {
-          text: 'Por favor, ingresa todos los dígitos del código',
-          type: 'error',
-        };
-        animateMessage();
-        loading.value = false;
+      } catch (err) {
+        console.error('Error al procesar datos de usuario:', err);
+        showError('Error al procesar datos de autenticación: ' + (err.message || ''));
         return;
       }
-  
-      // Unir los dígitos para formar el código de verificación
-      const code = digits.value.join('');
-  
-      console.log('Enviando verificación con código:', code);
-      console.log('Email para verificación:', props.email);
-  
-      // Realizar la solicitud usando la API correcta
-      const response = await axios.post(`${API_URL}/api/users/verify/`, {
-        email: props.email,
-        code: code
-      }, {
+    }
+    
+    // Si no hay datos codificados, buscar token y user_id separados (versión antigua)
+    const token = queryParams.get('token');
+    const userId = queryParams.get('user_id');
+    
+    if (!token || !userId) {
+      showError('No se recibieron datos de autenticación válidos');
+      return;
+    }
+    
+    console.log('Usando formato antiguo de token:', token.substring(0, 20) + '...');
+    
+    // CORRECCIÓN: Asegurarse de guardar solo el string del token
+    localStorage.setItem('token', token);
+    
+    // Obtener datos del usuario con una petición adicional
+    try {
+      const response = await axios.get(`${API_URL}/users/${userId}`, {
         headers: {
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         }
       });
       
-      console.log('Respuesta de verificación:', response.data);
+      const userProfile = response.data;
       
-      // Manejar respuesta exitosa
-      message.value = {
-        text: '¡Tu cuenta ha sido verificada exitosamente!',
-        type: 'success',
+      // Crear objeto de usuario
+      const user = {
+        id: parseInt(userId),
+        username: userProfile.Nombre_Usuario || '',
+        email: userProfile.Correo_Electronico || '',
+        roles: userProfile.roles || ['usuario']
       };
-      animateMessage();
-  
-      // Limpiar el email almacenado
-      localStorage.removeItem('pendingVerificationEmail');
-  
-      // Redirigir al usuario después de la verificación
+      
+      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('userRole', user.roles[0] || 'usuario');
+      localStorage.setItem('googleAuth', 'true');
+      
+      // Actualizar el rol en el store
+      authStore.setRole(user.roles[0] || 'usuario');
+      
+      // Redirigir según el rol
       setTimeout(() => {
-        router.push({ path: '/login' });
-      }, 2000);
-  
-    } catch (error: any) {
-      console.error('Error de verificación:', error);
+        redirectByRole(user.roles);
+      }, 800);
       
-      // Preparar mensaje de error
-      let errorMsg = 'Error al verificar el código';
-      
-      if (axios.isAxiosError(error) && error.response) {
-        // Error de respuesta del servidor
-        if (error.response.data?.detail) {
-          errorMsg = error.response.data.detail;
-        } else if (error.response.status === 400) {
-          errorMsg = 'Código inválido o expirado';
-        } else {
-          errorMsg = `Error ${error.response.status}: ${error.response.statusText}`;
-        }
-        
-        console.error('Detalles del error:', {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data
-        });
-      } else if (axios.isAxiosError(error) && error.request) {
-        // Error de conexión
-        errorMsg = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
-      } else if (error instanceof Error) {
-        errorMsg = error.message;
-      }
-      
-      message.value = {
-        text: errorMsg,
-        type: 'error',
-      };
-      animateMessage();
-    } finally {
-      loading.value = false;
+    } catch (err) {
+      console.error('Error al obtener datos del usuario:', err);
+      showError('Error al obtener datos del usuario');
     }
-  };
-  
-  // Animación inicial del contenedor al montar el componente
-  onMounted(() => {
-    gsap.from(".verification-container", {
-      opacity: 0,
-      y: 50,
-      duration: 1,
-      ease: "power2.out",
-    });
-  
-    // Enfocar el primer campo de dígito automáticamente
-    const firstInput = document.querySelector('.digit-input:first-child') as HTMLInputElement;
-    if (firstInput) {
-      setTimeout(() => {
-        firstInput.focus();
-      }, 500);
-    }
-  });
-  </script>
-  
-  <style scoped>
-  .verification-container {
-    max-width: 90%; /* Ajusta el ancho máximo para que no sobresalga */
-    margin: 0 auto;
-    padding: 1rem; /* Reduce el padding para pantallas pequeñas */
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  } catch (err) {
+    console.error('Error general en el procesamiento:', err);
+    showError('Error inesperado durante la autenticación');
   }
+};
+
+// Función para mostrar errores
+const showError = (message: string) => {
+  error.value = true;
+  loading.value = false;
+  errorMessage.value = message;
+};
+
+// Función para redirigir según el rol
+const redirectByRole = (roles: string[]) => {
+  console.log('Redirigiendo según roles:', roles);
   
-  .verification-title {
-    text-align: center;
-    margin-bottom: 1rem;
-    color: #333;
-    font-size: 1.5rem; /* Ajusta el tamaño de la fuente */
+  if (roles.includes('admin')) {
+    router.push('/dashboard');
+  } else if (roles.includes('entrenador')) {
+    router.push('/coach-dashboard');
+  } else if (roles.includes('usuario')) {
+    router.push('/user-dashboard');
+  } else {
+    router.push('/');
   }
-  
-  .verification-message {
-    text-align: center;
-    margin-bottom: 1.5rem; /* Reduce el margen inferior */
-    color: #666;
-    font-size: 0.9rem; /* Ajusta el tamaño de la fuente */
-  }
-  
-  .digits-container {
-    display: flex;
-    justify-content: center;
-    gap: 8px; /* Reduce el espacio entre los campos */
-    margin-bottom: 1.5rem; /* Reduce el margen inferior */
-  }
-  
-  .digit-input {
-    width: 40px; /* Reduce el ancho de los campos */
-    height: 45px; /* Reduce la altura de los campos */
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 20px; /* Reduce el tamaño de la fuente */
-    text-align: center;
-    transition: border 0.3s, transform 0.3s;
-  }
-  
-  .digit-input:focus {
-    outline: none;
-    border-color: #5995fd;
-    box-shadow: 0 0 8px rgba(89, 149, 253, 0.3);
-  }
-  
-  .btn {
-    width: 100%;
-    padding: 10px; /* Reduce el padding */
-    border: none;
-    border-radius: 50px;
-    background-color: #5995fd;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s;
-  }
-  
-  .btn:hover:not(:disabled) {
-    background-color: #4d84e2;
-  }
-  
-  .btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-  
-  .message {
-    margin-top: 1rem; /* Reduce el margen superior */
-    padding: 8px; /* Reduce el padding */
-    border-radius: 5px;
-    text-align: center;
-    font-size: 0.9rem; /* Ajusta el tamaño de la fuente */
-  }
-  
-  .message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-  
-  .message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
-  
-  .loader {
-    width: 18px; /* Reduce el tamaño del loader */
-    height: 18px; /* Reduce el tamaño del loader */
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    border-top-color: #fff;
-    animation: spin 1s ease-in-out infinite;
-  }
-  
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  /* Media queries para ajustes adicionales en pantallas pequeñas */
-  @media (max-width: 480px) {
-    .verification-container {
-      padding: 0.5rem;
-    }
-  
-    .digit-input {
-      width: 35px;
-      height: 40px;
-      font-size: 18px;
-    }
-  
-    .btn {
-      padding: 8px;
-    }
-  
-    .message {
-      font-size: 0.8rem;
-    }
-  }
-  </style>
+};
+</script>
+
+<style scoped>
+.oauth-callback-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.loader-container {
+  text-align: center;
+}
+
+.loader {
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  text-align: center;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.error-message h3 {
+  color: #e74c3c;
+  margin-bottom: 15px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-top: 20px;
+  background-color: #3498db;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #2980b9;
+}
+</style>

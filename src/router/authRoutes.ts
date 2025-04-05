@@ -2,7 +2,7 @@ import { RouteRecordRaw } from "vue-router";
 import LoginView from "@/views/auth/LoginView.vue";
 import RegisterView from "@/views/auth/RegisterView.vue";
 import OAuthCallbackView from "@/views/auth/OAuthCallbackView.vue";
-import DebugToolView from "@/views/auth/DebugToolView.vue";
+import DebugToolView from "@/views/auth/DebugToolView.vue"; // Importa la vista de depuración
 import AuthLayout from "@/layouts/AuthLayout.vue";
 
 const authRoutes: RouteRecordRaw[] = [
@@ -64,6 +64,7 @@ const authRoutes: RouteRecordRaw[] = [
       return { path: "/" };
     },
   },
+  //(accesible para cualquiera con el token)
   {
     path: "/auth/debug",
     name: "DebugTool",
