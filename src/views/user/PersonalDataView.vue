@@ -197,12 +197,17 @@ const alert = reactive({
 
 // Reglas de validación
 const requiredRule = (v: string) => !!v || 'Este campo es requerido';
-const phoneRule = (v: string) => !v || /^[0-9]{10}$/.test(v) || 'Teléfono inválido';
-
-// Computed
-const fullName = computed(() => {
-  return `${personalData.firstName || ''} ${personalData.lastName1 || ''} ${personalData.lastName2 || ''}`.trim();
-});
+const phoneRule = (v: string) => {
+  if (!v) return true; // Si está vacío, permitirlo
+  
+  // Permitir formato con código de país: +52 seguido de 10 dígitos
+  const formatoConPrefijo = /^\+52\d{10}$/.test(v);
+  
+  // Permitir formato sin código de país: exactamente 10 dígitos
+  const formatoSinPrefijo = /^\d{10}$/.test(v);
+  
+  return formatoConPrefijo || formatoSinPrefijo || 'Formato de teléfono inválido. Use 10 dígitos o +52 seguido de 10 dígitos';
+};
 
 const calculatedAge = computed(() => {
   if (!personalData.birthDate) return null;
@@ -212,11 +217,21 @@ const calculatedAge = computed(() => {
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 });
 
+// Cálculo del IMC usando la fórmula IMC = peso (kg) / estatura (m²)
 const calculatedBMI = computed(() => {
   if (!personalData.height || !personalData.weight) return null;
-  const heightInMeters = personalData.height / 100;
-  const bmi = personalData.weight / (heightInMeters * heightInMeters);
-  return bmi.toFixed(1);
+  const heightInMeters = personalData.height / 100; // Convertir cm a metros
+  const heightSquared = heightInMeters * heightInMeters; // Elevar la altura al cuadrado (m²)
+  const bmi = personalData.weight / heightSquared; // Aplicar la fórmula IMC = peso / estatura²
+  
+  // Devolver con 1 decimal y añadir clasificación según OMS
+  let classification = '';
+  if (bmi < 18.5) classification = ' (Bajo peso)';
+  else if (bmi < 25) classification = ' (Normal)';
+  else if (bmi < 30) classification = ' (Sobrepeso)';
+  else classification = ' (Obesidad)';
+  
+  return bmi.toFixed(1) + classification;
 });
 
 const maxBirthDate = computed(() => {
@@ -228,22 +243,32 @@ const maxBirthDate = computed(() => {
 const loadPersonalData = async () => {
   try {
     loading.value = true;
-    const userData = await PersonalDataService.getPersonalData();
+    
+    try {
+      // Intentar cargar datos personales del usuario
+      const userData = await PersonalDataService.getPersonalData();
 
-    personalData.title = userData.Titulo_Cortesia || '';
-    personalData.firstName = userData.Nombre || '';
-    personalData.lastName1 = userData.Primer_Apellido || '';
-    personalData.lastName2 = userData.Segundo_Apellido || '';
-    personalData.phoneNumber = userData.Numero_Telefonico || '';
-    personalData.birthDate = userData.Fecha_Nacimiento ? new Date(userData.Fecha_Nacimiento).toISOString().split('T')[0] : '';
-    personalData.gender = userData.Genero || '';
-    personalData.bloodType = userData.Tipo_Sangre || '';
-    personalData.height = userData.Estatura ? userData.Estatura * 100 : null;
-    personalData.weight = userData.Peso;
-    personalData.photoUrl = userData.Fotografia;
-
-  } catch (error) {
-    console.error('Error al cargar datos personales:', error);
+      // Mapear datos del API a la interfaz de usuario
+      personalData.title = userData.Titulo_Cortesia || '';
+      personalData.firstName = userData.Nombre || '';
+      personalData.lastName1 = userData.Primer_Apellido || '';
+      personalData.lastName2 = userData.Segundo_Apellido || '';
+      personalData.phoneNumber = userData.Numero_Telefonico || '';
+      personalData.birthDate = userData.Fecha_Nacimiento ? new Date(userData.Fecha_Nacimiento).toISOString().split('T')[0] : '';
+      personalData.gender = userData.Genero || '';
+      personalData.bloodType = userData.Tipo_Sangre || '';
+      // Convertir la estatura de metros a centímetros para mostrar en el formulario
+      personalData.height = userData.Estatura ? userData.Estatura * 100 : null;
+      // Asegurarse de que el peso se muestre correctamente
+      personalData.weight = userData.Peso || null;
+      
+      console.log('Datos cargados - Estatura (m):', userData.Estatura, 'Peso (kg):', userData.Peso, 'Teléfono:', userData.Numero_Telefonico);
+      personalData.photoUrl = userData.Fotografia || null;
+      
+    } catch (error) {
+      console.warn('No se encontró perfil existente, se mostrará formulario vacío para crear uno nuevo:', error);
+      // No mostramos alerta de error ya que podría ser primera vez usando la aplicación
+    }
   } finally {
     loading.value = false;
   }
@@ -253,19 +278,21 @@ const savePersonalData = async () => {
   try {
     loading.value = true;
 
+    // Preparar datos para enviar al API
     const apiData = {
       Titulo_Cortesia: personalData.title || null,
-      Nombre: personalData.firstName || null,
-      Primer_Apellido: personalData.lastName1 || null,
+      Nombre: personalData.firstName,
+      Primer_Apellido: personalData.lastName1,
       Segundo_Apellido: personalData.lastName2 || null,
       Numero_Telefonico: personalData.phoneNumber || null,
       Fecha_Nacimiento: personalData.birthDate || null,
-      Genero: personalData.gender || null,
+      Genero: personalData.gender,
       Tipo_Sangre: personalData.bloodType || null,
       Estatura: personalData.height ? personalData.height / 100 : null,
       Peso: personalData.weight
     };
 
+    // Usar el servicio actualizado para guardar o crear perfil
     const result = await PersonalDataService.saveOrCreateProfile(apiData, photo.value);
 
     if (result.Fotografia) {
