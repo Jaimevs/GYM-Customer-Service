@@ -118,7 +118,7 @@
           </div>
           <v-card-text class="pa-0">
             <v-data-table :headers="headers" :items="classes" :items-per-page="10" :search="search"
-              class="elevation-0 classes-table" :footer-props="{
+              class="elevation-0 classes-table" :loading="loading" :footer-props="{
                 itemsPerPageOptions: [5, 10, 20, -1],
                 showFirstLastPage: true
               }">
@@ -162,24 +162,79 @@
       </v-col>
     </v-row>
 
-    <!-- Diálogos (se mantienen igual que en tu versión original) -->
+    <!-- Diálogo para crear/editar clases -->
     <v-dialog v-model="classDialog" max-width="600px" persistent>
-      <!-- ... contenido del diálogo ... -->
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">{{ isEditing ? 'Editar Clase' : 'Nueva Clase' }}</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-form ref="form" v-model="validForm">
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field v-model="editedItem.Nombre" label="Nombre de la clase*" required :rules="[v => !!v || 'Nombre es requerido']"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-textarea v-model="editedItem.Descripcion" label="Descripción" rows="3"></v-textarea>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-select v-model="editedItem.Dia_Inicio" :items="diasSemana" label="Día de inicio*" required :rules="[v => !!v || 'Día inicio es requerido']"></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-select v-model="editedItem.Dia_Fin" :items="diasSemana" label="Día de fin*" required :rules="[v => !!v || 'Día fin es requerido']"></v-select>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field v-model="editedItem.Hora_Inicio" type="time" label="Hora de inicio*" required :rules="[v => !!v || 'Hora inicio es requerida']"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field v-model="editedItem.Hora_Fin" type="time" label="Hora de fin*" required :rules="[v => !!v || 'Hora fin es requerida']"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field v-model="editedItem.Duracion_Minutos" type="number" label="Duración (minutos)*" required :rules="[
+                    v => !!v || 'Duración es requerida',
+                    v => (v && v > 0) || 'Duración debe ser mayor a 0'
+                  ]"></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-switch v-model="editedItem.Estatus" label="Activa" color="success"></v-switch>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-1" text @click="closeClassDialog">Cancelar</v-btn>
+          <v-btn color="primary" :loading="saving" @click="saveClass">Guardar</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
 
+    <!-- Diálogo de confirmación para eliminar -->
     <v-dialog v-model="deleteDialog" max-width="400px">
-      <!-- ... contenido del diálogo de confirmación ... -->
+      <v-card>
+        <v-card-title class="text-h5">Confirmar eliminación</v-card-title>
+        <v-card-text>
+          ¿Estás seguro que deseas eliminar esta clase? Esta acción no se puede deshacer.
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="grey darken-1" text @click="deleteDialog = false">Cancelar</v-btn>
+          <v-btn color="error" :loading="deleting" @click="deleteClass">Eliminar</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, reactive, onMounted, computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Icon } from '@iconify/vue';
-import CoachClassesService from '../../services/CoachClassesService';
+import CoachClassesService, { Clase, ClaseCreate, ClaseUpdate } from '../../services/CoachClassesService';
 
 export default defineComponent({
   name: 'CoachClassesView',
@@ -188,43 +243,60 @@ export default defineComponent({
     Icon
   },
   setup() {
-    // Inicializar animaciones
-    onMounted(() => {
-      AOS.init({
-        duration: 800,
-        once: true,
-        easing: 'ease-in-out-quad'
-      });
-    });
-
+    // Inicializar variables
     const search = ref('');
+    const loading = ref(false);
+    const error = ref('');
+    const successMessage = ref('');
     const timePeriod = ref('week');
-    const error = ref(null);
-    const successMessage = ref(null);
     const classDialog = ref(false);
     const deleteDialog = ref(false);
     const isEditing = ref(false);
     const saving = ref(false);
     const deleting = ref(false);
-    const classToDelete = ref(null);
-
+    const classes = ref<Clase[]>([]);
+    const validForm = ref(false);
+    const form = ref(null);
+    const classToDelete = ref<Clase | null>(null);
+    const upcomingClasses = ref([]);
+    
+    // Días de la semana para los selectores
+    const diasSemana = [
+      'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
+    ];
+    
+    // Plantilla para nueva clase
+    const defaultItem: ClaseCreate = {
+      Nombre: '',
+      Descripcion: '',
+      Dia_Inicio: 'Lunes',
+      Dia_Fin: 'Lunes',
+      Hora_Inicio: '08:00',
+      Hora_Fin: '09:00',
+      Duracion_Minutos: 60,
+      Estatus: true
+    };
+    
+    // Item en edición
+    const editedItem = reactive<any>({ ...defaultItem });
+    
     // Periodos de tiempo para filtrado
-    const timePeriods = ref([
+    const timePeriods = [
       { text: 'Hoy', value: 'today' },
       { text: 'Esta semana', value: 'week' },
       { text: 'Este mes', value: 'month' },
       { text: 'Próximas 2 semanas', value: '2weeks' }
-    ]);
-
-    // Tarjetas de resumen
+    ];
+    
+    // Datos para tarjetas de resumen (se actualizarán con datos reales)
     const summaryCards = ref([
-      { icon: 'solar:clock-circle-outline', title: 'Clases esta semana', value: '8' },
-      { icon: 'solar:users-group-two-rounded-outline', title: 'Alumnos inscritos', value: '42' },
-      { icon: 'solar:clock-square-outline', title: 'Horas de clase', value: '12' },
-      { icon: 'solar:user-heart-outline', title: 'Clases VIP', value: '3' }
+      { icon: 'solar:clock-circle-outline', title: 'Clases esta semana', value: '0' },
+      { icon: 'solar:users-group-two-rounded-outline', title: 'Clases activas', value: '0' },
+      { icon: 'solar:clock-square-outline', title: 'Horas de clase', value: '0' },
+      { icon: 'solar:user-heart-outline', title: 'Total clases', value: '0' }
     ]);
-
-    // Datos para el gráfico de barras
+    
+    // Configuración del gráfico de barras
     const barChartOptions = ref({
       chart: {
         type: 'bar',
@@ -268,20 +340,14 @@ export default defineComponent({
         }
       }
     });
-
+    
+    // Datos del gráfico (se actualizarán con datos reales)
     const barChartSeries = ref([{
       name: 'Clases',
-      data: [3, 2, 4, 5, 3, 1, 0]
+      data: [0, 0, 0, 0, 0, 0, 0]
     }]);
-
-    // Clases próximas
-    const upcomingClasses = ref([
-      { id: 1, name: 'Yoga Avanzado', date: 'Hoy', time: '18:00 - 19:30', type: 'yoga', icon: 'mdi-yoga' },
-      { id: 2, name: 'CrossFit', date: 'Mañana', time: '07:00 - 08:00', type: 'crossfit', icon: 'mdi-dumbbell' },
-      { id: 3, name: 'Pilates', date: 'Miércoles', time: '09:00 - 10:00', type: 'pilates', icon: 'mdi-yoga' }
-    ]);
-
-    // Datos para la tabla
+    
+    // Encabezados para la tabla
     const headers = ref([
       { text: 'Nombre', value: 'Nombre', sortable: true },
       { text: 'Horario', value: 'Horario', sortable: false },
@@ -289,20 +355,61 @@ export default defineComponent({
       { text: 'Estado', value: 'Estatus', sortable: true },
       { text: 'Acciones', value: 'Acciones', sortable: false, width: '120px', align: 'center' },
     ]);
-
-    const classes = ref([
-      { id: 1, Nombre: 'Yoga Matutino', Dia_Inicio: 'Lunes', Dia_Fin: 'Viernes', Hora_Inicio: '08:00', Hora_Fin: '09:00', Duracion_Minutos: 60, Estatus: true },
-      { id: 2, Nombre: 'CrossFit', Dia_Inicio: 'Martes', Dia_Fin: 'Jueves', Hora_Inicio: '18:00', Hora_Fin: '19:00', Duracion_Minutos: 60, Estatus: true },
-      { id: 3, Nombre: 'Pilates', Dia_Inicio: 'Miércoles', Dia_Fin: 'Miércoles', Hora_Inicio: '10:00', Hora_Fin: '11:00', Duracion_Minutos: 60, Estatus: false },
-      // ... más clases
-    ]);
-
-    // Funciones de ayuda
+    
+    // Inicializar animaciones y cargar datos
+    onMounted(() => {
+      AOS.init({
+        duration: 800,
+        once: true,
+        easing: 'ease-in-out-quad'
+      });
+      
+      fetchClasses();
+    });
+    
+    // Función para obtener clases del servicio
+    const fetchClasses = async () => {
+      try {
+        loading.value = true;
+        error.value = '';
+        
+        // Obtener las clases
+        classes.value = await CoachClassesService.getMyClasses();
+        
+        // Obtener estadísticas
+        const stats = await CoachClassesService.getClassesStats();
+        
+        // Actualizar tarjetas de resumen
+        summaryCards.value[0].value = stats.totalClasses.toString();
+        summaryCards.value[1].value = stats.activeClasses.toString();
+        summaryCards.value[2].value = stats.totalHours.toString();
+        summaryCards.value[3].value = stats.totalClasses.toString();
+        
+        // Actualizar datos del gráfico
+        barChartSeries.value = [{
+          name: 'Clases',
+          data: stats.chartData
+        }];
+        
+        // Actualizar próximas clases
+        upcomingClasses.value = stats.upcomingClasses;
+        
+      } catch (err: any) {
+        error.value = err.message || 'Error al cargar las clases';
+        console.error('Error al cargar clases:', err);
+      } finally {
+        loading.value = false;
+      }
+    };
+    
+    // Funciones de ayuda para colores y formato
     const getClassColor = (type: string) => {
       const typeColors: Record<string, string> = {
         'yoga': '#4CAF50',
         'crossfit': '#FF9800',
-        'pilates': '#2196F3'
+        'pilates': '#2196F3',
+        'cardio': '#F44336',
+        'general': '#9C27B0'
       };
       return typeColors[type] || '#9E9E9E';
     };
@@ -331,26 +438,137 @@ export default defineComponent({
       return timeString.substring(0, 5);
     };
 
-    // Funciones de acción (se mantienen igual que en tu versión original)
+    // Funciones para gestión de clases
     const changeTimePeriod = (period: string) => {
       timePeriod.value = period;
-      // Actualizar datos según el periodo
+      // En una implementación completa, podrías filtrar los datos según el período
     };
 
     const viewClassDetails = (cls: any) => {
-      // Lógica para ver detalles
+      // Mostrar detalles de la clase (podrías abrir el modal de edición en modo solo lectura)
+      Object.assign(editedItem, cls);
+      isEditing.value = true;
+      classDialog.value = true;
     };
 
     const openAddClassDialog = () => {
-      // Lógica para abrir diálogo
+      isEditing.value = false;
+      Object.assign(editedItem, defaultItem);
+      classDialog.value = true;
     };
 
-    const editClass = (cls: any) => {
-      // Lógica para editar
+    const closeClassDialog = () => {
+      classDialog.value = false;
+      setTimeout(() => {
+        Object.assign(editedItem, defaultItem);
+      }, 300);
     };
 
-    const confirmDeleteClass = (cls: any) => {
-      // Lógica para confirmar eliminación
+    const editClass = (item: Clase) => {
+      isEditing.value = true;
+      Object.assign(editedItem, {
+        Nombre: item.Nombre,
+        Descripcion: item.Descripcion,
+        Dia_Inicio: item.Dia_Inicio,
+        Dia_Fin: item.Dia_Fin,
+        Hora_Inicio: item.Hora_Inicio,
+        Hora_Fin: item.Hora_Fin,
+        Duracion_Minutos: item.Duracion_Minutos,
+        Estatus: item.Estatus
+      });
+      editedItem.ID = item.ID; // Guardar el ID para la actualización
+      classDialog.value = true;
+    };
+
+    const confirmDeleteClass = (item: Clase) => {
+      classToDelete.value = item;
+      deleteDialog.value = true;
+    };
+
+    const saveClass = async () => {
+      // Validar formulario
+      if (!validForm.value || !form.value) {
+        error.value = 'Por favor complete todos los campos requeridos';
+        return;
+      }
+
+      try {
+        saving.value = true;
+        error.value = '';
+        
+        if (isEditing.value) {
+          // Actualizar clase existente
+          const id = editedItem.ID;
+          const updateData: ClaseUpdate = {
+            Nombre: editedItem.Nombre,
+            Descripcion: editedItem.Descripcion,
+            Dia_Inicio: editedItem.Dia_Inicio,
+            Dia_Fin: editedItem.Dia_Fin,
+            Hora_Inicio: editedItem.Hora_Inicio,
+            Hora_Fin: editedItem.Hora_Fin,
+            Duracion_Minutos: Number(editedItem.Duracion_Minutos),
+            Estatus: editedItem.Estatus
+          };
+          
+          await CoachClassesService.updateClass(id, updateData);
+          successMessage.value = 'Clase actualizada correctamente';
+        } else {
+          // Crear nueva clase
+          const newClass: ClaseCreate = {
+            Nombre: editedItem.Nombre,
+            Descripcion: editedItem.Descripcion,
+            Dia_Inicio: editedItem.Dia_Inicio,
+            Dia_Fin: editedItem.Dia_Fin,
+            Hora_Inicio: editedItem.Hora_Inicio,
+            Hora_Fin: editedItem.Hora_Fin,
+            Duracion_Minutos: Number(editedItem.Duracion_Minutos),
+            Estatus: editedItem.Estatus
+          };
+          
+          await CoachClassesService.createClass(newClass);
+          successMessage.value = 'Clase creada correctamente';
+        }
+        
+        // Cerrar diálogo y refrescar datos
+        closeClassDialog();
+        fetchClasses();
+        
+        // Limpiar mensaje de éxito después de 3 segundos
+        setTimeout(() => {
+          successMessage.value = '';
+        }, 3000);
+      } catch (err: any) {
+        error.value = err.message || 'Error al guardar la clase';
+        console.error('Error al guardar clase:', err);
+      } finally {
+        saving.value = false;
+      }
+    };
+
+    const deleteClass = async () => {
+      if (!classToDelete.value) return;
+      
+      try {
+        deleting.value = true;
+        error.value = '';
+        
+        await CoachClassesService.deleteClass(classToDelete.value.ID);
+        successMessage.value = 'Clase eliminada correctamente';
+        
+        // Cerrar diálogo y refrescar datos
+        deleteDialog.value = false;
+        fetchClasses();
+        
+        // Limpiar mensaje de éxito después de 3 segundos
+        setTimeout(() => {
+          successMessage.value = '';
+        }, 3000);
+      } catch (err: any) {
+        error.value = err.message || 'Error al eliminar la clase';
+        console.error('Error al eliminar clase:', err);
+      } finally {
+        deleting.value = false;
+      }
     };
 
     return {
@@ -371,15 +589,25 @@ export default defineComponent({
       saving,
       deleting,
       classToDelete,
+      editedItem,
+      form,
+      validForm,
+      diasSemana,
+      loading,
+      // Funciones
       changeTimePeriod,
       viewClassDetails,
       openAddClassDialog,
+      closeClassDialog,
       editClass,
       confirmDeleteClass,
       getClassColor,
       getScheduleColor,
       getDurationColor,
-      formatTime
+      formatTime,
+      saveClass,
+      deleteClass,
+      fetchClasses
     };
   },
 });
