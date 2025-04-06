@@ -23,12 +23,8 @@
           <input type="email" v-model="email" placeholder="Correo electrónico" required />
         </div>
 
-        <!-- Teléfono (ahora requerido) -->
-        <div class="input-field" ref="phoneField">
-          <Icon icon="eva:phone-outline" width="20" height="20" />
-          <input type="tel" v-model="phone" placeholder="Número de teléfono" required />
-        </div>
-
+        <!-- Teléfono (eliminado) -->
+        
         <!-- Contraseña -->
         <div class="input-field" ref="passwordField">
           <Icon icon="solar:lock-password-linear" width="20" height="20" />
@@ -100,7 +96,7 @@ const username = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
-const phone = ref('');
+// Se eliminó la referencia al teléfono
 const loading = ref(false);
 const message = ref<{ text: string; type: 'success' | 'error' } | null>(null);
 const showVerification = ref(false); // Controlar la visibilidad del componente de verificación
@@ -114,7 +110,7 @@ const API_URL = 'https://gymtoday12.com';
 const title = ref(null);
 const usernameField = ref(null);
 const emailField = ref(null);
-const phoneField = ref(null);
+// Se eliminó la referencia al phoneField
 const passwordField = ref(null);
 const confirmPasswordField = ref(null);
 const submitButton = ref(null);
@@ -138,36 +134,12 @@ const validateEmail = (email: string): boolean => {
   return emailRegex.test(email);
 };
 
-// Validar formato de teléfono
-const validatePhone = (phone: string): boolean => {
-  // Verifica que el teléfono tenga al menos 10 dígitos
-  return /^\d{10,}$/.test(phone.replace(/\D/g, ''));
-};
-
 // Manejar el envío del formulario
 const handleSubmit = async () => {
   // Validación básica de correo electrónico
   if (!validateEmail(email.value)) {
     message.value = {
       text: 'Por favor, ingresa un correo electrónico válido',
-      type: 'error',
-    };
-    return;
-  }
-
-  // Validar que el teléfono no esté vacío
-  if (!phone.value) {
-    message.value = {
-      text: 'El número telefónico es obligatorio',
-      type: 'error',
-    };
-    return;
-  }
-
-  // Validar formato de teléfono
-  if (!validatePhone(phone.value)) {
-    message.value = {
-      text: 'Por favor, ingresa un número telefónico válido (al menos 10 dígitos)',
       type: 'error',
     };
     return;
@@ -202,8 +174,8 @@ const handleSubmit = async () => {
     await AuthService.register({
       username: username.value,
       email: email.value,
-      password: password.value,
-      phone: phone.value
+      password: password.value
+      // Se eliminó el campo de teléfono
     });
 
     // Mostrar mensaje de éxito
@@ -278,13 +250,13 @@ onMounted(() => {
     { ref: title.value, delay: staggerDelay * 1 },
     { ref: usernameField.value, delay: staggerDelay * 2 },
     { ref: emailField.value, delay: staggerDelay * 3 },
-    { ref: phoneField.value, delay: staggerDelay * 4 },
-    { ref: passwordField.value, delay: staggerDelay * 5 },
-    { ref: confirmPasswordField.value, delay: staggerDelay * 6 },
-    { ref: submitButton.value, delay: staggerDelay * 7 },
-    { ref: dividerWrapper.value, delay: staggerDelay * 8 },
-    { ref: googleButton.value, delay: staggerDelay * 9 },
-    { ref: loginText.value, delay: staggerDelay * 10 }
+    // Se eliminó la referencia a phoneField
+    { ref: passwordField.value, delay: staggerDelay * 4 },
+    { ref: confirmPasswordField.value, delay: staggerDelay * 5 },
+    { ref: submitButton.value, delay: staggerDelay * 6 },
+    { ref: dividerWrapper.value, delay: staggerDelay * 7 },
+    { ref: googleButton.value, delay: staggerDelay * 8 },
+    { ref: loginText.value, delay: staggerDelay * 9 }
   ];
 
   elements.forEach(elem => {

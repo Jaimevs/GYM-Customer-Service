@@ -13,7 +13,6 @@ interface RegisterCredentials {
   username: string;
   email: string;
   password: string;
-  phone?: string;
 }
 
 interface User {
@@ -74,15 +73,13 @@ class AuthService {
       console.log("Enviando registro con datos:", {
         Nombre_Usuario: credentials.username,
         Correo_Electronico: credentials.email,
-        Contrasena: credentials.password,
-        Numero_Telefonico_Movil: credentials.phone || null
+        Contrasena: credentials.password
       });
 
       const response = await axios.post(`${API_URL}/users/register/`, {
         Nombre_Usuario: credentials.username,
         Correo_Electronico: credentials.email,
-        Contrasena: credentials.password,
-        Numero_Telefonico_Movil: credentials.phone || null
+        Contrasena: credentials.password
       });
 
       console.log("Respuesta del registro:", response.data);
