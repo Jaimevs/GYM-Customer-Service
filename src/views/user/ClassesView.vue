@@ -160,9 +160,8 @@
                 <v-menu v-model="endDateMenu" :close-on-content-click="false" location="bottom">
                   <template v-slot:activator="{ props }">
                     <v-text-field v-model="filters.endDate" label="Hasta" prepend-inner-icon="solar:calendar-linear"
-                      readonly v-bind="props" cleaHistorial de Reservaciones
-rable variant="outlined" density="comfortable"
-                      @click:clear="filters.endDate = null"></v-text-field>
+                      readonly v-bind="props" cleaHistorial de Reservaciones rable variant="outlined"
+                      density="comfortable" @click:clear="filters.endDate = null"></v-text-field>
                   </template>
                   <v-date-picker v-model="filters.endDate" @update:model-value="endDateMenu = false"></v-date-picker>
                 </v-menu>
@@ -296,10 +295,11 @@ rable variant="outlined" density="comfortable"
             </v-row>
 
             <!-- Botón de reserva -->
-            <v-row v-if="selectedClass && reservationDate" class="mt-4" data-aos="fade-up">
+            <v-row class="reservation-button-row mt-4">
               <v-col cols="12" class="d-flex justify-end">
-                <v-btn color="primary" size="large" :loading="submitting" :disabled="submitting || !isFormValid"
-                  @click="createReservation" variant="flat">
+                <v-btn color="primary" size="large" :loading="submitting"
+                  :disabled="!selectedClass || !reservationDate || submitting" @click="createReservation"
+                  variant="flat">
                   <Icon icon="solar:calendar-check-bold" width="20" class="mr-2" />
                   Confirmar Reservación
                 </v-btn>
@@ -678,5 +678,21 @@ const getStatusIconColor = (status: string): string => {
   &:hover {
     transform: scale(1.1);
   }
+}
+
+.reservation-button-row {
+  position: relative;
+  z-index: 5;
+  margin-top: 16px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: none !important;
+}
+
+.reservation-button-row .v-btn {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 </style>

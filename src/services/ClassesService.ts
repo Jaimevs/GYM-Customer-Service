@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday1243.com";
+const API_URL = import.meta.env.VITE_API_URL || "https://gymtoday12.com";
 
 export interface Clase {
   ID: number;
