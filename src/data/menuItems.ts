@@ -16,7 +16,7 @@ export const adminMenuItems = [
     icon: "solar:calendar-outline",
   },
   {
-    title: "Valoración de Servicios",
+    title: "Panel de Evaluaciones",
     link: "/service-evaluation",
     icon: "solar:star-line-duotone",
   },

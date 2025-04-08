@@ -1,15 +1,15 @@
 <template>
-  <v-container fluid class="service-rating-content">
+  <v-container fluid class="admin-dashboard-content">
     <!-- Título y descripción -->
     <h1 class="dashboard-title" data-aos="fade-down">
-      <span class="title-text">Valoración de Servicios</span>
+      <span class="title-text">Panel de Evaluaciones</span>
       <span class="title-highlight"></span>
     </h1>
     <p class="text-subtitle-1" data-aos="fade-down" data-aos-delay="100">
-      Monitorea y analiza las valoraciones de los clientes sobre los servicios del gimnasio.
-      <v-chip v-if="isConnected" color="var(--color-grafica-rojo-fuego)" small class="ml-2" dark>
-        <v-icon left small>mdi-check-circle</v-icon>
-        Conectado en tiempo real
+      Gestiona y analiza las valoraciones de los entrenadores del gimnasio.
+      <v-chip v-if="loading" color="var(--color-grafica-amarillo-dorado)" small class="ml-2" dark>
+        <v-icon left small>mdi-refresh</v-icon>
+        Cargando datos
       </v-chip>
     </p>
 
@@ -35,48 +35,64 @@
       </v-col>
     </v-row>
 
-    <!-- Detalles de Calificaciones -->
+    <!-- Estadísticas por entrenador -->
     <v-row class="mb-6">
       <v-col cols="12" data-aos="zoom-in">
-        <v-card class="pa-4 rating-card" elevation="2">
+        <v-card class="pa-4 trainers-card" elevation="2">
           <v-card-title class="card-title d-flex align-center">
-            <v-icon large left color="var(--color-grafica-amarillo-dorado)">mdi-star-box</v-icon>
-            <span>Detalles de Calificaciones</span>
+            <v-icon large left color="var(--color-grafica-naranja-calido)">mdi-account-group</v-icon>
+            <span>Top Entrenadores</span>
           </v-card-title>
           <v-card-text>
-            <v-simple-table class="rating-table">
+            <v-simple-table class="trainers-table">
               <template v-slot:default>
                 <thead>
                   <tr>
-                    <th class="text-left">Estrellas</th>
-                    <th class="text-center">Cantidad</th>
-                    <th class="text-center">Porcentaje</th>
+                    <th class="text-left">Entrenador</th>
+                    <th class="text-center">Promedio</th>
+                    <th class="text-center">Evaluaciones</th>
                     <th class="text-left">Distribución</th>
+                    <th class="text-center">Acción</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(item, index) in calificacionesDetalle" :key="index"
+                  <tr v-for="(entrenador, index) in estadisticasPorEntrenador" :key="index"
                     :data-aos="index % 2 === 0 ? 'fade-right' : 'fade-left'" :data-aos-delay="100 * index">
-                    <td class="star-cell">
-                      <v-rating :value="item.valor" dense readonly size="20" :color="getColorForRating(item.valor)"
-                        class="rating-stars"></v-rating>
-                      <span class="star-text">{{ item.valor }} estrella{{ item.valor !== 1 ? 's' : '' }}</span>
+                    <td class="name-cell">
+                      <div class="d-flex align-center">
+                        <v-avatar size="36" class="mr-2">
+                          <v-icon>mdi-account</v-icon>
+                        </v-avatar>
+                        <span class="trainer-name">{{ entrenador.nombre }}</span>
+                      </div>
                     </td>
-                    <td class="text-center amount-cell">
-                      <v-chip small :color="getColorForRating(item.valor)" dark class="amount-chip">
-                        {{ item.cantidad }}
+                    <td class="text-center rating-cell">
+                      <v-rating :value="entrenador.promedio_calificacion" half-increments readonly dense
+                        color="var(--color-grafica-amarillo-dorado)" background-color="var(--color-gris-claro)">
+                      </v-rating>
+                      <span class="rating-value">{{ entrenador.promedio_calificacion }}</span>
+                    </td>
+                    <td class="text-center">
+                      <v-chip small color="var(--color-grafica-ocre)" dark>
+                        {{ entrenador.total_quejas }}
                       </v-chip>
                     </td>
-                    <td class="text-center percentage-cell">
-                      <span class="percentage-value">{{ item.porcentaje.toFixed(1) }}%</span>
+                    <td class="distribution-cell">
+                      <div class="distribution-bars">
+                        <div v-for="(value, key) in entrenador.distribucion_calificaciones" :key="key"
+                          class="distribution-bar-container">
+                          <div class="distribution-bar" :style="{
+                            width: value + '%',
+                            backgroundColor: evaluationsService.getColorForRating(evaluationsService.getRatingValue(key))
+                          }"></div>
+                        </div>
+                      </div>
                     </td>
-                    <td class="progress-cell">
-                      <v-progress-linear :value="item.porcentaje" :color="getColorForRating(item.valor)" height="16"
-                        rounded striped>
-                        <template v-slot:default="{ value }">
-                          <strong class="progress-text">{{ Math.ceil(value) }}%</strong>
-                        </template>
-                      </v-progress-linear>
+                    <td class="text-center action-cell">
+                      <v-btn small outlined color="var(--color-grafica-rojo-fuego)"
+                        @click="verDetalleEntrenador(entrenador.entrenador_id)">
+                        Ver Detalle
+                      </v-btn>
                     </td>
                   </tr>
                 </tbody>
@@ -86,248 +102,370 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Modal para detalle de un entrenador -->
+    <v-dialog v-model="detalleEntrenadorDialog" max-width="800">
+      <v-card class="pa-4" v-if="entrenadorSeleccionado">
+        <v-card-title class="headline">
+          Detalle de {{ entrenadorSeleccionado.nombre }}
+        </v-card-title>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12" md="6">
+              <div class="d-flex align-center mb-4">
+                <h3 class="mr-2">Calificación promedio:</h3>
+                <v-rating :value="entrenadorSeleccionado.promedio_calificacion" readonly half-increments
+                  color="var(--color-grafica-amarillo-dorado)"></v-rating>
+                <span class="ml-2 font-weight-bold">{{ entrenadorSeleccionado.promedio_calificacion }}</span>
+              </div>
+              <div class="mb-4">
+                <h3>Distribución de calificaciones</h3>
+                <v-simple-table dense>
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th>Estrellas</th>
+                        <th>Porcentaje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(value, key) in entrenadorSeleccionado.distribucion_calificaciones" :key="key">
+                        <td>{{ key.replace('_', ' ') }}</td>
+                        <td>{{ value.toFixed(1) }}%</td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+              </div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <h3 class="mb-2">Último mes</h3>
+              <apexchart type="bar" :options="entrenadorGrafica.options" :series="entrenadorGrafica.series" height="200">
+              </apexchart>
+            </v-col>
+          </v-row>
+
+          <h3 class="mt-4 mb-2">Comentarios recientes</h3>
+          <v-list>
+            <v-list-item v-for="(queja, index) in ultimasQuejas" :key="index" class="mb-2 rounded-lg"
+              :class="'bg-rating-' + queja.calificacion">
+              <v-list-item-avatar>
+                <v-avatar color="grey lighten-2">
+                  <v-icon>mdi-account</v-icon>
+                </v-avatar>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title>
+                  {{ queja.usuario_nombre }}
+                  <v-rating :value="queja.calificacion" dense readonly size="16"
+                    color="var(--color-grafica-amarillo-dorado)" background-color="var(--color-gris-claro)"
+                    class="d-inline-block ml-2"></v-rating>
+                </v-list-item-title>
+                <v-list-item-subtitle>{{ evaluationsService.formatDate(queja.fecha) }} | Clase: {{ queja.clase_nombre }}
+                </v-list-item-subtitle>
+                <v-list-item-subtitle class="mt-1 font-italic">
+                  "{{ queja.comentario || 'Sin comentario' }}"
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="var(--color-grafica-rojo-fuego)" text @click="detalleEntrenadorDialog = false">
+            Cerrar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
-<script lang="ts" setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import axios from 'axios';
+<script lang="ts">
+import { defineComponent, ref, onMounted, computed } from 'vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import EvaluationsService from '@/services/EvaluationsService';
 
-// Inicializar AOS
-onMounted(() => {
-  AOS.init({
-    duration: 600,
-    easing: 'ease-in-out',
-    once: true
-  });
-});
+export default defineComponent({
+  name: 'ServiceRatingView',
+  setup() {
+    // Estados
+    const loading = ref(false);
+    const estadisticas = ref(null);
+    const estadisticasPorEntrenador = ref([]);
+    const entrenadorSeleccionado = ref(null);
+    const detalleEntrenadorDialog = ref(false);
+    const ultimasQuejas = ref([]);
+    const evaluationsService = EvaluationsService;
 
-// Variables para la conexión WebSocket
-const isConnected = ref(false);
-const socket = ref(null);
-const calificacionesStats = ref({
-  calificaciones: [],
-  total: 0
-});
+    // Inicializar AOS
+    onMounted(() => {
+      AOS.init({
+        duration: 600,
+        easing: 'ease-in-out',
+        once: true
+      });
 
-// Obtener calificaciones detalladas
-const calificacionesDetalle = computed(() => {
-  return calificacionesStats.value.calificaciones;
-});
+      // Cargar datos al montar el componente
+      fetchEstadisticas();
+    });
 
-// Calcular el promedio de calificación
-const promedioCalificacion = computed(() => {
-  if (calificacionesStats.value.total === 0) return 0;
+    // Obtener estadísticas del servidor
+    const fetchEstadisticas = async () => {
+      loading.value = true;
+      try {
+        const data = await evaluationsService.getEstadisticasGenerales();
+        estadisticas.value = data;
+        estadisticasPorEntrenador.value = data.estadisticas_por_entrenador || [];
+        loading.value = false;
+      } catch (error) {
+        console.error('Error al obtener estadísticas:', error);
+        loading.value = false;
+      }
+    };
 
-  const suma = calificacionesStats.value.calificaciones.reduce((acc, cal) => {
-    return acc + (cal.valor * cal.cantidad);
-  }, 0);
+    // Ver detalle de un entrenador
+    const verDetalleEntrenador = async (entrenadorId) => {
+      loading.value = true;
+      try {
+        const data = await evaluationsService.getDetalleEntrenador(entrenadorId);
+        entrenadorSeleccionado.value = data;
+        ultimasQuejas.value = data.ultimas_quejas || [];
+        detalleEntrenadorDialog.value = true;
+        loading.value = false;
+      } catch (error) {
+        console.error('Error al obtener detalle del entrenador:', error);
+        loading.value = false;
+      }
+    };
 
-  return ((suma / calificacionesStats.value.total) * 20).toFixed(1); // Convertir a porcentaje para el radialBar
-});
+    // Calcular la cantidad en base al porcentaje y total
+    const calcularCantidad = (porcentaje) => {
+      if (!estadisticas.value) return 0;
+      return evaluationsService.calcularCantidadPorPorcentaje(porcentaje, estadisticas.value.total_quejas);
+    };
 
-// Calificación promedio para la gráfica
-const calificacionPromedio = computed(() => {
-  return {
-    options: {
-      chart: {
-        id: "calificacion-promedio",
-        foreColor: 'var(--color-texto-principal)'
-      },
-      plotOptions: {
-        radialBar: {
-          startAngle: -135,
-          endAngle: 135,
-          hollow: {
-            margin: 0,
-            size: '70%',
+    // Preparar datos para calificación promedio
+    const calificacionPromedio = computed(() => {
+      const promedio = estadisticas.value ? estadisticas.value.promedio_calificacion * 20 : 0; // Convertir a porcentaje (0-100)
+
+      return {
+        options: {
+          chart: {
+            id: "calificacion-promedio",
+            foreColor: 'var(--color-texto-principal)'
           },
-          dataLabels: {
-            name: {
-              show: false,
-            },
-            value: {
-              fontSize: '30px',
-              show: true,
-              formatter: function (val) {
-                return (val / 20).toFixed(1); // Convertir de vuelta a escala 0-5
+          plotOptions: {
+            radialBar: {
+              startAngle: -135,
+              endAngle: 135,
+              hollow: {
+                margin: 0,
+                size: '70%',
               },
-              color: 'var(--color-texto-principal)'
+              dataLabels: {
+                name: {
+                  show: false,
+                },
+                value: {
+                  fontSize: '30px',
+                  show: true,
+                  formatter: function (val) {
+                    return (val / 20).toFixed(1); // Convertir de vuelta a escala 0-5
+                  },
+                  color: 'var(--color-texto-principal)'
+                }
+              }
             }
-          }
-        }
-      },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: 'dark',
-          type: 'horizontal',
-          gradientToColors: ['var(--color-grafica-rojo-fuego)'],
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        lineCap: 'round'
-      },
-      labels: ["Promedio"],
-    },
-    series: [promedioCalificacion.value], // Promedio en porcentaje (0-100)
-  };
-});
+          },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'dark',
+              type: 'horizontal',
+              gradientToColors: ['var(--color-grafica-rojo-fuego)'],
+              stops: [0, 100]
+            }
+          },
+          stroke: {
+            lineCap: 'round'
+          },
+          labels: ["Promedio"],
+        },
+        series: [promedio], // Promedio en porcentaje (0-100)
+      };
+    });
 
-// Distribución de calificaciones para la gráfica
-const distribucionCalificaciones = computed(() => {
-  return {
-    options: {
-      chart: {
-        foreColor: 'var(--color-texto-principal)'
-      },
-      labels: calificacionesStats.value.calificaciones.map(c => `${c.valor} Estrellas`),
-      colors: [
-        'var(--color-grafica-rojo-granate)',
-        'var(--color-grafica-rojo-fuego)',
-        'var(--color-grafica-amarillo-dorado)',
-        'var(--color-grafica-naranja-calido)',
-        'var(--color-grafica-ocre)'
-      ],
-      legend: {
-        position: 'bottom',
-        labels: {
-          colors: 'var(--color-texto-principal)'
-        }
-      },
-      tooltip: {
-        y: {
-          formatter: function (val, { seriesIndex, dataPointIndex, w }) {
-            const porcentaje = calificacionesStats.value.calificaciones[dataPointIndex].porcentaje.toFixed(2);
-            return `${val} (${porcentaje}%)`;
-          }
-        }
-      },
-      plotOptions: {
-        pie: {
-          donut: {
+    // Preparar datos para distribución de calificaciones
+    const distribucionCalificaciones = computed(() => {
+      const distribucion = estadisticas.value ? estadisticas.value.distribucion_calificaciones : {
+        "5_estrellas": 0,
+        "4_estrellas": 0,
+        "3_estrellas": 0,
+        "2_estrellas": 0,
+        "1_estrella": 0
+      };
+
+      const labels = Object.keys(distribucion).map(key => {
+        return key.replace('_', ' ');
+      });
+
+      const series = Object.values(distribucion).map(value => {
+        return calcularCantidad(value);
+      });
+
+      return {
+        options: {
+          chart: {
+            foreColor: 'var(--color-texto-principal)'
+          },
+          labels: labels,
+          colors: [
+            'var(--color-grafica-ocre)',
+            'var(--color-grafica-naranja-calido)',
+            'var(--color-grafica-amarillo-dorado)',
+            'var(--color-grafica-rojo-fuego)',
+            'var(--color-grafica-rojo-granate)'
+          ],
+          legend: {
+            position: 'bottom',
             labels: {
-              show: true,
-              total: {
-                show: true,
-                label: 'Total',
-                formatter: function () {
-                  return calificacionesStats.value.total;
+              colors: 'var(--color-texto-principal)'
+            }
+          },
+          tooltip: {
+            y: {
+              formatter: function (val, { seriesIndex, dataPointIndex, w }) {
+                const porcentaje = Object.values(distribucion)[dataPointIndex];
+                return `${val} (${porcentaje.toFixed(2)}%)`;
+              }
+            }
+          },
+          plotOptions: {
+            pie: {
+              donut: {
+                labels: {
+                  show: true,
+                  total: {
+                    show: true,
+                    label: 'Total',
+                    formatter: function () {
+                      return estadisticas.value ? estadisticas.value.total_quejas : 0;
+                    }
+                  }
                 }
               }
             }
           }
-        }
-      }
-    },
-    series: calificacionesStats.value.calificaciones.map(c => c.cantidad),
-  };
-});
-
-// Método para obtener color basado en calificación
-const getColorForRating = (rating) => {
-  const colors = {
-    1: 'var(--color-grafica-rojo-granate)', // Rojo granate
-    2: 'var(--color-grafica-rojo-fuego)',   // Rojo fuego
-    3: 'var(--color-grafica-amarillo-dorado)', // Amarillo dorado
-    4: 'var(--color-grafica-naranja-calido)',  // Naranja cálido
-    5: 'var(--color-grafica-ocre)'          // Ocre
-  };
-  return colors[rating] || 'var(--color-grafica-gris-plata)';
-};
-
-// Conectar al WebSocket
-const connectWebSocket = () => {
-  // Define la URL del WebSocket
-  const wsUrl = 'wss://gymtoday1243.com/api/estadisticas/ws/calificaciones';
-
-  // Crea la conexión WebSocket
-  socket.value = new WebSocket(wsUrl);
-
-  // Evento cuando se abre la conexión
-  socket.value.onopen = () => {
-    console.log('Conexión WebSocket establecida');
-    isConnected.value = true;
-  };
-
-  // Evento cuando se reciben datos
-  socket.value.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log('Datos recibidos:', data);
-    calificacionesStats.value = data;
-  };
-
-  // Evento cuando se cierra la conexión
-  socket.value.onclose = () => {
-    console.log('Conexión WebSocket cerrada');
-    isConnected.value = false;
-
-    // Intentar reconectar después de 3 segundos
-    setTimeout(() => {
-      connectWebSocket();
-    }, 3000);
-  };
-
-  // Evento en caso de error
-  socket.value.onerror = (error) => {
-    console.error('Error en la conexión WebSocket:', error);
-    isConnected.value = false;
-  };
-};
-
-// Obtener datos iniciales (REST API)
-const fetchInitialData = async () => {
-  try {
-    // Obtener estadísticas de calificaciones
-    const statsResponse = await axios.get('https://gymtoday1243.com/api/estadisticas/calificaciones');
-    calificacionesStats.value = statsResponse.data;
-  } catch (error) {
-    console.error('Error al obtener datos iniciales:', error);
-    // Si falla la obtención de datos, usar datos de ejemplo
-    if (calificacionesStats.value.calificaciones.length === 0) {
-      calificacionesStats.value = {
-        calificaciones: [
-          { valor: 1, cantidad: 5, porcentaje: 5 },
-          { valor: 2, cantidad: 10, porcentaje: 10 },
-          { valor: 3, cantidad: 20, porcentaje: 20 },
-          { valor: 4, cantidad: 30, porcentaje: 30 },
-          { valor: 5, cantidad: 35, porcentaje: 35 }
-        ],
-        total: 100
+        },
+        series: series,
       };
-    }
-  }
-};
+    });
 
-// Solicitar actualización cada 30 segundos como respaldo
-let updateInterval;
+    // Gráfica para el detalle de un entrenador
+    const entrenadorGrafica = computed(() => {
+      if (!entrenadorSeleccionado.value || !entrenadorSeleccionado.value.tendencia_calificaciones) {
+        return {
+          options: {
+            chart: {
+              type: 'bar',
+              height: 200,
+              foreColor: 'var(--color-texto-principal)',
+            },
+            xaxis: {
+              categories: [],
+            },
+            yaxis: {
+              min: 0,
+              max: 5,
+            },
+            colors: ['var(--color-grafica-amarillo-dorado)'],
+            plotOptions: {
+              bar: {
+                borderRadius: 4,
+              }
+            }
+          },
+          series: [{
+            name: 'Calificación',
+            data: []
+          }]
+        };
+      }
 
-onMounted(() => {
-  // Obtener datos iniciales
-  fetchInitialData();
+      const tendencia = entrenadorSeleccionado.value.tendencia_calificaciones;
+      const categorias = tendencia.map(item => {
+        const [year, month] = item.periodo.split('-');
+        const date = new Date(year, parseInt(month) - 1);
+        return date.toLocaleDateString('es-ES', { month: 'short' });
+      });
 
-  // Conectar al WebSocket
-  connectWebSocket();
+      return {
+        options: {
+          chart: {
+            type: 'bar',
+            height: 200,
+            foreColor: 'var(--color-texto-principal)',
+          },
+          xaxis: {
+            categories: categorias,
+          },
+          yaxis: {
+            min: 0,
+            max: 5,
+            labels: {
+              formatter: function (value) {
+                return value.toFixed(1);
+              }
+            }
+          },
+          colors: ['var(--color-grafica-amarillo-dorado)'],
+          plotOptions: {
+            bar: {
+              borderRadius: 4,
+              columnWidth: '50%',
+            }
+          },
+          dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+              return val.toFixed(1);
+            },
+            style: {
+              fontSize: '12px',
+              colors: ['#333']
+            }
+          },
+          tooltip: {
+            y: {
+              formatter: function (value) {
+                return value.toFixed(1) + ' / 5';
+              }
+            }
+          }
+        },
+        series: [{
+          name: 'Calificación',
+          data: tendencia.map(item => item.promedio_calificacion)
+        }]
+      };
+    });
 
-  // Establecer intervalo para solicitar actualizaciones
-  updateInterval = setInterval(() => {
-    if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-      socket.value.send('update');
-    }
-  }, 30000);
-});
-
-onUnmounted(() => {
-  // Limpiar recursos al desmontar el componente
-  if (socket.value) {
-    socket.value.close();
-  }
-
-  if (updateInterval) {
-    clearInterval(updateInterval);
+    return {
+      loading,
+      estadisticas,
+      estadisticasPorEntrenador,
+      calificacionPromedio,
+      distribucionCalificaciones,
+      entrenadorSeleccionado,
+      detalleEntrenadorDialog,
+      ultimasQuejas,
+      entrenadorGrafica,
+      verDetalleEntrenador,
+      calcularCantidad,
+      evaluationsService
+    };
   }
 });
 </script>
@@ -335,7 +473,7 @@ onUnmounted(() => {
 <style scoped lang="scss">
 @import "@/styles/_variables.scss";
 
-.service-rating-content {
+.admin-dashboard-content {
   padding: 2rem;
 }
 
@@ -395,13 +533,13 @@ onUnmounted(() => {
   }
 }
 
-.rating-card {
+.trainers-card {
   .v-card__title {
     border-bottom: 2px solid var(--color-grafica-amarillo-dorado);
   }
 }
 
-.rating-table {
+.trainers-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 12px;
@@ -443,38 +581,66 @@ onUnmounted(() => {
       transform: scale(1.01);
     }
   }
+}
 
-  .star-cell {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    .rating-stars {
-      flex-shrink: 0;
-    }
-
-    .star-text {
-      font-weight: 500;
-      color: var(--color-texto-secundario);
-    }
+.name-cell {
+  .trainer-name {
+    font-weight: 500;
   }
+}
 
-  .amount-chip {
-    font-weight: 600;
-    min-width: 40px;
-    justify-content: center;
-  }
+.rating-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 
-  .percentage-value {
+  .rating-value {
     font-weight: 600;
     color: var(--color-texto-principal);
   }
+}
 
-  .progress-text {
-    color: white;
-    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-    font-size: 0.75rem;
+.distribution-cell {
+  .distribution-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+
+    .distribution-bar-container {
+      height: 4px;
+      background-color: var(--color-gris-claro);
+      border-radius: 2px;
+      overflow: hidden;
+
+      .distribution-bar {
+        height: 100%;
+        border-radius: 2px;
+      }
+    }
   }
+}
+
+// Colores para los distintos niveles de calificación en el modal
+.bg-rating-5 {
+  background-color: rgba(var(--color-grafica-ocre-rgb), 0.1) !important;
+}
+
+.bg-rating-4 {
+  background-color: rgba(var(--color-grafica-naranja-calido-rgb), 0.1) !important;
+}
+
+.bg-rating-3 {
+  background-color: rgba(var(--color-grafica-amarillo-dorado-rgb), 0.1) !important;
+}
+
+.bg-rating-2 {
+  background-color: rgba(var(--color-grafica-rojo-fuego-rgb), 0.1) !important;
+}
+
+.bg-rating-1 {
+  background-color: rgba(var(--color-grafica-rojo-granate-rgb), 0.1) !important;
 }
 
 @media (max-width: 960px) {
@@ -489,28 +655,22 @@ onUnmounted(() => {
     }
   }
 
-  .service-rating-content {
+  .admin-dashboard-content {
     padding: 1rem;
   }
 
-  .rating-table {
+  .trainers-table {
     border-spacing: 0 8px;
 
     th,
     td {
       padding: 10px 12px;
     }
-
-    .star-cell {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-    }
   }
 }
 
 @media (max-width: 600px) {
-  .rating-table {
+  .trainers-table {
     display: block;
     overflow-x: auto;
 

@@ -24,16 +24,25 @@
           </div>
           <v-card-text>
             <v-form @submit.prevent="saveProfileSettings">
-              <v-text-field v-model="profileSettings.name" label="Nombre Completo" outlined dense
+              <v-text-field v-model="profileSettings.Nombre" label="Nombre" outlined dense
                 prepend-inner-icon="mdi-account" class="mb-3"></v-text-field>
 
-              <v-text-field v-model="profileSettings.email" label="Correo Electrónico" outlined dense
+              <v-text-field v-model="profileSettings.Primer_Apellido" label="Primer Apellido" outlined dense
+                prepend-inner-icon="mdi-account-supervisor" class="mb-3"></v-text-field>
+                
+              <v-text-field v-model="profileSettings.Segundo_Apellido" label="Segundo Apellido" outlined dense
+                prepend-inner-icon="mdi-account-supervisor-circle" class="mb-3"></v-text-field>
+
+              <v-text-field v-model="profileSettings.Nombre_Usuario" label="Nombre de Usuario" outlined dense
+                prepend-inner-icon="mdi-account-badge" class="mb-3"></v-text-field>
+
+              <v-text-field v-model="profileSettings.Correo_Electronico" label="Correo Electrónico" outlined dense
                 prepend-inner-icon="mdi-email" class="mb-3"></v-text-field>
 
-              <v-text-field v-model="profileSettings.phone" label="Teléfono" outlined dense
+              <v-text-field v-model="profileSettings.Numero_Telefonico" label="Teléfono" outlined dense
                 prepend-inner-icon="mdi-phone" class="mb-3"></v-text-field>
 
-              <v-btn type="submit" color="primary" block class="save-btn">
+              <v-btn type="submit" color="primary" block class="save-btn" :loading="loadingSave">
                 <Icon icon="mdi:content-save" left />
                 Guardar Cambios
               </v-btn>
@@ -53,16 +62,13 @@
           </div>
           <v-card-text>
             <v-form @submit.prevent="changePassword">
-              <v-text-field v-model="passwordSettings.currentPassword" label="Contraseña Actual" type="password"
-                outlined dense prepend-inner-icon="mdi-lock" class="mb-3"></v-text-field>
-
               <v-text-field v-model="passwordSettings.newPassword" label="Nueva Contraseña" type="password" outlined
                 dense prepend-inner-icon="mdi-key" class="mb-3"></v-text-field>
 
               <v-text-field v-model="passwordSettings.confirmPassword" label="Confirmar Nueva Contraseña"
                 type="password" outlined dense prepend-inner-icon="mdi-key-change" class="mb-3"></v-text-field>
 
-              <v-btn type="submit" color="primary" block class="save-btn">
+              <v-btn type="submit" color="primary" block class="save-btn" :loading="loadingPassword">
                 <Icon icon="mdi:key-variant" left />
                 Cambiar Contraseña
               </v-btn>
@@ -97,14 +103,25 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Alert para notificaciones -->
+    <v-snackbar v-model="showAlert" :color="alertColor" :timeout="3000">
+      {{ alertMessage }}
+      <template v-slot:action="{ attrs }">
+        <v-btn text v-bind="attrs" @click="showAlert = false">
+          Cerrar
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Icon } from '@iconify/vue';
+import SettingsService from '@/services/SettingsService';
 
 export default defineComponent({
   name: 'CoachSettingsView',
@@ -113,22 +130,29 @@ export default defineComponent({
   },
   setup() {
     // Inicializar animaciones
-    AOS.init({
-      duration: 800,
-      once: true,
-      easing: 'ease-in-out-quad'
+    onMounted(() => {
+      AOS.init({
+        duration: 800,
+        once: true,
+        easing: 'ease-in-out-quad'
+      });
+      
+      // Cargar datos del perfil al montar el componente
+      fetchProfileData();
     });
 
     // Datos del formulario de perfil
     const profileSettings = ref({
-      name: 'Carlos Martínez',
-      email: 'carlos.martinez@example.com',
-      phone: '+34 612 345 678',
+      Nombre: '',
+      Primer_Apellido: '',
+      Segundo_Apellido: '',  // Añadido Segundo_Apellido
+      Numero_Telefonico: '',
+      Nombre_Usuario: '',
+      Correo_Electronico: ''
     });
 
     // Datos del formulario de cambio de contraseña
     const passwordSettings = ref({
-      currentPassword: '',
       newPassword: '',
       confirmPassword: '',
     });
@@ -140,26 +164,107 @@ export default defineComponent({
       availability: true,
     });
 
+    // Estados de carga
+    const loadingSave = ref(false);
+    const loadingPassword = ref(false);
+
+    // Estado para alertas
+    const showAlert = ref(false);
+    const alertMessage = ref('');
+    const alertColor = ref('success');
+
+    // Función para mostrar alertas
+    const showNotification = (message: string, color: string = 'success') => {
+      alertMessage.value = message;
+      alertColor.value = color;
+      showAlert.value = true;
+    };
+
+    // Cargar datos del perfil
+    const fetchProfileData = async () => {
+      try {
+        const profileData = await SettingsService.getProfileData();
+        profileSettings.value = {
+          Nombre: profileData.Nombre || '',
+          Primer_Apellido: profileData.Primer_Apellido || '',
+          Segundo_Apellido: profileData.Segundo_Apellido || '',  // Añadido Segundo_Apellido
+          Numero_Telefonico: profileData.Numero_Telefonico || '',
+          Nombre_Usuario: profileData.Nombre_Usuario || '',
+          Correo_Electronico: profileData.Correo_Electronico || ''
+        };
+      } catch (error) {
+        console.error('Error al cargar datos del perfil:', error);
+        showNotification('No se pudieron cargar los datos del perfil. Por favor, intenta más tarde.', 'error');
+      }
+    };
+
     // Método para guardar los cambios del perfil
-    const saveProfileSettings = () => {
-      console.log('Configuración guardada:', profileSettings.value);
-      // Lógica para guardar los cambios en el backend
+    const saveProfileSettings = async () => {
+      loadingSave.value = true;
+      
+      try {
+        // Intentar actualizar el perfil
+        await SettingsService.updateProfileData(profileSettings.value);
+        showNotification('Perfil actualizado correctamente');
+      } catch (error: any) {
+        // Si el error es 404 (perfil no existe), intentar crear uno nuevo
+        if (error.response && error.response.status === 404) {
+          try {
+            await SettingsService.createProfileData(profileSettings.value);
+            showNotification('Perfil creado correctamente');
+          } catch (createError) {
+            console.error('Error al crear perfil:', createError);
+            showNotification('Error al crear el perfil', 'error');
+          }
+        } else {
+          console.error('Error al guardar cambios:', error);
+          showNotification('Error al guardar los cambios', 'error');
+        }
+      } finally {
+        loadingSave.value = false;
+      }
     };
 
     // Método para cambiar la contraseña
-    const changePassword = () => {
+    const changePassword = async () => {
+      // Validar que las contraseñas coincidan
       if (passwordSettings.value.newPassword !== passwordSettings.value.confirmPassword) {
-        alert('La nueva contraseña y la confirmación no coinciden.');
+        showNotification('Las contraseñas no coinciden', 'error');
         return;
       }
-      console.log('Contraseña cambiada:', passwordSettings.value);
-      // Lógica para cambiar la contraseña en el backend
+      
+      // Validar longitud mínima
+      if (passwordSettings.value.newPassword.length < 6) {
+        showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+        return;
+      }
+      
+      loadingPassword.value = true;
+      
+      try {
+        await SettingsService.changePassword(passwordSettings.value.newPassword);
+        showNotification('Contraseña cambiada correctamente');
+        
+        // Limpiar campos
+        passwordSettings.value.newPassword = '';
+        passwordSettings.value.confirmPassword = '';
+      } catch (error) {
+        console.error('Error al cambiar contraseña:', error);
+        showNotification('Error al cambiar la contraseña', 'error');
+      } finally {
+        loadingPassword.value = false;
+      }
     };
 
     return {
       profileSettings,
       passwordSettings,
       additionalSettings,
+      loadingSave,
+      loadingPassword,
+      showAlert,
+      alertMessage,
+      alertColor,
       saveProfileSettings,
       changePassword,
     };
