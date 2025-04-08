@@ -5,7 +5,7 @@
       <span class="title-text">Gestión de Usuarios</span>
       <span class="title-highlight"></span>
     </h1>
-    <p class="text-subtitle-1">Administra los usuarios del sistema, cambia roles y edita su información.</p>
+    <p class="text-subtitle-1">Administra los usuarios del sistema y cambia sus roles.</p>
 
     <!-- Filtros de Búsqueda -->
     <v-row class="mb-6">
@@ -15,48 +15,14 @@
           <v-card-subtitle>Filtra los resultados por nombre o rol</v-card-subtitle>
           <v-card-text>
             <v-row>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="6">
                 <v-text-field v-model="filtroNombre" label="Buscar por Nombre o Email" clearable
                   prepend-icon="mdi-magnify" hint="Busca por nombre o correo electrónico"
                   persistent-hint></v-text-field>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="6">
                 <v-select v-model="filtroRol" :items="rolesDisponibles" label="Filtrar por Rol" clearable
                   prepend-icon="mdi-filter-variant" hint="Selecciona un rol específico" persistent-hint></v-select>
-              </v-col>
-              <v-col cols="12" md="4" class="d-flex align-center">
-                <v-btn color="var(--color-grafica-rojo-fuego)" @click="aplicarFiltros" block>
-                  <v-icon left>mdi-filter</v-icon>
-                  Aplicar Filtros
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-
-    <!-- Control de IDs a consultar -->
-    <v-row class="mb-6">
-      <v-col cols="12">
-        <v-card class="pa-4" elevation="2">
-          <v-card-title class="card-title">Consulta de Usuarios</v-card-title>
-          <v-card-subtitle>Indica el rango de IDs a consultar</v-card-subtitle>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-text-field v-model="idInicio" label="ID Inicio" type="number" min="1" hide-details
-                  @keyup.enter="cargarDatos" hint="Primer ID a consultar" persistent-hint></v-text-field>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-text-field v-model="idFin" label="ID Fin" type="number" min="1" hide-details
-                  @keyup.enter="cargarDatos" hint="Último ID a consultar" persistent-hint></v-text-field>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-btn color="var(--color-grafica-rojo-fuego)" @click="cargarDatos" :loading="cargando" block>
-                  <v-icon left>mdi-refresh</v-icon>
-                  Cargar Datos
-                </v-btn>
               </v-col>
             </v-row>
           </v-card-text>
@@ -79,31 +45,16 @@
             <div v-if="cargando" class="text-center py-4">
               <v-progress-circular indeterminate color="var(--color-grafica-rojo-fuego)"
                 size="50"></v-progress-circular>
-              <p class="mt-2">Cargando datos... ({{ progresoCarga }}%)</p>
+              <p class="mt-2">Cargando datos...</p>
             </div>
             <v-data-table v-else :headers="cabecerasUsuarios" :items="usuariosFiltrados" :items-per-page="-1" dense
-              class="elevation-1" :search="filtroBusqueda">
-
-              <template v-slot:header="{ props: { headers } }">
-                <thead>
-                  <tr>
-                    <th v-for="header in headers" :key="header.value" :class="header.class">
-                      <v-tooltip bottom>
-                        <template v-slot:activator="{ on, attrs }">
-                          <span v-bind="attrs" v-on="on">{{ header.text }}</span>
-                        </template>
-                        <span>{{ header.tooltip }}</span>
-                      </v-tooltip>
-                    </th>
-                  </tr>
-                </thead>
-              </template>
+              class="elevation-1">
 
               <!-- Columna de enumeración -->
               <template #item.index="{ index, item }">
                 <div>
                   {{ index + 1 }}
-                  <span class="text-caption text-grey-darken-1">(ID: {{ item.Usuario_ID }})</span>
+                  <span class="text-caption text-grey-darken-1">(ID: {{ item.ID }})</span>
                 </div>
               </template>
 
@@ -112,21 +63,11 @@
                 <v-select v-model="item.selectedRol" :items="rolesDisponibles" dense outlined hide-details></v-select>
               </template>
 
-              <!-- Columna de Estado -->
-              <template #item.Estatus="{ item }">
-                <v-chip :color="item.Estatus === 1 ? 'success' : 'error'" small>
-                  {{ item.Estatus === 1 ? 'Activo' : 'Inactivo' }}
-                </v-chip>
-              </template>
-
               <!-- Acciones -->
               <template #item.acciones="{ item }">
                 <v-btn icon small color="success" @click="editarUsuario(item)"
                   :disabled="item.selectedRol === item.Nombre" v-tooltip="'Guardar cambio de rol'">
                   <v-icon small>mdi-content-save</v-icon>
-                </v-btn>
-                <v-btn icon small color="error" @click="eliminarUsuario(item)">
-                  <v-icon small>mdi-delete</v-icon>
                 </v-btn>
               </template>
             </v-data-table>
@@ -158,26 +99,18 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
-
-// URL base de la API
-const apiBaseUrl = 'https://gymtoday1243.com';
+import UserManagementService, { Usuario } from '@/services/UserManagementService';
 
 // Estado para controlar la carga
 const cargando = ref(false);
-const progresoCarga = ref(0);
-
-// Rango de IDs a consultar
-const idInicio = ref(1);
-const idFin = ref(10); // Inicia consultando los primeros 10 IDs
 
 // Datos de usuarios
-const usuarios = ref([]);
+const usuarios = ref<Usuario[]>([]);
 
 // Roles disponibles
 const rolesDisponibles = ['admin', 'entrenador', 'usuario'];
 
-// Definición de cabeceras para la tabla según la estructura de la API
+// Definición de cabeceras para la tabla
 const cabecerasUsuarios = [
   {
     text: 'ID',
@@ -187,9 +120,9 @@ const cabecerasUsuarios = [
     tooltip: 'Número secuencial del usuario'
   },
   {
-    text: 'Rol de usuario',
+    text: 'Rol actual',
     value: 'Nombre',
-    tooltip: 'Nivel de acceso del usuario en el sistema',
+    tooltip: 'Rol actual del usuario en el sistema',
     width: '180px'
   },
   {
@@ -203,13 +136,6 @@ const cabecerasUsuarios = [
     tooltip: 'Dirección de correo del usuario'
   },
   {
-    text: 'Estado',
-    value: 'Estatus',
-    tooltip: 'Indica si el usuario está activo o inactivo',
-    align: 'center',
-    width: '120px'
-  },
-  {
     text: 'Acciones',
     value: 'acciones',
     sortable: false,
@@ -219,158 +145,46 @@ const cabecerasUsuarios = [
   },
 ];
 
-const alertas = ref([]);
+const alertas = ref<{mensaje: string, tipo: string}[]>([]);
 
 // Estados de filtros
 const filtroNombre = ref('');
 const filtroRol = ref('');
-const filtroBusqueda = ref('');
 
-// Función para formatear fechas
-const formatearFecha = (fechaString) => {
-  if (!fechaString) return '-';
-  const fecha = new Date(fechaString);
-  return fecha.toLocaleString();
-};
-
-// Función para limpiar alertas
-const limpiarAlertas = () => {
-  alertas.value = [];
-};
-
-// Función para obtener datos de un ID específico
-const obtenerDatosPorId = async (id) => {
-  try {
-    const url = `${apiBaseUrl}/users/${id}/roles1`;
-    const respuesta = await axios.get(url);
-
-    // Inicializar el rol seleccionado para cada usuario
-    if (respuesta.data && Array.isArray(respuesta.data)) {
-      respuesta.data.forEach(usuario => {
-        usuario.selectedRol = usuario.Nombre; // Inicializar con el rol actual
-        usuario.Usuario_ID = id; // Guardar el ID del usuario de la URL
-      });
-    }
-
-    return respuesta.data;
-  } catch (error) {
-    console.log(`No se encontraron datos para el ID ${id}`);
-    return null;
-  }
-};
-
-// Función para cargar todos los datos en el rango de IDs especificado
+// Función para cargar usuarios
 const cargarDatos = async () => {
   if (cargando.value) return;
 
   cargando.value = true;
-  progresoCarga.value = 0;
   usuarios.value = [];
 
   try {
-    const inicio = parseInt(idInicio.value);
-    const fin = parseInt(idFin.value);
-
-    if (isNaN(inicio) || isNaN(fin) || inicio < 1 || fin < inicio) {
-      throw new Error('Rango de IDs inválido');
-    }
-
-    const total = fin - inicio + 1;
-    let encontrados = 0;
-
-    for (let id = inicio; id <= fin; id++) {
-      // Actualizar progreso
-      progresoCarga.value = Math.round(((id - inicio) / total) * 100);
-
-      const datos = await obtenerDatosPorId(id);
-      if (datos && Array.isArray(datos)) {
-        // Añadir un atributo para mostrar el ID de usuario en la tabla
-        // (para debugging, no visible en la UI)
-        datos.forEach(item => {
-          item.indiceTabla = usuarios.value.length + 1;
-        });
-
-        usuarios.value = [...usuarios.value, ...datos];
-        encontrados += datos.length;
-      }
-    }
+    // Obtener usuarios con roles
+    const usuariosCargados = await UserManagementService.obtenerUsuariosConRoles();
+    
+    usuarios.value = usuariosCargados.map(usuario => ({
+      ...usuario,
+      selectedRol: usuario.Nombre
+    }));
 
     alertas.value.unshift({
-      mensaje: `Se han cargado ${encontrados} registros correctamente en el rango de IDs ${inicio} a ${fin}.`,
+      mensaje: `Se han cargado ${usuarios.value.length} usuarios correctamente.`,
       tipo: 'success'
     });
 
   } catch (error) {
     console.error('Error al cargar datos:', error);
     alertas.value.unshift({
-      mensaje: `Error al cargar datos: ${error.message || 'Error desconocido'}`,
+      mensaje: `Error al cargar datos: ${error instanceof Error ? error.message : 'Error desconocido'}`,
       tipo: 'error'
     });
   } finally {
     cargando.value = false;
-    progresoCarga.value = 100;
   }
-};
-
-// Cargar datos iniciales al montar el componente
-onMounted(() => {
-  cargarDatos();
-});
-
-// Métodos
-const aplicarFiltros = () => {
-  console.log('Filtros aplicados:', filtroNombre.value, filtroRol.value);
 };
 
 // Método para guardar cambio de rol
-const guardarRol = async (usuario) => {
-  try {
-    // Verificar si hay cambios para guardar
-    if (usuario.selectedRol === usuario.Nombre) {
-      alertas.value.unshift({
-        mensaje: "No hay cambios para guardar en el rol",
-        tipo: "info"
-      });
-      return;
-    }
-
-    // Convertir nombre de rol a ID
-    const roles = {
-      'admin': 1,
-      'usuario': 2,
-      'entrenador': 3
-    };
-
-    const rolId = roles[usuario.selectedRol] || 1;
-
-    // Extraer ID de usuario del objeto (si está disponible)
-    const userId = usuario.Usuario_ID || idInicio.value; // Usar el ID inicio como fallback
-
-    cargando.value = true;
-    const response = await axios.post(`${apiBaseUrl}/users/${userId}/update_rol99`, {
-      rol_id: rolId
-    });
-
-    // Actualizar rol en la interfaz
-    usuario.Nombre = usuario.selectedRol;
-
-    alertas.value.unshift({
-      mensaje: `El rol del usuario ${usuario.Nombre_Usuario} ha sido actualizado a "${usuario.selectedRol}" (ID: ${rolId}).`,
-      tipo: 'success',
-    });
-
-  } catch (error) {
-    console.error('Error al actualizar rol:', error);
-    alertas.value.unshift({
-      mensaje: `Error al actualizar rol: ${error.response?.data?.detail || error.message || 'Error desconocido'}`,
-      tipo: 'error',
-    });
-  } finally {
-    cargando.value = false;
-  }
-};
-
-const editarUsuario = async (usuario) => {
+const editarUsuario = async (usuario: Usuario) => {
   try {
     // Verificar si hay cambios para guardar
     if (usuario.selectedRol === usuario.Nombre) {
@@ -382,61 +196,53 @@ const editarUsuario = async (usuario) => {
     }
 
     // Convertir nombre de rol a ID
-    const roles = {
+    const roles: {[key: string]: number} = {
       'admin': 1,
       'usuario': 2,
       'entrenador': 3
     };
 
-    const rolId = roles[usuario.selectedRol] || 1;
-
-    // Obtener el ID del usuario correcto
-    // Esto es crítico para actualizar el usuario correcto
-    const userId = usuario.Usuario_ID;
-
-    if (!userId) {
-      alertas.value.unshift({
-        mensaje: `Error: No se pudo determinar el ID del usuario ${usuario.Nombre_Usuario}`,
-        tipo: 'error',
-      });
-      return;
-    }
-
-    console.log(`Actualizando usuario ID: ${userId} a rol: ${rolId} (${usuario.selectedRol})`);
+    // Obtener el ID del rol
+    const rolId = roles[usuario.selectedRol || 'usuario'] || 2;
 
     cargando.value = true;
-    const response = await axios.post(`${apiBaseUrl}/users/${userId}/update_rol99`, {
-      rol_id: rolId
-    });
 
-    // Actualizar rol en la interfaz
-    usuario.Nombre = usuario.selectedRol;
+    // Llamar al servicio para cambiar el rol
+    await UserManagementService.cambiarRolUsuario(usuario.ID, rolId);
+
+    // Recargar datos para reflejar cambios
+    await cargarDatos();
 
     alertas.value.unshift({
-      mensaje: `Se ha guardado el cambio de rol de ${usuario.Nombre_Usuario} (ID: ${userId}) a "${usuario.selectedRol}" (Rol ID: ${rolId}).`,
+      mensaje: `Se ha guardado el cambio de rol de ${usuario.Nombre_Usuario} (ID: ${usuario.ID}) a "${usuario.selectedRol}" (Rol ID: ${rolId}).`,
       tipo: 'success',
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al guardar rol:', error);
+    
+    // Manejo detallado de errores
+    let errorMessage = 'Error desconocido al cambiar rol';
+    
+    if (error.response) {
+      // El servidor respondió con un código de estado fuera del rango 2xx
+      errorMessage = error.response.data?.detail || 
+                     error.response.data?.message || 
+                     `Error ${error.response.status}: ${error.response.statusText}`;
+    } else if (error.request) {
+      // La solicitud se hizo pero no se recibió respuesta
+      errorMessage = 'No se recibió respuesta del servidor';
+    } else {
+      // Algo sucedió al configurar la solicitud
+      errorMessage = error.message;
+    }
+
     alertas.value.unshift({
-      mensaje: `Error al guardar rol: ${error.response?.data?.detail || error.message || 'Error desconocido'}`,
+      mensaje: `Error al guardar rol: ${errorMessage}`,
       tipo: 'error',
     });
   } finally {
     cargando.value = false;
-  }
-};
-
-const eliminarUsuario = (usuario) => {
-  console.log('Eliminar usuario:', usuario.Nombre_Usuario);
-  const index = usuarios.value.findIndex((u) => u.ID === usuario.ID);
-  if (index !== -1) {
-    usuarios.value.splice(index, 1);
-    alertas.value.unshift({
-      mensaje: `El usuario ${usuario.Nombre_Usuario} ha sido eliminado.`,
-      tipo: 'error',
-    });
   }
 };
 
@@ -449,6 +255,11 @@ const usuariosFiltrados = computed(() => {
         (u.Correo_Electronico && u.Correo_Electronico.toLowerCase().includes(filtroNombre.value.toLowerCase()))) &&
       (!filtroRol.value || u.Nombre === filtroRol.value)
   );
+});
+
+// Cargar datos iniciales al montar el componente
+onMounted(() => {
+  cargarDatos();
 });
 </script>
 
