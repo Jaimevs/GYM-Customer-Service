@@ -5,7 +5,7 @@
       <v-col cols="12">
         <div class="d-flex align-center justify-center mb-2">
           <Icon icon="solar:chat-round-like-bold" width="36" class="mr-3 text-primary" />
-          <h1 class="text-h3 font-weight-bold text-gradient">Feedback y Sugerencias</h1>
+          <h1 class="text-h3 font-weight-bold text-gradient">Feedback y Opiniones</h1>
         </div>
         <p class="text-subtitle-1 text-medium-emphasis text-center">
           Comparte tus comentarios para ayudarnos a mejorar
@@ -52,71 +52,95 @@
                       </div>
                     </template>
                   </v-radio>
-                  <v-radio label="Sugerencia o comentario" value="comment" color="primary">
+                  <v-radio label="Opinión" value="opinion" color="primary">
                     <template v-slot:label>
                       <div class="d-flex align-center">
                         <Icon icon="solar:chat-round-like-bold" width="20" class="mr-2 text-green-darken-1" />
-                        <span>Sugerencia</span>
+                        <span>Opinión</span>
                       </div>
                     </template>
                   </v-radio>
                 </v-radio-group>
               </div>
 
-              <!-- Selección de entrenador/clase (solo para quejas) -->
-              <div v-if="feedbackType === 'complaint'" class="form-section">
-                <div class="section-header mb-4">
-                  <Icon icon="solar:dumbbell-bold" width="24" class="mr-2 text-primary" />
-                  <h2 class="text-h5 font-weight-bold">Detalles de la Clase</h2>
+              <!-- Formulario para Quejas -->
+              <div v-if="feedbackType === 'complaint'" class="feedback-complaint-form">
+                <!-- Selección de entrenador/clase (solo para quejas) -->
+                <div class="form-section">
+                  <div class="section-header mb-4">
+                    <Icon icon="solar:dumbbell-bold" width="24" class="mr-2 text-primary" />
+                    <h2 class="text-h5 font-weight-bold">Detalles de la Clase</h2>
+                  </div>
+
+                  <v-row dense>
+                    <v-col cols="12" md="6">
+                      <v-select v-model="selectedTrainer" :items="trainers" item-title="name" item-value="id"
+                        label="Entrenador" variant="outlined" density="comfortable" clearable :loading="loadingTrainers"
+                        :disabled="loadingTrainers" prepend-inner-icon="solar:user-bold"
+                        @update:model-value="loadTrainerClasses"></v-select>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <v-select v-model="selectedService" :items="trainerClasses" item-title="name" item-value="id"
+                        label="Clase" variant="outlined" density="comfortable" clearable :loading="loadingClasses"
+                        :disabled="loadingClasses || !selectedTrainer"
+                        prepend-inner-icon="solar:calendar-mark-bold"></v-select>
+                    </v-col>
+                  </v-row>
+
+                  <v-alert v-if="selectedTrainer && !loadingClasses && trainerClasses.length === 0" type="info"
+                    variant="tonal" class="mt-2">
+                    Este entrenador no tiene clases asignadas actualmente.
+                  </v-alert>
                 </div>
 
-                <v-row dense>
-                  <v-col cols="12" md="6">
-                    <v-select v-model="selectedTrainer" :items="trainers" item-title="name" item-value="id"
-                      label="Entrenador" variant="outlined" density="comfortable" clearable :loading="loadingTrainers"
-                      :disabled="loadingTrainers" prepend-inner-icon="solar:user-bold"
-                      @update:model-value="loadTrainerClasses"></v-select>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-select v-model="selectedService" :items="trainerClasses" item-title="name" item-value="id"
-                      label="Clase" variant="outlined" density="comfortable" clearable :loading="loadingClasses"
-                      :disabled="loadingClasses || !selectedTrainer"
-                      prepend-inner-icon="solar:calendar-mark-bold"></v-select>
-                  </v-col>
-                </v-row>
+                <!-- Calificación para Quejas -->
+                <div class="form-section">
+                  <div class="section-header mb-4">
+                    <Icon icon="solar:star-bold" width="24" class="mr-2 text-primary" />
+                    <h2 class="text-h5 font-weight-bold">Calificación</h2>
+                  </div>
+                  <div class="d-flex align-center justify-center">
+                    <v-rating v-model="rating" color="amber" background-color="amber-lighten-4" size="40"
+                      empty-icon="mdi-star-outline" full-icon="mdi-star" clearable></v-rating>
+                    <span class="text-h6 ml-4">{{ ratingText }}</span>
+                  </div>
+                </div>
 
-                <v-alert v-if="selectedTrainer && !loadingClasses && trainerClasses.length === 0" type="info"
-                  variant="tonal" class="mt-2">
-                  Este entrenador no tiene clases asignadas actualmente.
-                </v-alert>
+                <!-- Comentarios para Quejas -->
+                <div class="form-section">
+                  <div class="section-header mb-4">
+                    <Icon icon="solar:chat-round-bold" width="24" class="mr-2 text-primary" />
+                    <h2 class="text-h5 font-weight-bold">Comentarios</h2>
+                  </div>
+                  <v-textarea v-model="comments" label="Describe tu experiencia"
+                    placeholder="Sé específico para ayudarnos a mejorar..." variant="outlined" rows="5" auto-grow
+                    :rules="[requiredRule]"></v-textarea>
+                </div>
               </div>
 
-              <!-- Calificación -->
-              <div class="form-section">
-                <div class="section-header mb-4">
-                  <Icon icon="solar:star-bold" width="24" class="mr-2 text-primary" />
-                  <h2 class="text-h5 font-weight-bold">Calificación</h2>
+              <!-- Formulario para Opiniones -->
+              <div v-else class="feedback-opinion-form">
+                <!-- Tipo de opinión -->
+                <div class="form-section">
+                  <div class="section-header mb-4">
+                    <Icon icon="solar:document-bold" width="24" class="mr-2 text-primary" />
+                    <h2 class="text-h5 font-weight-bold">Tipo de Opinión</h2>
+                  </div>
+                  <v-select v-model="opinionType" :items="opinionTypes" label="Selecciona el tipo de opinión"
+                    variant="outlined" density="comfortable" prepend-inner-icon="solar:chat-square-like-bold"
+                    :rules="[requiredRule]"></v-select>
                 </div>
-                <div class="d-flex align-center justify-center">
 
-
-                  <v-rating v-model="rating" color="amber" background-color="amber-lighten-4" size="40"
-                    empty-icon="mdi-star-outline" full-icon="mdi-star" clearable></v-rating>
-
-
-                  <span class="text-h6 ml-4">{{ ratingText }}</span>
+                <!-- Comentarios para Opiniones -->
+                <div class="form-section">
+                  <div class="section-header mb-4">
+                    <Icon icon="solar:chat-round-bold" width="24" class="mr-2 text-primary" />
+                    <h2 class="text-h5 font-weight-bold">Tu Opinión</h2>
+                  </div>
+                  <v-textarea v-model="comments" label="Describe tu experiencia o sugerencia"
+                    placeholder="Sé específico para ayudarnos a mejorar..." variant="outlined" rows="5" auto-grow
+                    :rules="[requiredRule]"></v-textarea>
                 </div>
-              </div>
-
-              <!-- Comentarios -->
-              <div class="form-section">
-                <div class="section-header mb-4">
-                  <Icon icon="solar:chat-round-bold" width="24" class="mr-2 text-primary" />
-                  <h2 class="text-h5 font-weight-bold">Comentarios</h2>
-                </div>
-                <v-textarea v-model="comments" label="Describe tu experiencia o sugerencia"
-                  placeholder="Sé específico para ayudarnos a mejorar..." variant="outlined" rows="5" auto-grow
-                  :rules="[requiredRule]"></v-textarea>
               </div>
 
               <!-- Botones de acción -->
@@ -146,9 +170,9 @@
                 <Icon icon="hugeicons:complaint" width="20" class="mr-2" />
                 Mis Quejas
               </v-tab>
-              <v-tab value="suggestions">
+              <v-tab value="opinions">
                 <Icon icon="solar:chat-round-like-bold" width="20" class="mr-2" />
-                Mis Sugerencias
+                Mis Opiniones
               </v-tab>
             </v-tabs>
 
@@ -157,7 +181,7 @@
               <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
             </div>
 
-            <!-- Sin historial -->
+            <!-- Sin historial de quejas -->
             <v-alert v-else-if="historyTab === 'complaints' && myComplaints.length === 0" type="info" variant="tonal"
               class="text-center py-6">
               <Icon icon="solar:inbox-line-duotone" width="48" class="mb-4 text-grey-lighten-1" />
@@ -165,11 +189,12 @@
               <p class="text-body-1">Tus quejas aparecerán aquí cuando las envíes</p>
             </v-alert>
 
-            <v-alert v-else-if="historyTab === 'suggestions' && mySuggestions.length === 0" type="info" variant="tonal"
+            <!-- Sin historial de opiniones -->
+            <v-alert v-else-if="historyTab === 'opinions' && myOpinions.length === 0" type="info" variant="tonal"
               class="text-center py-6">
               <Icon icon="solar:inbox-line-duotone" width="48" class="mb-4 text-grey-lighten-1" />
-              <p class="text-h6">No has realizado ninguna sugerencia</p>
-              <p class="text-body-1">Tus sugerencias aparecerán aquí cuando las envíes</p>
+              <p class="text-h6">No has compartido ninguna opinión</p>
+              <p class="text-body-1">Tus opiniones aparecerán aquí cuando las envíes</p>
             </v-alert>
 
             <!-- Lista de quejas -->
@@ -206,31 +231,47 @@
               </v-list-item>
             </v-list>
 
-            <!-- Lista de sugerencias -->
-            <v-list v-else-if="historyTab === 'suggestions'" class="history-list">
-              <v-list-item v-for="item in mySuggestions" :key="item.ID" class="history-item mb-4" data-aos="fade-up">
+            <!-- Lista de opiniones -->
+            <v-list v-else-if="historyTab === 'opinions'" class="history-list">
+              <v-list-item v-for="item in myOpinions" :key="item.ID" class="history-item mb-4" data-aos="fade-up">
                 <template v-slot:prepend>
-                  <v-avatar color="green-lighten-5" size="48" class="mr-4">
-                    <Icon icon="solar:chat-round-like-bold" width="24" class="text-green-darken-1" />
+                  <v-avatar :color="getOpinionTypeColor(item.Tipo)" size="48" class="mr-4">
+                    <Icon :icon="getOpinionTypeIcon(item.Tipo)" width="24"
+                      :class="getOpinionTypeTextColor(item.Tipo)" />
                   </v-avatar>
                 </template>
 
-                <v-list-item-title class="font-weight-bold text-h6">
-                  {{ item.Tipo || 'Sugerencia' }}
+                <v-list-item-title class="font-weight-bold text-h6 d-flex align-center">
+                  {{ item.Tipo }}
+                  <v-chip size="small" :color="getOpinionStatusColor(item.Estatus)" label class="ml-2">
+                    {{ item.Estatus ? 'Respondida' : 'Pendiente' }}
+                  </v-chip>
                 </v-list-item-title>
 
                 <v-list-item-subtitle class="mt-2">
                   <div class="d-flex align-center mb-2">
-                    <v-rating :model-value="item.Calificacion" readonly color="amber" size="20" density="compact"
-                      class="mr-2"></v-rating>
                     <span class="text-caption text-medium-emphasis">{{ formatDate(item.Fecha_Registro) }}</span>
                   </div>
-                  <p class="text-body-1">{{ item.Comentario }}</p>
+                  <p class="text-body-1">{{ item.Descripcion }}</p>
+
+                  <!-- Mostrar respuesta si existe -->
+                  <div v-if="item.Estatus === true" class="mt-3 pa-3 response-section">
+                    <div class="d-flex align-center mb-2">
+                      <Icon icon="solar:chat-square-like-bold" width="18" class="mr-2 text-primary" />
+                      <span class="text-subtitle-2 font-weight-bold">Respuesta:</span>
+                    </div>
+                    <p class="text-body-1">{{ item.Respuesta || 'Sin respuesta detallada.' }}</p>
+                  </div>
                 </v-list-item-subtitle>
 
                 <template v-slot:append>
-                  <v-btn icon variant="text" color="error" @click.stop="deleteSuggestion(item.ID)"
-                    :loading="deletingItem === item.ID">
+                  <v-btn icon variant="text" :color="item.Estatus ? 'info' : 'primary'"
+                    @click.stop="item.Estatus ? viewOpinionDetails(item) : editOpinion(item)"
+                    :disabled="loadingItem === item.ID">
+                    <Icon :icon="item.Estatus ? 'solar:eye-bold' : 'solar:pen-bold'" width="20" />
+                  </v-btn>
+                  <v-btn icon variant="text" color="error" @click.stop="deleteOpinion(item.ID)"
+                    :loading="loadingItem === item.ID">
                     <Icon icon="solar:trash-bin-trash-bold" width="20" />
                   </v-btn>
                 </template>
@@ -240,20 +281,107 @@
         </v-window-item>
       </v-window>
     </v-card>
+
+    <!-- Diálogo para editar opinión -->
+    <v-dialog v-model="editDialog" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h5">Editar Opinión</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="updateOpinion">
+            <!-- Tipo de opinión -->
+            <v-select v-model="editedOpinion.Tipo" :items="opinionTypes" label="Tipo de opinión" variant="outlined"
+              density="comfortable" prepend-inner-icon="solar:chat-square-like-bold" :rules="[requiredRule]"
+              class="mb-4"></v-select>
+
+            <!-- Descripción -->
+            <v-textarea v-model="editedOpinion.Descripcion" label="Tu opinión" variant="outlined" rows="5" auto-grow
+              :rules="[requiredRule]"></v-textarea>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="secondary" variant="text" @click="editDialog = false">Cancelar</v-btn>
+          <v-btn color="primary" variant="flat" :loading="updating" @click="updateOpinion">Guardar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
+    <!-- Diálogo para ver detalles de opinión -->
+    <v-dialog v-model="viewDialog" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h5 primary--text">
+          Detalles de la Opinión
+          <v-spacer></v-spacer>
+          <v-btn icon @click="viewDialog = false">
+            <Icon icon="solar:close-circle-bold" width="24" />
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text class="pt-4">
+          <div v-if="currentOpinionDetails">
+            <!-- Encabezado -->
+            <div class="d-flex align-center mb-4">
+              <v-avatar :color="getOpinionTypeColor(currentOpinionDetails.Tipo)" size="36" class="mr-3">
+                <Icon :icon="getOpinionTypeIcon(currentOpinionDetails.Tipo)" width="20"
+                  :class="getOpinionTypeTextColor(currentOpinionDetails.Tipo)" />
+              </v-avatar>
+
+              <div>
+                <div class="d-flex align-center">
+                  <span class="text-h6 font-weight-bold">{{ currentOpinionDetails.Tipo }}</span>
+                  <v-chip size="small" :color="getOpinionStatusColor(currentOpinionDetails.Estatus)" label class="ml-2">
+                    {{ currentOpinionDetails.Estatus ? 'Respondida' : 'Pendiente' }}
+                  </v-chip>
+                </div>
+                <span class="text-caption text-medium-emphasis">
+                  {{ formatDate(currentOpinionDetails.Fecha_Registro) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Contenido de la opinión -->
+            <div class="mb-4">
+              <p class="text-subtitle-2 font-weight-bold mb-1">Tu opinión:</p>
+              <div class="pa-3 rounded-lg" style="background-color: rgba(0,0,0,0.03);">
+                <p class="text-body-1">{{ currentOpinionDetails.Descripcion }}</p>
+              </div>
+            </div>
+
+            <!-- Respuesta (si existe) -->
+            <div v-if="currentOpinionDetails.Estatus && currentOpinionDetails.Respuesta">
+              <p class="text-subtitle-2 font-weight-bold mb-1">Respuesta:</p>
+              <div class="pa-3 response-section">
+                <p class="text-body-1">{{ currentOpinionDetails.Respuesta }}</p>
+                <p v-if="currentOpinionDetails.Fecha_Actualizacion" class="text-caption text-medium-emphasis mt-2">
+                  Respondido el: {{ formatDate(currentOpinionDetails.Fecha_Actualizacion) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" variant="text" @click="viewDialog = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { Icon } from '@iconify/vue';
-import FeedbackService, { Queja, Sugerencia } from '@/services/FeedbackService';
+import FeedbackService, { Queja } from '@/services/FeedbackService';
 import ClassesService from '@/services/ClassesService';
+import OpinionClienteService, { OpinionCliente } from '@/services/OpinionClienteService';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 // Estado del formulario
 const activeTab = ref<'new' | 'history'>('new');
-const feedbackType = ref<'complaint' | 'comment'>('complaint');
+const feedbackType = ref<'complaint' | 'opinion'>('complaint');
 const selectedTrainer = ref<number | null>(null);
 const selectedService = ref<number | null>(null);
 const rating = ref(0);
@@ -262,12 +390,35 @@ const loading = ref(false);
 const error = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
 
+// Estado para el tipo de opinión
+const opinionType = ref<string>('Sugerencia');
+const opinionTypes = [
+  'Queja',
+  'Sugerencia',
+  'Felicitacion',
+  'Recomendacion',
+  'Otro'
+];
+
 // Estado para el historial
-const historyTab = ref<'complaints' | 'suggestions'>('complaints');
+const historyTab = ref<'complaints' | 'opinions'>('complaints');
 const myComplaints = ref<Queja[]>([]);
-const mySuggestions = ref<Sugerencia[]>([]);
+const myOpinions = ref<OpinionCliente[]>([]);
 const loadingHistory = ref(false);
 const deletingItem = ref<number | null>(null);
+const loadingItem = ref<number | null>(null);
+
+// Estado para edición de opiniones
+const editDialog = ref(false);
+const editedOpinion = ref<{ ID?: number, Tipo: string, Descripcion: string }>({
+  Tipo: '',
+  Descripcion: ''
+});
+const updating = ref(false);
+
+// Estado para visualización de detalles
+const viewDialog = ref(false);
+const currentOpinionDetails = ref<OpinionCliente | null>(null);
 
 // Estado para entrenadores y clases
 const trainers = ref<{ id: number; name: string }[]>([]);
@@ -284,13 +435,14 @@ const requiredRule = (v: string) => !!v || 'Este campo es requerido';
 
 // Computados
 const isFormValid = computed(() => {
-  if (rating.value === 0) return false;
   if (comments.value.trim().length === 0) return false;
 
   if (feedbackType.value === 'complaint') {
+    if (rating.value === 0) return false;
     return !!selectedTrainer.value && !!selectedService.value;
+  } else {
+    return opinionType.value.trim().length > 0;
   }
-  return true;
 });
 
 const ratingText = computed(() => {
@@ -389,7 +541,8 @@ const loadFeedbackHistory = async () => {
     if (historyTab.value === 'complaints') {
       myComplaints.value = await FeedbackService.getMyComplaints();
     } else {
-      mySuggestions.value = await FeedbackService.getMySuggestions();
+      myOpinions.value = await OpinionClienteService.getMisOpiniones();
+      console.log('Opiniones recibidas:', JSON.stringify(myOpinions.value, null, 2));
     }
   } catch (err) {
     console.error('Error al cargar historial de feedback:', err);
@@ -417,19 +570,19 @@ const submitFeedback = async () => {
       });
 
       successMessage.value = '¡Tu queja ha sido enviada con éxito!';
+      historyTab.value = 'complaints';
     } else {
-      await FeedbackService.createSuggestion({
-        Calificacion: rating.value,
-        Comentario: comments.value,
-        Tipo: 'Sugerencia'
+      await OpinionClienteService.createOpinion({
+        Tipo: opinionType.value,
+        Descripcion: comments.value
       });
 
-      successMessage.value = '¡Tu sugerencia ha sido enviada con éxito!';
+      successMessage.value = '¡Tu opinión ha sido enviada con éxito!';
+      historyTab.value = 'opinions';
     }
 
     resetForm();
     activeTab.value = 'history'; // Cambiar a la pestaña de historial
-    historyTab.value = feedbackType.value === 'complaint' ? 'complaints' : 'suggestions';
   } catch (err) {
     console.error('Error al enviar feedback:', err);
     error.value = 'No se pudo enviar tu feedback. Por favor, intenta nuevamente más tarde.';
@@ -438,7 +591,7 @@ const submitFeedback = async () => {
   }
 };
 
-// Función para eliminar una queja
+// Funciones para manejo de quejas
 const deleteComplaint = async (id: number) => {
   if (!confirm('¿Estás seguro de que deseas eliminar esta queja?')) return;
 
@@ -457,23 +610,99 @@ const deleteComplaint = async (id: number) => {
   }
 };
 
-// Función para eliminar una sugerencia
-const deleteSuggestion = async (id: number) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar esta sugerencia?')) return;
+// Funciones para manejo de opiniones
+const editOpinion = (opinion: OpinionCliente) => {
+  editedOpinion.value = {
+    ID: opinion.ID,
+    Tipo: opinion.Tipo,
+    Descripcion: opinion.Descripcion
+  };
+  editDialog.value = true;
+};
 
-  deletingItem.value = id;
+// Función para ver detalles de opinión
+const viewOpinionDetails = (opinion: OpinionCliente) => {
+  currentOpinionDetails.value = opinion;
+  viewDialog.value = true;
+};
+
+const updateOpinion = async () => {
+  if (!editedOpinion.value.ID) return;
+
+  updating.value = true;
   error.value = null;
 
   try {
-    await FeedbackService.deleteSuggestion(id);
+    await OpinionClienteService.updateOpinion(editedOpinion.value.ID, {
+      Tipo: editedOpinion.value.Tipo,
+      Descripcion: editedOpinion.value.Descripcion
+    });
+
+    editDialog.value = false;
     loadFeedbackHistory();
-    successMessage.value = 'Sugerencia eliminada con éxito';
+    successMessage.value = 'Opinión actualizada con éxito';
   } catch (err) {
-    console.error(`Error al eliminar sugerencia ${id}:`, err);
-    error.value = 'No se pudo eliminar la sugerencia. Por favor, intenta nuevamente más tarde.';
+    console.error('Error al actualizar opinión:', err);
+    error.value = 'No se pudo actualizar la opinión. Por favor, intenta nuevamente más tarde.';
   } finally {
-    deletingItem.value = null;
+    updating.value = false;
   }
+};
+
+const deleteOpinion = async (id: number) => {
+  if (!confirm('¿Estás seguro de que deseas eliminar esta opinión?')) return;
+
+  loadingItem.value = id;
+  error.value = null;
+
+  try {
+    await OpinionClienteService.deleteOpinion(id);
+    loadFeedbackHistory();
+    successMessage.value = 'Opinión eliminada con éxito';
+  } catch (err) {
+    console.error(`Error al eliminar opinión ${id}:`, err);
+    error.value = 'No se pudo eliminar la opinión. Por favor, intenta nuevamente más tarde.';
+  } finally {
+    loadingItem.value = null;
+  }
+};
+
+// Función para obtener color según el tipo de opinión
+const getOpinionTypeColor = (type: string): string => {
+  switch (type) {
+    case 'Queja': return 'amber-lighten-5';
+    case 'Sugerencia': return 'green-lighten-5';
+    case 'Felicitacion': return 'blue-lighten-5';
+    case 'Recomendacion': return 'purple-lighten-5';
+    default: return 'grey-lighten-3';
+  }
+};
+
+// Función para obtener icono según el tipo de opinión
+const getOpinionTypeIcon = (type: string): string => {
+  switch (type) {
+    case 'Queja': return 'hugeicons:complaint';
+    case 'Sugerencia': return 'solar:chat-round-like-bold';
+    case 'Felicitacion': return 'solar:like-bold';
+    case 'Recomendacion': return 'solar:stars-bold';
+    default: return 'solar:chat-bold';
+  }
+};
+
+// Función para obtener color de texto según el tipo de opinión
+const getOpinionTypeTextColor = (type: string): string => {
+  switch (type) {
+    case 'Queja': return 'text-amber-darken-2';
+    case 'Sugerencia': return 'text-green-darken-1';
+    case 'Felicitacion': return 'text-blue-darken-1';
+    case 'Recomendacion': return 'text-purple-darken-1';
+    default: return 'text-grey-darken-1';
+  }
+};
+
+// Función para obtener color según el estado de la opinión
+const getOpinionStatusColor = (status: boolean): string => {
+  return status ? 'success' : 'warning';
 };
 
 // Obtener nombre de entrenador por ID
@@ -506,6 +735,7 @@ const resetForm = () => {
   selectedService.value = null;
   rating.value = 0;
   comments.value = '';
+  opinionType.value = 'Sugerencia';
 };
 </script>
 
@@ -566,6 +796,12 @@ const resetForm = () => {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
+}
+
+.response-section {
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  border-left: 3px solid var(--v-theme-primary);
 }
 
 .v-btn {
