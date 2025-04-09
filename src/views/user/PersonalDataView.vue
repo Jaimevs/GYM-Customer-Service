@@ -195,6 +195,13 @@ const alert = reactive({
   message: ''
 });
 
+// Computados
+const fullName = computed(() => {
+  return [personalData.firstName, personalData.lastName1, personalData.lastName2]
+    .filter(part => part)
+    .join(' ');
+});
+
 // Reglas de validación
 const requiredRule = (v: string) => !!v || 'Este campo es requerido';
 const phoneRule = (v: string) => {
@@ -274,6 +281,53 @@ const loadPersonalData = async () => {
   }
 };
 
+const handlePhotoChange = (fileInput: Event | File | File[] | null) => {
+  let file: File | null = null;
+  
+  // Manejar diferentes tipos de eventos/entradas
+  if (fileInput instanceof Event && fileInput.target) {
+    const target = fileInput.target as HTMLInputElement;
+    file = target.files?.[0] || null;
+  } else if (fileInput instanceof File) {
+    file = fileInput;
+  } else if (Array.isArray(fileInput) && fileInput.length > 0) {
+    file = fileInput[0];
+  } else if (fileInput === null) {
+    // Limpieza de archivo
+    personalData.photoUrl = null;
+    return;
+  }
+  
+  if (file && file instanceof File) {
+    // Validar tipo y tamaño
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      showAlert('error', 'Formato de imagen no válido. Use JPG, PNG, GIF o WebP.');
+      photo.value = null;
+      return;
+    }
+    
+    if (file.size > 5000000) { // 5MB
+      showAlert('warning', 'La imagen es grande y podría tardar en procesarse.');
+    }
+    
+    // Mostrar vista previa
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        personalData.photoUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Error al generar vista previa:", error);
+      showAlert('error', 'No se pudo procesar la imagen. Intente con otra.');
+      photo.value = null;
+    }
+  } else {
+    console.warn("Archivo no válido o no proporcionado:", fileInput);
+  }
+};
+
 const savePersonalData = async () => {
   try {
     loading.value = true;
@@ -292,18 +346,22 @@ const savePersonalData = async () => {
       Peso: personalData.weight
     };
 
-    // Usar el servicio actualizado para guardar o crear perfil
-    const result = await PersonalDataService.saveOrCreateProfile(apiData, photo.value);
-
-    if (result.Fotografia) {
-      personalData.photoUrl = result.Fotografia;
+    try {
+      // Usar el servicio actualizado para guardar o crear perfil
+      const result = await PersonalDataService.saveOrCreateProfile(apiData, photo.value);
+      
+      if (result.Fotografia) {
+        personalData.photoUrl = result.Fotografia;
+      }
+      
+      showAlert('success', 'Tus datos se han guardado correctamente');
+      
+      // Limpiar el estado de la foto seleccionada
+      photo.value = null;
+    } catch (error) {
+      console.error('Error al guardar datos personales:', error);
+      showAlert('error', 'No se pudieron guardar los datos. Por favor intenta nuevamente.');
     }
-
-    showAlert('success', 'Tus datos se han guardado correctamente');
-
-  } catch (error) {
-    console.error('Error al guardar datos personales:', error);
-    showAlert('error', 'No se pudieron guardar los datos. Por favor intenta nuevamente.');
   } finally {
     loading.value = false;
   }
@@ -312,16 +370,6 @@ const savePersonalData = async () => {
 const resetForm = () => {
   loadPersonalData();
   photo.value = null;
-};
-
-const handlePhotoChange = (file: File) => {
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      personalData.photoUrl = e.target?.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
 };
 
 const showAlert = (type: 'success' | 'error' | 'info' | 'warning', message: string) => {
