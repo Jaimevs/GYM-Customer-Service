@@ -38,7 +38,7 @@
             </div>
             <div class="metric-info">
               <h3 class="metric-title">Comentarios</h3>
-              <p class="metric-value">{{ comments.length }}</p>
+              <p class="metric-value">{{ totalEvaluations }}</p>
               <v-btn text small class="metric-link" @click="showAllComments">
                 Ver todos
                 <Icon icon="mdi:chevron-right" right small />
@@ -78,13 +78,23 @@
             <h2>Distribución de Valoraciones</h2>
           </div>
           <v-card-text class="text-center">
-            <apexchart type="radialBar" height="300" :options="ratingChart.options" :series="ratingChart.series">
-            </apexchart>
-            <div class="d-flex justify-space-around mt-2">
-              <v-chip v-for="(label, index) in ratingChart.options.labels" :key="index" :color="getRatingColor(index)"
-                text-color="white" small class="px-3">
-                {{ label }}
-              </v-chip>
+            <div v-if="loading" class="text-center py-4">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+              <p class="mt-2">Cargando datos...</p>
+            </div>
+            <div v-else-if="error" class="text-center py-4">
+              <Icon icon="mdi:alert-circle" color="error" width="36" />
+              <p class="error--text mt-2">{{ error }}</p>
+            </div>
+            <div v-else>
+              <apexchart type="radialBar" height="300" :options="ratingChart.options" :series="ratingChart.series">
+              </apexchart>
+              <div class="d-flex justify-space-around mt-2">
+                <v-chip v-for="(label, index) in ratingChart.options.labels" :key="index" :color="getRatingColor(index)"
+                  text-color="white" small class="px-3">
+                  {{ label }}
+                </v-chip>
+              </div>
             </div>
           </v-card-text>
         </v-card>
@@ -99,28 +109,46 @@
             </div>
             <h2>Comentarios Recientes</h2>
             <v-spacer></v-spacer>
-            <v-btn icon @click="refreshComments">
+            <v-btn icon @click="refreshData">
               <Icon icon="mdi:refresh" />
             </v-btn>
           </div>
           <v-card-text>
-            <v-list class="comments-list">
-              <v-list-item v-for="(comment, index) in comments" :key="index" class="comment-item">
+            <div v-if="loading" class="text-center py-4">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+              <p class="mt-2">Cargando comentarios...</p>
+            </div>
+            <div v-else-if="error" class="text-center py-4">
+              <Icon icon="mdi:alert-circle" color="error" width="36" />
+              <p class="error--text mt-2">{{ error }}</p>
+              <v-btn color="primary" class="mt-3" @click="refreshData">
+                Reintentar
+              </v-btn>
+            </div>
+            <v-list v-else class="comments-list">
+              <template v-if="comments.length > 0">
+                <v-list-item v-for="(comment, index) in comments" :key="index" class="comment-item">
+                  <v-list-item-content>
+                    <v-list-item-title class="client-name">{{ comment.client }}</v-list-item-title>
+                    <v-list-item-subtitle class="comment-date">
+                      {{ formatDate(comment.date) }}
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle class="comment-text">
+                      "{{ comment.text }}"
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-chip small :color="getRatingColor(comment.rating - 1)" dark>
+                      <Icon icon="mdi:star" left small />
+                      {{ comment.rating }}/5
+                    </v-chip>
+                  </v-list-item-action>
+                </v-list-item>
+              </template>
+              <v-list-item v-else class="text-center">
                 <v-list-item-content>
-                  <v-list-item-title class="client-name">{{ comment.client }}</v-list-item-title>
-                  <v-list-item-subtitle class="comment-date">
-                    {{ formatDate(comment.date) }}
-                  </v-list-item-subtitle>
-                  <v-list-item-subtitle class="comment-text">
-                    "{{ comment.text }}"
-                  </v-list-item-subtitle>
+                  <p class="text-subtitle-1">No hay comentarios disponibles</p>
                 </v-list-item-content>
-                <v-list-item-action>
-                  <v-chip small :color="getRatingColor(comment.rating - 1)" dark>
-                    <Icon icon="mdi:star" left small />
-                    {{ comment.rating }}/5
-                  </v-chip>
-                </v-list-item-action>
               </v-list-item>
             </v-list>
             <v-btn block color="primary" class="mt-4" @click="showAllComments">
@@ -130,15 +158,56 @@
         </v-card>
       </v-col>
     </v-row>
+    
+    <!-- Modal para ver todas las evaluaciones -->
+    <v-dialog v-model="showAllCommentsDialog" max-width="800">
+      <v-card>
+        <v-card-title class="headline">
+          <div class="chart-icon-bg mr-2">
+            <Icon icon="mdi:comment-text" width="24" />
+          </div>
+          Todas las Evaluaciones
+        </v-card-title>
+        <v-card-text>
+          <v-data-table
+            :headers="commentsHeaders"
+            :items="allEvaluations"
+            :items-per-page="10"
+            class="elevation-1"
+            :footer-props="{
+              'items-per-page-options': [5, 10, 15, 20, -1],
+              'items-per-page-text': 'Evaluaciones por página:',
+            }"
+          >
+            <template v-slot:item.calificacion="{ item }">
+              <v-chip small :color="getRatingColor(item.calificacion - 1)" dark>
+                {{ item.calificacion }}/5
+              </v-chip>
+            </template>
+            <template v-slot:item.fecha="{ item }">
+              {{ formatDate(item.fecha) }}
+            </template>
+          </v-data-table>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="showAllCommentsDialog = false">
+            Cerrar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import VueApexCharts from "vue3-apexcharts";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { Icon } from '@iconify/vue';
+import EvaluationService, { EvaluacionDetalle } from "@/services/EvaluationCoachService";
 
 export default defineComponent({
   name: "EvaluationsView",
@@ -147,42 +216,37 @@ export default defineComponent({
     Icon
   },
   setup() {
-    onMounted(() => {
-      AOS.init({
-        duration: 800,
-        once: true,
-        easing: "ease-in-out-quad",
-      });
+    // Estado
+    const loading = ref(true);
+    const error = ref<string | null>(null);
+    const evaluations = ref<EvaluacionDetalle[]>([]);
+    const showAllCommentsDialog = ref(false);
+    
+    // Datos derivados
+    const averageRating = ref(0);
+    const evaluatedClients = ref(0);
+    const totalEvaluations = computed(() => evaluations.value.length);
+    const comments = ref([]);
+    
+    // Headers para tabla de comentarios
+    const commentsHeaders = [
+      { text: 'Cliente', value: 'nombre_usuario' },
+      { text: 'Clase', value: 'clase_nombre' },
+      { text: 'Calificación', value: 'calificacion' },
+      { text: 'Comentario', value: 'comentario' },
+      { text: 'Fecha', value: 'fecha' },
+    ];
+    
+    // Evaluaciones para la tabla completa
+    const allEvaluations = computed(() => {
+      return evaluations.value.map(evaluation => ({
+        nombre_usuario: evaluation.nombre_usuario,
+        clase_nombre: evaluation.clase_nombre,
+        calificacion: evaluation.calificacion,
+        comentario: evaluation.comentario || "Sin comentario",
+        fecha: evaluation.fecha
+      }));
     });
-
-    const averageRating = ref(87);
-    const evaluatedClients = ref(24);
-    const comments = ref([
-      {
-        client: "Juan Pérez",
-        text: "Excelente entrenador, muy motivador. He logrado mis objetivos más rápido de lo esperado.",
-        rating: 5,
-        date: "2023-10-15",
-      },
-      {
-        client: "María López",
-        text: "Muy buen seguimiento, me siento más fuerte y con mejor condición física.",
-        rating: 4,
-        date: "2023-10-12",
-      },
-      {
-        client: "Carlos Ramírez",
-        text: "Podría mejorar la comunicación entre sesiones, pero el entrenamiento es efectivo.",
-        rating: 3,
-        date: "2023-10-10",
-      },
-      {
-        client: "Ana García",
-        text: "Las rutinas son desafiantes pero adaptadas a mi nivel. Muy profesional.",
-        rating: 5,
-        date: "2023-10-08",
-      },
-    ]);
 
     const ratingChart = ref({
       options: {
@@ -213,7 +277,58 @@ export default defineComponent({
         labels: ["5 Estrellas", "4 Estrellas", "3 Estrellas", "2 Estrellas", "1 Estrella"],
         colors: ["#FF7043", "#FFB74D", "#FFD54F", "#FFA000", "#F57C00"],
       },
-      series: [65, 20, 8, 4, 3],
+      series: [0, 0, 0, 0, 0],
+    });
+
+    // Cargar datos desde la API
+    const loadData = async () => {
+      loading.value = true;
+      error.value = null;
+      
+      try {
+        // Obtener evaluaciones del servicio
+        const data = await EvaluationService.getTrainerEvaluations();
+        evaluations.value = data;
+        
+        // Procesar estadísticas
+        const stats = EvaluationService.processStatistics(data);
+        averageRating.value = stats.promedioCalificacion;
+        
+        // Actualizar serie para el gráfico
+        const totalCount = data.length;
+        if (totalCount > 0) {
+          ratingChart.value.series = [
+            Math.round((stats.distribucionCalificaciones["5_estrellas"] / totalCount) * 100),
+            Math.round((stats.distribucionCalificaciones["4_estrellas"] / totalCount) * 100),
+            Math.round((stats.distribucionCalificaciones["3_estrellas"] / totalCount) * 100),
+            Math.round((stats.distribucionCalificaciones["2_estrellas"] / totalCount) * 100),
+            Math.round((stats.distribucionCalificaciones["1_estrella"] / totalCount) * 100)
+          ];
+        }
+        
+        // Obtener comentarios recientes
+        comments.value = EvaluationService.getRecentComments(data);
+        
+        // Obtener número de clientes únicos
+        evaluatedClients.value = EvaluationService.getUniqueClientCount(data);
+        
+      } catch (err) {
+        console.error("Error al cargar datos:", err);
+        error.value = "No se pudieron cargar las evaluaciones. Inténtalo de nuevo.";
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    onMounted(() => {
+      AOS.init({
+        duration: 800,
+        once: true,
+        easing: "ease-in-out-quad",
+      });
+      
+      // Cargar datos al montar el componente
+      loadData();
     });
 
     const getRatingColor = (index: number) => {
@@ -230,32 +345,46 @@ export default defineComponent({
     };
 
     const showAllRatings = () => {
-      console.log("Mostrar todas las valoraciones");
+      showAllCommentsDialog.value = true;
     };
 
     const showAllComments = () => {
-      console.log("Mostrar todos los comentarios");
+      showAllCommentsDialog.value = true;
     };
 
     const showClientList = () => {
-      console.log("Mostrar lista de clientes evaluados");
+      showAllCommentsDialog.value = true;
     };
 
-    const refreshComments = () => {
-      console.log("Refrescando comentarios...");
+    const refreshData = () => {
+      loadData();
     };
 
     return {
+      // Estado
+      loading,
+      error,
+      evaluations,
+      showAllCommentsDialog,
+      
+      // Datos derivados
       averageRating,
       evaluatedClients,
+      totalEvaluations,
       comments,
+      allEvaluations,
+      commentsHeaders,
+      
+      // Gráficos
       ratingChart,
+      
+      // Métodos
       getRatingColor,
       formatDate,
       showAllRatings,
       showAllComments,
       showClientList,
-      refreshComments,
+      refreshData,
     };
   },
 });
