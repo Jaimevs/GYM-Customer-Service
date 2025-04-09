@@ -33,7 +33,10 @@
     <v-menu offset-y>
       <template v-slot:activator="{ props }">
         <v-avatar size="40" class="user-avatar" v-bind="props">
-          <img src="https://randomuser.me/api/portraits/men/71.jpg" alt="User Avatar" class="avatar-image" />
+          <!-- Usar la foto de perfil del usuario si existe, de lo contrario mostrar iniciales o avatar por defecto -->
+          <v-img v-if="userPhoto" :src="userPhoto" alt="Foto de perfil" cover></v-img>
+          <v-img v-else-if="profileLoading" src="@/assets/img/avatar-placeholder.png" alt="Cargando" cover></v-img>
+          <span v-else class="text-h6">{{ userInitials }}</span>
         </v-avatar>
       </template>
       <v-list class="user-menu">
@@ -61,6 +64,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore"; // Importar el store de autenticación
 import AuthService from "@/services/AuthService"; // Importar el servicio de autenticación
+import PersonalDataService from "@/services/PersonalDataService"; // Importar el servicio de datos personales
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -71,6 +75,9 @@ const notifications = ref(["Notificación 1", "Notificación 2", "Notificación 
 
 // Información del usuario
 const username = ref('');
+const userPhoto = ref<string | null>(null);
+const profileLoading = ref(false);
+
 const userInitials = computed(() => {
   if (!username.value) return 'U';
   return username.value.charAt(0).toUpperCase();
@@ -79,13 +86,37 @@ const userInitials = computed(() => {
 // Obtener el rol del usuario desde el store
 const userRole = computed(() => authStore.getRole);
 
+// Cargar la foto de perfil del usuario
+const loadUserPhoto = async () => {
+  try {
+    profileLoading.value = true;
+    
+    // Intentar obtener los datos del perfil incluyendo la foto
+    const userProfile = await PersonalDataService.getPersonalData();
+    
+    if (userProfile && userProfile.Fotografia) {
+      userPhoto.value = userProfile.Fotografia;
+    } else {
+      userPhoto.value = null;
+    }
+  } catch (error) {
+    console.error('Error al cargar la foto de perfil:', error);
+    userPhoto.value = null;
+  } finally {
+    profileLoading.value = false;
+  }
+};
+
 // Cargar datos del usuario al montar el componente
-onMounted(() => {
+onMounted(async () => {
   try {
     const userStr = localStorage.getItem('user');
     if (userStr) {
       const userData = JSON.parse(userStr);
       username.value = userData.username || '';
+      
+      // Cargar la foto de perfil
+      await loadUserPhoto();
     }
   } catch (error) {
     console.error('Error al cargar datos del usuario:', error);
@@ -126,4 +157,29 @@ const toggleSidebar = () => {
 
 <style scoped lang="scss">
 @use "@/styles/common/_navbar-dashboard.scss";
+
+.user-avatar {
+  cursor: pointer;
+  border: 2px solid var(--v-primary-base);
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  .v-img {
+    object-fit: cover;
+  }
+  
+  span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--v-primary-lighten-1);
+    color: white;
+    font-weight: bold;
+  }
+}
 </style>
